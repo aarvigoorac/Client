@@ -16,6 +16,7 @@
       --skeleton-base: #e0e0e0;
       --skeleton-shine: #f5f5f5;
       --danger: #ff4d4f;
+      --danger-bg: #fff1f0;
     }
     
     @media (prefers-color-scheme: dark) {
@@ -27,333 +28,408 @@
         --border: #333333;
         --skeleton-base: #333333;
         --skeleton-shine: #444444;
-        --danger: #ff7875;
+        --danger: #ff4d4f;
+        --danger-bg: rgba(255, 77, 79, 0.15);
       }
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; -webkit-tap-highlight-color: transparent; }
     
+    /* Hide scrollbar globally */
     ::-webkit-scrollbar { display: none; }
     html, body, .modal-scroll { -ms-overflow-style: none; scrollbar-width: none; }
 
-    body { background-color: var(--bg-color); color: var(--text-main); padding-bottom: 110px; overflow-x: hidden; display: flex; flex-direction: column; align-items: center; }
+    body { background-color: var(--bg-color); color: var(--text-main); padding-bottom: 100px; display: flex; flex-direction: column; align-items: center; }
 
     .page-container { width: 100%; max-width: 800px; padding: 16px; display: flex; flex-direction: column; gap: 16px; }
 
-    .page-title { font-size: 20px; font-weight: 800; color: var(--text-main); margin-bottom: 4px; }
+    .page-header { font-size: 20px; font-weight: 800; padding: 8px 4px; display: flex; align-items: center; gap: 8px; }
 
     /* Cart Items List */
-    .cart-list { display: flex; flex-direction: column; gap: 12px; width: 100%; }
-
-    .cart-card { background: var(--surface-color); border-radius: 16px; overflow: hidden; box-shadow: 0 2px 4px -1px rgba(0,0,0,0.03); border: 1px solid var(--border); display: flex; align-items: center; padding: 12px; gap: 12px; position: relative; }
+    .cart-list { display: flex; flex-direction: column; gap: 12px; }
     
-    .cart-img-wrap { width: 90px; height: 90px; background: var(--surface-color); flex-shrink: 0; display: flex; align-items: center; justify-content: center; border: 1px solid var(--border); border-radius: 12px; padding: 4px; }
-    .cart-img-wrap img { width: 100%; height: 100%; object-fit: contain; mix-blend-mode: multiply; }
-    @media (prefers-color-scheme: dark) { .cart-img-wrap img { mix-blend-mode: normal; } }
-
-    .cart-info { display: flex; flex-direction: column; flex: 1; justify-content: space-between; height: 90px; }
-    .cart-title-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
-    .cart-title { font-size: 14px; font-weight: 600; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; color: var(--text-main); }
+    .cart-item { background: var(--surface-color); border-radius: 16px; padding: 12px; display: flex; gap: 12px; box-shadow: 0 2px 4px -1px rgba(0,0,0,0.03); border: 1px solid var(--border); position: relative; }
     
-    .delete-icon-btn { background: none; border: none; cursor: pointer; color: var(--text-sub); padding: 2px; display: flex; align-items: center; justify-content: center; }
-    .delete-icon-btn svg { width: 18px; height: 18px; stroke: currentColor; stroke-width: 2; }
-    .delete-icon-btn:active { color: var(--danger); }
+    .item-img-wrap { width: 90px; height: 90px; background: var(--bg-color); border-radius: 10px; padding: 8px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+    .item-img-wrap img { width: 100%; height: 100%; object-fit: contain; mix-blend-mode: multiply; }
+    @media (prefers-color-scheme: dark) { .item-img-wrap img { mix-blend-mode: normal; } }
 
-    .cart-price-row { display: flex; justify-content: space-between; align-items: center; margin-top: auto; }
-    .cart-price { font-size: 16px; font-weight: 800; color: var(--text-main); }
+    .item-details { flex: 1; display: flex; flex-direction: column; justify-content: space-between; padding-right: 24px; }
+    .item-title { font-size: 14px; font-weight: 600; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.3; }
+    
+    .item-bottom { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 8px; }
+    .item-price { font-size: 16px; font-weight: 800; }
 
-    /* Stepper Widget */
-    .stepper { display: flex; align-items: center; background: var(--bg-color); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
-    .stepper-btn { background: none; border: none; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 16px; font-weight: 700; color: var(--text-main); }
+    /* Delete Button */
+    .btn-delete { position: absolute; top: 12px; right: 12px; background: none; border: none; padding: 4px; color: var(--text-sub); cursor: pointer; border-radius: 4px; }
+    .btn-delete:active { background: var(--danger-bg); color: var(--danger); }
+    .btn-delete svg { width: 18px; height: 18px; stroke: currentColor; stroke-width: 2; }
+
+    /* Stepper UI */
+    .stepper { display: flex; align-items: center; background: var(--bg-color); border-radius: 8px; border: 1px solid var(--border); overflow: hidden; }
+    .stepper-btn { background: none; border: none; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; font-size: 18px; color: var(--text-main); cursor: pointer; }
     .stepper-btn:active { background: var(--border); }
-    .stepper-val { width: 32px; text-align: center; font-size: 14px; font-weight: 700; color: var(--text-main); }
-
-    /* Skeleton Loading */
-    .skeleton { background: linear-gradient(90deg, var(--skeleton-base) 25%, var(--skeleton-shine) 50%, var(--skeleton-base) 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 6px; }
-    @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
-    .sk-card { height: 114px; border-radius: 16px; }
+    .stepper-val { width: 36px; text-align: center; font-size: 14px; font-weight: 700; pointer-events: none; }
 
     /* Empty State */
-    .empty-state { display: none; flex-direction: column; align-items: center; justify-content: center; padding: 80px 20px; text-align: center; width: 100%; }
+    .empty-state { display: none; flex-direction: column; align-items: center; justify-content: center; padding: 80px 20px; text-align: center; }
     .empty-state.active { display: flex; }
     .empty-state svg { width: 80px; height: 80px; color: var(--border); margin-bottom: 16px; }
     .empty-state h3 { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
-    .empty-state p { color: var(--text-sub); font-size: 14px; margin-bottom: 20px; }
-    .shop-now-btn { background: var(--primary); color: white; border: none; padding: 12px 24px; border-radius: 12px; font-size: 15px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 12px rgba(40, 116, 240, 0.3); }
+    .empty-state p { color: var(--text-sub); font-size: 14px; line-height: 1.5; margin-bottom: 24px; }
+    .btn-shop { background: var(--primary); color: white; border: none; padding: 12px 24px; border-radius: 12px; font-size: 15px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 12px rgba(40, 116, 240, 0.25); }
 
-    /* Sticky Bottom Checkout Bar */
-    .sticky-checkout-bar { position: fixed; bottom: 0; left: 0; width: 100%; background: var(--surface-color); border-top: 1px solid var(--border); padding: 16px 20px; display: none; justify-content: space-between; align-items: center; z-index: 40; box-shadow: 0 -4px 12px rgba(0,0,0,0.03); padding-bottom: calc(16px + env(safe-area-inset-bottom)); }
-    .sticky-checkout-bar.active { display: flex; }
+    /* Skeletons */
+    .skeleton { background: linear-gradient(90deg, var(--skeleton-base) 25%, var(--skeleton-shine) 50%, var(--skeleton-base) 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 6px; }
+    @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+    .sk-img { width: 90px; height: 90px; border-radius: 10px; }
+    .sk-text { height: 14px; width: 80%; margin-bottom: 8px; }
+    .sk-price { height: 20px; width: 40%; }
+
+    /* Sticky Bottom Action Bar */
+    .action-bar { position: fixed; bottom: 0; left: 0; width: 100%; background: var(--surface-color); border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 16px 20px calc(16px + env(safe-area-inset-bottom)); z-index: 20; box-shadow: 0 -4px 12px rgba(0,0,0,0.03); transform: translateY(100%); transition: transform 0.3s; }
+    .action-bar.active { transform: translateY(0); }
+    .total-block { display: flex; flex-direction: column; }
     .total-label { font-size: 12px; color: var(--text-sub); font-weight: 600; text-transform: uppercase; }
-    .total-amount { font-size: 20px; font-weight: 800; color: var(--text-main); }
-    .checkout-btn { background: var(--primary); color: white; border: none; padding: 14px 28px; border-radius: 14px; font-size: 16px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(40, 116, 240, 0.3); transition: transform 0.15s; }
-    .checkout-btn:active { transform: scale(0.96); }
-    .checkout-btn svg { width: 18px; height: 18px; stroke: currentColor; stroke-width: 2.5; }
+    .total-amount { font-size: 22px; font-weight: 800; color: var(--text-main); }
+    
+    .btn-checkout { background: var(--primary); color: #fff; border: none; padding: 14px 24px; border-radius: 14px; font-size: 16px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(40, 116, 240, 0.25); transition: transform 0.1s; }
+    .btn-checkout:active { transform: scale(0.96); }
 
-    /* Delete Confirmation Modal (Bottom Sheet) */
+    /* Slide-Up Delete Modal */
     .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 999; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; backdrop-filter: blur(4px); }
     .modal-overlay.active { opacity: 1; pointer-events: auto; }
     
-    .confirm-modal { position: fixed; bottom: 0; left: 0; width: 100%; background: var(--bg-color); border-radius: 24px 24px 0 0; z-index: 1000; transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1); display: flex; flex-direction: column; overflow: hidden; padding: 24px; box-shadow: 0 -10px 40px rgba(0,0,0,0.2); }
-    .confirm-modal.active { transform: translateY(0); }
+    .delete-modal { position: fixed; bottom: 0; left: 0; width: 100%; background: var(--bg-color); border-radius: 24px 24px 0 0; z-index: 1000; transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1); display: flex; flex-direction: column; overflow: hidden; padding: 24px 20px calc(24px + env(safe-area-inset-bottom)); box-shadow: 0 -10px 40px rgba(0,0,0,0.2); }
+    .delete-modal.active { transform: translateY(0); }
     
-    .modal-pull { width: 40px; height: 4px; background: var(--border); border-radius: 2px; margin: 0 auto 16px; }
-    .confirm-title { font-size: 18px; font-weight: 800; margin-bottom: 8px; color: var(--text-main); }
-    .confirm-desc { font-size: 14px; color: var(--text-sub); margin-bottom: 24px; line-height: 1.5; }
-    .confirm-actions { display: flex; gap: 12px; }
-    .modal-btn { flex: 1; padding: 14px; border-radius: 12px; font-size: 15px; font-weight: 700; text-align: center; cursor: pointer; border: none; }
-    .modal-btn-cancel { background: var(--surface-color); color: var(--text-main); border: 1.5px solid var(--border); }
-    .modal-btn-delete { background: var(--danger); color: white; box-shadow: 0 4px 12px rgba(255, 77, 79, 0.3); }
+    .modal-pull-indicator { width: 40px; height: 4px; background: var(--border); border-radius: 2px; margin: 0 auto 20px; }
+    
+    .modal-title { font-size: 20px; font-weight: 800; text-align: center; margin-bottom: 8px; }
+    .modal-desc { font-size: 15px; color: var(--text-sub); text-align: center; margin-bottom: 24px; line-height: 1.5; }
+    
+    .modal-actions { display: flex; gap: 12px; }
+    .btn-modal { flex: 1; padding: 14px; border-radius: 12px; font-size: 16px; font-weight: 700; border: none; cursor: pointer; }
+    .btn-cancel { background: var(--surface-color); color: var(--text-main); border: 1.5px solid var(--border); }
+    .btn-confirm-delete { background: var(--danger); color: white; box-shadow: 0 4px 12px rgba(255, 77, 79, 0.25); }
 
-    .hidden { display: none !important; }
+    /* Toast Notification */
+    #toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-100px); background: var(--text-main); color: var(--bg-color); padding: 12px 24px; border-radius: 50px; font-size: 14px; font-weight: 600; opacity: 0; transition: all 0.4s cubic-bezier(0.32, 0.72, 0, 1); z-index: 2000; box-shadow: 0 8px 20px rgba(0,0,0,0.15); display: flex; align-items: center; gap: 8px; width: max-content; }
+    #toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
   </style>
 </head>
 <body>
 
   <div class="page-container">
-    <h2 class="page-title">My Cart</h2>
+    <div class="page-header">
+      My Cart
+    </div>
 
-    <!-- Cart Items List Container -->
-    <div class="cart-list" id="cart-list">
-      <!-- Initial Skeletons -->
-      <div class="skeleton sk-card"></div>
-      <div class="skeleton sk-card"></div>
-      <div class="skeleton sk-card"></div>
+    <!-- Skeletons (Initial Load) -->
+    <div class="cart-list" id="skeleton-container">
+      <div class="cart-item">
+        <div class="skeleton sk-img"></div>
+        <div class="item-details" style="justify-content: flex-start; gap: 8px;">
+          <div class="skeleton sk-text"></div>
+          <div class="skeleton sk-text" style="width: 50%"></div>
+          <div class="skeleton sk-price" style="margin-top: 16px;"></div>
+        </div>
+      </div>
+      <div class="cart-item">
+        <div class="skeleton sk-img"></div>
+        <div class="item-details" style="justify-content: flex-start; gap: 8px;">
+          <div class="skeleton sk-text"></div>
+          <div class="skeleton sk-text" style="width: 50%"></div>
+          <div class="skeleton sk-price" style="margin-top: 16px;"></div>
+        </div>
+      </div>
     </div>
 
     <!-- Empty State -->
     <div class="empty-state" id="empty-state">
       <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.120-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+        <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
       </svg>
       <h3>Your cart is empty</h3>
-      <p>Explore our latest products and add items to your cart.</p>
-      <button class="shop-now-btn" id="shop-now-btn">Explore Products</button>
+      <p>Looks like you haven't added anything to your cart yet.</p>
+      <button class="btn-shop" onclick="window.parent.document.getElementById('content-frame').src='pages/home.html'">Explore Products</button>
     </div>
+
+    <!-- Cart Items Rendered Here -->
+    <div class="cart-list" id="cart-container"></div>
   </div>
 
-  <!-- Sticky Bottom Checkout Bar -->
-  <div class="sticky-checkout-bar" id="checkout-bar">
-    <div>
-      <div class="total-label">Total Amount</div>
-      <div class="total-amount" id="total-amount">₹0</div>
+  <!-- Sticky Action Bar (Hidden if empty) -->
+  <div class="action-bar" id="action-bar">
+    <div class="total-block">
+      <span class="total-label">Total Payable</span>
+      <span class="total-amount" id="bar-total">₹0</span>
     </div>
-    <button class="checkout-btn" id="checkout-btn">
-      Proceed to Checkout
-      <svg fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" /></svg>
+    <button class="btn-checkout" id="btn-checkout">
+      Checkout
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="M12 5l7 7-7 7"></path></svg>
     </button>
   </div>
 
-  <!-- Delete Confirmation Modal -->
+  <!-- Slide-Up Delete Confirmation Modal -->
   <div class="modal-overlay" id="modal-bg"></div>
-  <div class="confirm-modal" id="confirm-modal">
-    <div class="modal-pull"></div>
-    <h3 class="confirm-title">Remove Item</h3>
-    <p class="confirm-desc" id="confirm-desc">Are you sure you want to remove this item from your cart?</p>
-    <div class="confirm-actions">
-      <button class="modal-btn modal-btn-cancel" id="modal-cancel">Cancel</button>
-      <button class="modal-btn modal-btn-delete" id="modal-confirm">Remove</button>
+  <div class="delete-modal" id="delete-modal">
+    <div class="modal-pull-indicator"></div>
+    <h2 class="modal-title">Remove Item</h2>
+    <p class="modal-desc">Are you sure you want to remove <strong id="delete-item-name">this item</strong> from your cart?</p>
+    
+    <div class="modal-actions">
+      <button class="btn-modal btn-cancel" id="btn-cancel-delete">Cancel</button>
+      <button class="btn-modal btn-confirm-delete" id="btn-confirm-delete">Remove</button>
     </div>
   </div>
+
+  <!-- Toast -->
+  <div id="toast">Item removed</div>
 
   <script type="module">
     import { auth, db } from '../config.js';
     import { doc, getDoc, updateDoc, deleteField, increment } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
     import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-    const cartList = document.getElementById('cart-list');
+    // DOM Elements
+    const skeletonContainer = document.getElementById('skeleton-container');
     const emptyState = document.getElementById('empty-state');
-    const checkoutBar = document.getElementById('checkout-bar');
-    const totalAmountEl = document.getElementById('total-amount');
-    const checkoutBtn = document.getElementById('checkout-btn');
-    const shopNowBtn = document.getElementById('shop-now-btn');
+    const cartContainer = document.getElementById('cart-container');
+    const actionBar = document.getElementById('action-bar');
+    const barTotal = document.getElementById('bar-total');
+    const btnCheckout = document.getElementById('btn-checkout');
+    const toast = document.getElementById('toast');
 
-    // Modal elements
+    // Modal Elements
     const modalBg = document.getElementById('modal-bg');
-    const confirmModal = document.getElementById('confirm-modal');
-    const modalCancel = document.getElementById('modal-cancel');
-    const modalConfirm = document.getElementById('modal-confirm');
-    const confirmDesc = document.getElementById('confirm-desc');
+    const deleteModal = document.getElementById('delete-modal');
+    const btnCancelDelete = document.getElementById('btn-cancel-delete');
+    const btnConfirmDelete = document.getElementById('btn-confirm-delete');
+    const deleteItemName = document.getElementById('delete-item-name');
 
+    // State Variables
     let currentUser = null;
-    let cartItemsData = {};
-    let itemPendingDeletion = null;
+    let localCartData = {}; 
+    let itemToDelete = null; // Stores ID of item pending deletion
     let isModalOpen = false;
 
-    const placeholderImg = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='400' viewBox='0 0 400 400'><rect width='400' height='400' fill='%23f1f3f6'/><path d='M200 160c-22.1 0-40 17.9-40 40s17.9 40 40 40 40-17.9 40-40-17.9-40-40-40zm0 64c-13.2 0-24-10.8-24-24s10.8-24 24-24 24 10.8 24 24-10.8 24-24 24z' fill='%23cccccc'/><path d='M264 120H136c-13.2 0-24 10.8-24 24v112c0 13.2 10.8 24 24 24h128c13.2 0 24-10.8 24-24V144c0-13.2-10.8-24-24-24zm8 136c0 4.4-3.6 8-8 8H136c-4.4 0-8-3.6-8-8V144c0-4.4 3.6-8 8-8h128c4.4 0 8 3.6 8 8v112z' fill='%23cccccc'/></svg>";
-
-    onAuthStateChanged(auth, (user) => {
+    // Wait for auth to fetch the single cart document
+    onAuthStateChanged(auth, async (user) => {
       if (user) {
         currentUser = user;
-        fetchCart();
+        await fetchCartData();
       } else {
-        cartList.innerHTML = '';
-        emptyState.classList.add('active');
+        showEmptyState();
       }
     });
 
-    // 1. Fetch Cart (1 Read Execution)
-    async function fetchCart() {
+    // 1. Single-Read Data Fetch
+    async function fetchCartData() {
       try {
         const cartRef = doc(db, 'carts', currentUser.uid);
-        const cartSnap = await getDoc(cartRef);
+        const docSnap = await getDoc(cartRef);
+        
+        skeletonContainer.style.display = 'none';
 
-        cartList.innerHTML = '';
-
-        if (!cartSnap.exists() || !cartSnap.data().items || Object.keys(cartSnap.data().items).length === 0) {
-          emptyState.classList.add('active');
-          checkoutBar.classList.remove('active');
-          return;
+        if (docSnap.exists() && docSnap.data().items && Object.keys(docSnap.data().items).length > 0) {
+          localCartData = docSnap.data().items;
+          renderCart();
+        } else {
+          showEmptyState();
         }
-
-        cartItemsData = cartSnap.data().items;
-        renderCartUI();
-
       } catch (error) {
-        console.error("Error fetching cart:", error);
-        cartList.innerHTML = `<p style="padding:24px; text-align:center; color: var(--text-sub);">Failed to load cart.</p>`;
+        console.error("Error loading cart:", error);
+        skeletonContainer.innerHTML = `<p style="text-align:center; color: var(--danger); padding: 20px;">Failed to load cart.</p>`;
       }
     }
 
-    // 2. Render Cart UI & Calculate Subtotal
-    function renderCartUI() {
-      cartList.innerHTML = '';
-      let grandTotal = 0;
-      let itemCount = 0;
+    function showEmptyState() {
+      skeletonContainer.style.display = 'none';
+      cartContainer.innerHTML = '';
+      emptyState.classList.add('active');
+      actionBar.classList.remove('active');
+    }
 
-      Object.entries(cartItemsData).forEach(([id, item]) => {
-        itemCount++;
-        const itemTotal = (item.price || 0) * (item.qty || 1);
-        grandTotal += itemTotal;
+    // 2. Local Rendering & Math Engine
+    function renderCart() {
+      if (Object.keys(localCartData).length === 0) {
+        showEmptyState();
+        return;
+      }
 
-        const imgUrl = item.image || placeholderImg;
+      emptyState.classList.remove('active');
+      cartContainer.innerHTML = '';
+      
+      let subTotal = 0;
+
+      // Loop through single document map
+      for (const [productId, item] of Object.entries(localCartData)) {
+        subTotal += (item.price * item.qty);
 
         const card = document.createElement('div');
-        card.className = 'cart-card';
+        card.className = 'cart-item';
         card.innerHTML = `
-          <div class="cart-img-wrap">
-            <img src="${imgUrl}" onerror="this.src='${placeholderImg}'" alt="${item.name}">
+          <div class="item-img-wrap">
+            <img src="${item.image}" alt="${item.name}">
           </div>
-          <div class="cart-info">
-            <div class="cart-title-row">
-              <div class="cart-title">${item.name}</div>
-              <button class="delete-icon-btn" data-id="${id}" title="Remove">
-                <svg fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-              </button>
-            </div>
-            <div class="cart-price-row">
-              <div class="cart-price">₹${itemTotal.toLocaleString('en-IN')}</div>
+          <div class="item-details">
+            <div class="item-title">${item.name}</div>
+            
+            <button class="btn-delete" data-id="${productId}" data-name="${item.name}">
+              <svg fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" /></svg>
+            </button>
+
+            <div class="item-bottom">
+              <div class="item-price">₹${(item.price * item.qty).toLocaleString('en-IN')}</div>
+              
               <div class="stepper">
-                <button class="stepper-btn" data-action="dec" data-id="${id}">-</button>
+                <button class="stepper-btn btn-minus" data-id="${productId}">-</button>
                 <div class="stepper-val">${item.qty}</div>
-                <button class="stepper-btn" data-action="inc" data-id="${id}">+</button>
+                <button class="stepper-btn btn-plus" data-id="${productId}">+</button>
               </div>
             </div>
           </div>
         `;
 
-        // Event Listeners for actions inside card
-        card.querySelector('.delete-icon-btn').addEventListener('click', () => promptDelete(id, item.name));
-        card.querySelector('[data-action="inc"]').addEventListener('click', () => updateQuantity(id, 1));
-        card.querySelector('[data-action="dec"]').addEventListener('click', () => {
-          if (item.qty === 1) {
-            promptDelete(id, item.name);
-          } else {
-            updateQuantity(id, -1);
-          }
-        });
+        cartContainer.appendChild(card);
+      }
 
-        cartList.appendChild(card);
+      // Update Action Bar Total
+      barTotal.innerText = `₹${subTotal.toLocaleString('en-IN')}`;
+      actionBar.classList.add('active');
+
+      attachEventListeners();
+    }
+
+    // 3. Attach Zero-Read Interaction Listeners
+    function attachEventListeners() {
+      // Plus Button
+      document.querySelectorAll('.btn-plus').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+          if (navigator.vibrate) navigator.vibrate(20);
+          const id = e.target.getAttribute('data-id');
+          
+          // Optimistic UI Update
+          localCartData[id].qty++;
+          renderCart(); 
+
+          // Silent Firebase Write
+          try {
+            await updateDoc(doc(db, 'carts', currentUser.uid), {
+              [`items.${id}.qty`]: increment(1)
+            });
+          } catch (err) { console.error("Increment failed:", err); }
+        });
       });
 
-      if (itemCount > 0) {
-        emptyState.classList.remove('active');
-        checkoutBar.classList.add('active');
-        totalAmountEl.innerText = `₹${grandTotal.toLocaleString('en-IN')}`;
-      } else {
-        emptyState.classList.add('active');
-        checkoutBar.classList.remove('active');
-      }
-    }
+      // Minus Button
+      document.querySelectorAll('.btn-minus').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+          if (navigator.vibrate) navigator.vibrate(20);
+          const id = e.target.getAttribute('data-id');
+          
+          if (localCartData[id].qty > 1) {
+            // Optimistic UI Update
+            localCartData[id].qty--;
+            renderCart();
 
-    // 3. Update Quantity (Zero-Read Increment Math)
-    async function updateQuantity(productId, delta) {
-      if (navigator.vibrate) navigator.vibrate(30);
-      try {
-        const cartRef = doc(db, 'carts', currentUser.uid);
-        await updateDoc(cartRef, {
-          [`items.${productId}.qty`]: increment(delta)
+            // Silent Firebase Write
+            try {
+              await updateDoc(doc(db, 'carts', currentUser.uid), {
+                [`items.${id}.qty`]: increment(-1)
+              });
+            } catch (err) { console.error("Decrement failed:", err); }
+          } else {
+            // Quantity is 1, trigger delete modal instead
+            triggerDeleteModal(id, localCartData[id].name);
+          }
         });
+      });
 
-        // Optimistic local update
-        cartItemsData[productId].qty += delta;
-        renderCartUI();
-      } catch (error) {
-        console.error("Failed to update qty:", error);
-        fetchCart(); // Fallback sync
-      }
+      // Trash Button
+      document.querySelectorAll('.btn-delete').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          if (navigator.vibrate) navigator.vibrate(40);
+          const currentBtn = e.currentTarget;
+          triggerDeleteModal(currentBtn.getAttribute('data-id'), currentBtn.getAttribute('data-name'));
+        });
+      });
     }
 
-    // 4. Modal & Deletion Handlers
-    function promptDelete(productId, productName) {
-      if (navigator.vibrate) navigator.vibrate(40);
-      itemPendingDeletion = productId;
-      confirmDesc.innerText = `Are you sure you want to remove "${productName}" from your cart?`;
+    // 4. Modal & Deletion Engine
+    function triggerDeleteModal(id, name) {
+      itemToDelete = id;
+      deleteItemName.innerText = name;
       
       modalBg.classList.add('active');
-      confirmModal.classList.add('active');
+      deleteModal.classList.add('active');
       isModalOpen = true;
       history.pushState({ modal: 'delete_confirm' }, '', '');
     }
 
-    function closeModalLogic() {
+    function closeModal() {
       modalBg.classList.remove('active');
-      confirmModal.classList.remove('active');
+      deleteModal.classList.remove('active');
       isModalOpen = false;
-      itemPendingDeletion = null;
+      itemToDelete = null;
     }
 
-    modalCancel.addEventListener('click', () => {
+    function triggerCloseModal() {
       if (isModalOpen) history.back();
+    }
+
+    window.addEventListener('popstate', (e) => {
+      if (isModalOpen) closeModal();
     });
 
-    modalBg.addEventListener('click', () => {
-      if (isModalOpen) history.back();
-    });
+    btnCancelDelete.addEventListener('click', triggerCloseModal);
+    modalBg.addEventListener('click', triggerCloseModal);
 
-    window.addEventListener('popstate', () => {
-      if (isModalOpen) closeModalLogic();
-    });
-
-    modalConfirm.addEventListener('click', async () => {
-      if (!itemPendingDeletion) return;
+    btnConfirmDelete.addEventListener('click', async () => {
+      if (!itemToDelete) return;
       if (navigator.vibrate) navigator.vibrate(40);
-
-      modalConfirm.innerText = 'Removing...';
-      modalConfirm.style.pointerEvents = 'none';
+      
+      const idToRemove = itemToDelete;
+      btnConfirmDelete.innerText = 'Removing...';
+      btnConfirmDelete.style.pointerEvents = 'none';
 
       try {
-        const cartRef = doc(db, 'carts', currentUser.uid);
-        await updateDoc(cartRef, {
-          [`items.${itemPendingDeletion}`]: deleteField()
+        // 1. Silent Firebase Write (Removes Map Key)
+        await updateDoc(doc(db, 'carts', currentUser.uid), {
+          [`items.${idToRemove}`]: deleteField()
         });
 
-        delete cartItemsData[itemPendingDeletion];
-        closeModalLogic();
-        renderCartUI();
-      } catch (error) {
-        console.error("Failed to delete item:", error);
-      } finally {
-        modalConfirm.innerText = 'Remove';
-        modalConfirm.style.pointerEvents = 'auto';
+        // 2. Optimistic UI Cleanup
+        delete localCartData[idToRemove];
+        
+        // Reset Button
+        btnConfirmDelete.innerText = 'Remove';
+        btnConfirmDelete.style.pointerEvents = 'auto';
+        
+        triggerCloseModal();
+        renderCart();
+
+        // Show Toast
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 2000);
+
+      } catch (err) {
+        console.error("Delete failed:", err);
+        btnConfirmDelete.innerText = 'Error';
+        setTimeout(() => {
+          btnConfirmDelete.innerText = 'Remove';
+          btnConfirmDelete.style.pointerEvents = 'auto';
+        }, 1500);
       }
     });
 
-    // 5. Proceed to Checkout Hand-off
-    checkoutBtn.addEventListener('click', () => {
+    // 5. Checkout Handoff
+    btnCheckout.addEventListener('click', () => {
       if (navigator.vibrate) navigator.vibrate(40);
       
-      const checkoutPayload = Object.entries(cartItemsData).map(([id, item]) => ({
+      // Flatten the map into an array for the checkout page
+      const checkoutPayload = Object.entries(localCartData).map(([id, item]) => ({
         id: id,
         name: item.name,
         price: item.price,
@@ -363,13 +439,11 @@
 
       sessionStorage.setItem('checkout_payload', JSON.stringify(checkoutPayload));
       sessionStorage.setItem('checkout_source', 'cart');
-
+      
+      // Redirect parent iframe
       window.parent.document.getElementById('content-frame').src = 'pages/checkout.html';
     });
 
-    shopNowBtn.addEventListener('click', () => {
-      window.parent.document.getElementById('content-frame').src = 'pages/home.html';
-    });
   </script>
 </body>
 </html>
