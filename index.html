@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#121212" media="(prefers-color-scheme: dark)">
+  <title>Aarvi Stores</title>
+  
+  <!-- PWA Manifest -->
+  <link rel="manifest" href="./manifest.json">
+  
+  <style>
+    :root {
+      --bg-color: #f1f3f6; /* Subtle gray background for main shell */
+      --surface-color: #ffffff;
+      --text-main: #000000;
+      --text-sub: #666666;
+      --border: #e0e0e0;
+      --primary: #2874f0; /* Brand Blue */
+      --header-height: 60px;
+      --nav-height: 65px;
+      --sidebar-width: 250px;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg-color: #000000;
+        --surface-color: #121212;
+        --text-main: #ffffff;
+        --text-sub: #a0a0a0;
+        --border: #333333;
+      }
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+      -webkit-touch-callout: none;
+      user-select: none;
+    }
+
+    body, html {
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      height: 100vh;
+      height: 100dvh; /* Fix for mobile browser URL bars */
+      width: 100vw;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* --- Top Header --- */
+    header {
+      height: var(--header-height);
+      background-color: var(--surface-color);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+      z-index: 50;
+      flex-shrink: 0;
+    }
+
+    .brand {
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .brand svg { width: 24px; height: 24px; fill: var(--primary); }
+
+    .dp-wrapper {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: 2px solid var(--primary);
+      overflow: hidden;
+      cursor: pointer;
+      display: block; /* Acts as a link wrapper */
+    }
+
+    .dp-wrapper img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    /* --- Main Layout Wrapper --- */
+    .layout-wrapper {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* --- Desktop Sidebar --- */
+    aside {
+      width: var(--sidebar-width);
+      background-color: var(--surface-color);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      z-index: 40;
+    }
+
+    .nav-list { display: flex; flex-direction: column; padding: 16px 12px; gap: 8px; }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 14px 16px;
+      border-radius: 12px;
+      color: var(--text-sub);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 15px;
+      transition: all 0.2s;
+    }
+
+    .nav-item:hover { background-color: var(--bg-color); color: var(--text-main); }
+    .nav-item.active { background-color: rgba(40, 116, 240, 0.1); color: var(--primary); }
+    .nav-item svg { width: 22px; height: 22px; fill: currentColor; }
+
+    /* --- Iframe Container --- */
+    main {
+      flex: 1;
+      background-color: var(--bg-color);
+      position: relative;
+    }
+
+    #content-frame {
+      width: 100%;
+      height: 100%;
+      border: none;
+      background: transparent;
+      display: block;
+    }
+
+    /* --- Mobile Bottom Nav --- */
+    .bottom-nav {
+      display: none;
+      height: var(--nav-height);
+      min-height: calc(var(--nav-height) + env(safe-area-inset-bottom));
+      background-color: var(--surface-color);
+      border-top: 1px solid var(--border);
+      z-index: 50;
+      flex-shrink: 0;
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+
+    .bottom-nav-inner {
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      height: 100%;
+      width: 100%;
+    }
+
+    .b-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      color: var(--text-sub);
+      text-decoration: none;
+      flex: 1;
+      height: 100%;
+    }
+
+    .b-item svg { width: 24px; height: 24px; fill: currentColor; transition: transform 0.2s; }
+    .b-item span { font-size: 11px; font-weight: 600; }
+    
+    .b-item.active { color: var(--primary); }
+    .b-item.active svg { transform: scale(1.15); }
+
+    /* --- PWA Install Pill --- */
+    #install-pill {
+      position: fixed;
+      bottom: calc(var(--nav-height) + env(safe-area-inset-bottom) + 20px);
+      left: 50%;
+      transform: translateX(-50%) translateY(150px);
+      background-color: var(--text-main);
+      color: var(--surface-color);
+      padding: 12px 24px;
+      border-radius: 50px;
+      font-size: 14px;
+      font-weight: 700;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      z-index: 100;
+      transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    #install-pill.show { transform: translateX(-50%) translateY(0); }
+    #install-pill svg { width: 18px; height: 18px; stroke: currentColor; }
+
+    /* --- Responsive Switching --- */
+    @media (max-width: 768px) {
+      aside { display: none; }
+      .bottom-nav { display: block; }
+    }
+    @media (min-width: 769px) {
+      #install-pill { bottom: 40px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- App Header -->
+  <header>
+    <div class="brand">
+      <svg viewBox="0 0 24 24"><path d="M12 2L2 22h20L12 2zm0 3.8l7.1 14.2H4.9L12 5.8z"/></svg>
+      Aarvi
+    </div>
+    
+    <!-- Profile Picture acts as a direct link to the account page -->
+    <a href="pages/account.html" target="content-frame" class="dp-wrapper" onclick="handleNavClick(-1)">
+      <img id="user-dp" src="" alt="Profile">
+    </a>
+  </header>
+
+  <div class="layout-wrapper">
+    <!-- Desktop Side Navigation -->
+    <aside>
+      <div class="nav-list">
+        <a href="pages/home.html" class="nav-item active" target="content-frame" onclick="handleNavClick(0)">
+          <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+          Home
+        </a>
+        <a href="pages/search.html" class="nav-item" target="content-frame" onclick="handleNavClick(1)">
+          <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+          Search
+        </a>
+        <a href="pages/cart.html" class="nav-item" target="content-frame" onclick="handleNavClick(2)">
+          <svg viewBox="0 0 24 24"><path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/></svg>
+          Cart
+        </a>
+        <a href="pages/orders.html" class="nav-item" target="content-frame" onclick="handleNavClick(3)">
+          <svg viewBox="0 0 24 24"><path d="M19 3h-4.18C14.4 1.84 13.3 1 12 1c-1.3 0-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm2 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
+          Orders
+        </a>
+      </div>
+    </aside>
+
+    <!-- Main Content Frame -->
+    <main>
+      <!-- Starts on home.html by default -->
+      <iframe src="pages/home.html" id="content-frame" name="content-frame" title="App Content"></iframe>
+    </main>
+  </div>
+
+  <!-- Mobile Bottom Navigation -->
+  <nav class="bottom-nav">
+    <div class="bottom-nav-inner">
+      <a href="pages/home.html" class="b-item active" target="content-frame" onclick="handleNavClick(0)">
+        <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+        <span>Home</span>
+      </a>
+      <a href="pages/search.html" class="b-item" target="content-frame" onclick="handleNavClick(1)">
+        <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+        <span>Search</span>
+      </a>
+      <a href="pages/cart.html" class="b-item" target="content-frame" onclick="handleNavClick(2)">
+        <svg viewBox="0 0 24 24"><path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/></svg>
+        <span>Cart</span>
+      </a>
+      <a href="pages/orders.html" class="b-item" target="content-frame" onclick="handleNavClick(3)">
+        <svg viewBox="0 0 24 24"><path d="M19 3h-4.18C14.4 1.84 13.3 1 12 1c-1.3 0-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm2 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
+        <span>Orders</span>
+      </a>
+    </div>
+  </nav>
+
+  <!-- Install App Pill -->
+  <div id="install-pill">
+    <svg fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+    Install App
+  </div>
+
+  <script type="module">
+    import { auth } from './config.js';
+    import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+    // 1. Service Worker Registration
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+          .then(reg => console.log('SW Registered'))
+          .catch(err => console.error('SW Failed', err));
+      });
+    }
+
+    // 2. Auth Protection & UI State
+    const dpImg = document.getElementById('user-dp');
+
+    onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        // TOP-LEVEL REDIRECT: Ensure login screen takes over the full browser
+        window.location.replace("pages/login.html");
+      } else {
+        // Populate profile picture in header
+        if (user.photoURL) {
+          dpImg.src = user.photoURL;
+          dpImg.style.opacity = '1';
+        }
+      }
+    });
+
+    // 3. Navigation Sync & Haptics
+    window.handleNavClick = function(index) {
+      // Trigger native device vibration
+      if (navigator.vibrate) navigator.vibrate(40);
+      
+      const sidebarItems = document.querySelectorAll('.nav-list .nav-item');
+      const bottomNavItems = document.querySelectorAll('.b-item');
+      
+      // Clear all active states
+      sidebarItems.forEach(item => item.classList.remove('active'));
+      bottomNavItems.forEach(item => item.classList.remove('active'));
+      
+      // If index is -1 (Profile Picture clicked), leave all tabs deselected
+      if (index >= 0) {
+        if (sidebarItems[index]) sidebarItems[index].classList.add('active');
+        if (bottomNavItems[index]) bottomNavItems[index].classList.add('active');
+      }
+    };
+
+    // 4. PWA Install Logic
+    let deferredPrompt;
+    const installPill = document.getElementById('install-pill');
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault(); // Stop native mini-infobar
+      deferredPrompt = e;
+      
+      // Delay showing the pill slightly for better UX
+      setTimeout(() => {
+        installPill.classList.add('show');
+      }, 3000);
+    });
+
+    installPill.addEventListener('click', async () => {
+      if (navigator.vibrate) navigator.vibrate(40);
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        if (outcome === 'accepted') {
+          console.log('User installed the PWA');
+        }
+        deferredPrompt = null;
+        installPill.classList.remove('show');
+      }
+    });
+
+    // Hide pill if already installed
+    window.addEventListener('appinstalled', () => {
+      installPill.classList.remove('show');
+      deferredPrompt = null;
+    });
+  </script>
+</body>
+</html>
