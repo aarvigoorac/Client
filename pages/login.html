@@ -41,6 +41,13 @@
       user-select: none;           
     }
 
+    /* Re-enable selection for inputs */
+    input, textarea {
+      -webkit-touch-callout: default;
+      -webkit-user-select: auto;
+      user-select: auto;
+    }
+
     body, html {
       background-color: var(--bg-color);
       color: var(--text-main);
@@ -52,7 +59,7 @@
       overflow: hidden;
     }
 
-    .login-container {
+    .card {
       background-color: var(--surface-color);
       width: 90%;
       max-width: 400px;
@@ -92,55 +99,45 @@
       margin-bottom: 10px;
     }
 
-    .brand-icon svg {
-      width: 32px;
-      height: 32px;
-      fill: currentColor;
-    }
+    .brand-icon svg { width: 32px; height: 32px; fill: currentColor; }
 
-    .app-title {
-      font-size: 1.75rem;
-      font-weight: 800;
-      letter-spacing: -0.5px;
-    }
+    .app-title { font-size: 1.75rem; font-weight: 800; letter-spacing: -0.5px; }
+    .app-title span { color: var(--primary); }
+    .app-subtitle { color: var(--text-sub); font-size: 0.95rem; font-weight: 500; }
 
-    .app-title span {
-      color: var(--primary);
-    }
-
-    .app-subtitle {
-      color: var(--text-sub);
-      font-size: 0.95rem;
-      font-weight: 500;
-    }
-
-    .login-btn {
+    .btn {
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 12px;
       width: 100%;
       padding: 14px;
-      background-color: var(--surface-color);
-      color: var(--text-main);
-      border: 1px solid var(--border);
       border-radius: 12px;
       font-size: 1rem;
       font-weight: 600;
       cursor: pointer;
       transition: all 0.2s ease;
+      border: none;
+    }
+
+    .btn:active { transform: scale(0.98); }
+
+    .btn-outline {
+      background-color: var(--surface-color);
+      color: var(--text-main);
+      border: 1px solid var(--border);
       box-shadow: 0 2px 4px rgba(0,0,0,0.05);
     }
+    
+    .btn-outline:active { background-color: var(--bg-color); }
 
-    .login-btn:active {
-      transform: scale(0.98);
-      background-color: var(--bg-color);
+    .btn-primary {
+      background-color: var(--primary);
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
     }
-
-    .login-btn svg {
-      width: 24px;
-      height: 24px;
-    }
+    
+    .btn-primary:active { background-color: var(--primary-hover); }
 
     .loader {
       display: none;
@@ -152,21 +149,55 @@
       animation: spin 1s ease-in-out infinite;
     }
 
-    @keyframes spin {
-      to { transform: rotate(360deg); }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .error-msg { color: #ef4444; font-size: 0.85rem; margin-top: 10px; display: none; }
+
+    /* --- Profile Setup UI --- */
+    #setup-container { display: none; }
+    
+    .profile-dp {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      border: 3px solid var(--primary);
+      object-fit: cover;
+      margin: 0 auto;
     }
 
-    .error-msg {
-      color: #ef4444;
-      font-size: 0.85rem;
-      margin-top: 10px;
-      display: none;
+    .user-name { font-size: 1.25rem; font-weight: 700; margin-top: 10px; }
+    
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      text-align: left;
+      gap: 6px;
+      margin-bottom: 16px;
     }
+
+    .form-label { font-size: 0.85rem; font-weight: 600; color: var(--text-sub); }
+    
+    .form-input {
+      padding: 12px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: var(--bg-color);
+      color: var(--text-main);
+      font-size: 1rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    
+    .form-input:focus { border-color: var(--primary); }
+
+    /* Main view toggles */
+    .hidden { display: none !important; }
   </style>
 </head>
 <body>
 
-  <div class="login-container">
+  <!-- 1. Primary Login View -->
+  <div class="card" id="login-container">
     <div class="branding">
       <div class="brand-icon">
         <svg viewBox="0 0 24 24"><path d="M12 2L2 22h20L12 2zm0 3.8l7.1 14.2H4.9L12 5.8z"/></svg>
@@ -176,8 +207,8 @@
     </div>
 
     <div>
-      <button class="login-btn" id="google-login-btn">
-        <svg viewBox="0 0 48 48">
+      <button class="btn btn-outline" id="google-login-btn">
+        <svg viewBox="0 0 48 48" width="24" height="24" id="google-icon">
           <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
           <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
           <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
@@ -190,31 +221,103 @@
     </div>
   </div>
 
-  <script type="module">
-    // Import configuration from root
-    import { auth, googleProvider } from '../config.js';
-    import { signInWithPopup, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+  <!-- 2. New User Setup View -->
+  <div class="card" id="setup-container">
+    <div>
+      <img id="setup-dp" class="profile-dp" src="" alt="Profile">
+      <h2 class="user-name" id="setup-name"></h2>
+      <p class="app-subtitle">Complete your profile to continue</p>
+    </div>
 
+    <div style="margin-top: 10px;">
+      <div class="form-group">
+        <label class="form-label">Mobile Number</label>
+        <input type="tel" id="user-phone" class="form-input" value="+91 ">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Address Line 1</label>
+        <input type="text" id="user-address-1" class="form-input" placeholder="House/Flat No., Street">
+      </div>
+      <div class="form-group" style="margin-bottom: 24px;">
+        <label class="form-label">Address Line 2</label>
+        <input type="text" id="user-address-2" class="form-input" placeholder="City, State, Pincode">
+      </div>
+      
+      <button class="btn btn-primary" id="proceed-btn">
+        <span id="proceed-text">Proceed</span>
+        <div class="loader" id="proceed-loader" style="border-top-color: #fff;"></div>
+      </button>
+      <p class="error-msg" id="setup-error-msg"></p>
+    </div>
+  </div>
+
+  <script type="module">
+    import { auth, db, googleProvider } from '../config.js';
+    import { signInWithPopup, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    // DOM Elements
+    const loginContainer = document.getElementById('login-container');
+    const setupContainer = document.getElementById('setup-container');
+    
     const loginBtn = document.getElementById('google-login-btn');
     const btnText = document.getElementById('btn-text');
     const btnLoader = document.getElementById('btn-loader');
     const errorMsg = document.getElementById('error-msg');
-    const googleIcon = loginBtn.querySelector('svg');
+    const googleIcon = document.getElementById('google-icon');
 
-    // 1. Check if already authenticated, redirect to App Shell
-    onAuthStateChanged(auth, (user) => {
+    const setupDp = document.getElementById('setup-dp');
+    const setupName = document.getElementById('setup-name');
+    const phoneInput = document.getElementById('user-phone');
+    const address1Input = document.getElementById('user-address-1');
+    const address2Input = document.getElementById('user-address-2');
+    const proceedBtn = document.getElementById('proceed-btn');
+    const proceedText = document.getElementById('proceed-text');
+    const proceedLoader = document.getElementById('proceed-loader');
+    const setupErrorMsg = document.getElementById('setup-error-msg');
+
+    let currentUser = null;
+
+    // 1. Auth State Listener
+    onAuthStateChanged(auth, async (user) => {
       if (user) {
-        // Redirect to the main index.html file located in the root directory
-        window.location.replace("../index.html");
+        currentUser = user;
+        
+        // Show loading state if triggered by auto-login on page refresh
+        loginBtn.style.pointerEvents = 'none';
+        btnText.innerText = "Checking profile...";
+        googleIcon.style.display = 'none';
+        btnLoader.style.display = 'block';
+
+        try {
+          // Check if user document exists in Firestore
+          const userRef = doc(db, 'users', user.uid);
+          const userSnap = await getDoc(userRef);
+
+          if (userSnap.exists()) {
+            // Existing user -> Redirect immediately
+            window.location.replace("../index.html");
+          } else {
+            // New user -> Show profile setup UI
+            loginContainer.classList.add('hidden');
+            setupContainer.style.display = 'flex';
+            
+            // Populate Google Data
+            setupDp.src = user.photoURL || '';
+            setupName.innerText = user.displayName || 'Welcome';
+          }
+        } catch (error) {
+          console.error("Firestore Check Error:", error);
+          errorMsg.innerText = "Failed to load profile. Please refresh.";
+          errorMsg.style.display = 'block';
+        }
       }
     });
 
-    // 2. Handle Google Login
+    // 2. Handle Google Login Click
     loginBtn.addEventListener('click', async () => {
-      // Trigger haptic feedback if available
       if (navigator.vibrate) navigator.vibrate(40);
 
-      // UI Loading State
       loginBtn.style.pointerEvents = 'none';
       btnText.innerText = "Signing in...";
       googleIcon.style.display = 'none';
@@ -223,21 +326,66 @@
 
       try {
         await signInWithPopup(auth, googleProvider);
-        // Success: onAuthStateChanged will catch the update and redirect automatically
+        // Do nothing else here. onAuthStateChanged will intercept the success 
+        // and route the user based on whether they exist in Firestore.
       } catch (error) {
         console.error("Authentication Error:", error);
-        
-        // Reset UI
         loginBtn.style.pointerEvents = 'auto';
         btnText.innerText = "Continue with Google";
         googleIcon.style.display = 'block';
         btnLoader.style.display = 'none';
-        
-        // Display Error
         errorMsg.innerText = error.message.includes('popup-closed') 
           ? "Login cancelled. Please try again." 
           : "Failed to sign in. Check your connection.";
         errorMsg.style.display = 'block';
+      }
+    });
+
+    // 3. Handle Profile Setup Submission
+    proceedBtn.addEventListener('click', async () => {
+      if (navigator.vibrate) navigator.vibrate(40);
+      setupErrorMsg.style.display = 'none';
+
+      const phone = phoneInput.value.trim();
+      const line1 = address1Input.value.trim();
+      const line2 = address2Input.value.trim();
+
+      // Basic Validation
+      if (phone.length < 5 || !line1 || !line2) {
+        setupErrorMsg.innerText = "Please fill out all fields.";
+        setupErrorMsg.style.display = 'block';
+        return;
+      }
+
+      proceedBtn.style.pointerEvents = 'none';
+      proceedText.style.display = 'none';
+      proceedLoader.style.display = 'block';
+
+      try {
+        // Create user document in Firestore
+        await setDoc(doc(db, 'users', currentUser.uid), {
+          name: currentUser.displayName,
+          email: currentUser.email,
+          photoURL: currentUser.photoURL,
+          phone: phone,
+          address: {
+            line1: line1,
+            line2: line2
+          },
+          createdAt: new Date().toISOString()
+        });
+
+        // Redirect to App Shell upon successful creation
+        window.location.replace("../index.html");
+
+      } catch (error) {
+        console.error("Save Error:", error);
+        setupErrorMsg.innerText = "Failed to save profile. Try again.";
+        setupErrorMsg.style.display = 'block';
+        
+        proceedBtn.style.pointerEvents = 'auto';
+        proceedText.style.display = 'block';
+        proceedLoader.style.display = 'none';
       }
     });
   </script>
