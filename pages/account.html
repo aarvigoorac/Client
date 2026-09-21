@@ -167,7 +167,7 @@
     .btn-outline { background-color: transparent; color: var(--primary); border: 2px solid var(--primary); padding: 14px; border-radius: 10px; gap: 8px; margin-bottom: 20px; }
     .btn-outline:active { background-color: rgba(40, 116, 240, 0.1); }
     
-    .btn-danger { background-color: transparent; color: #d32f2f; margin-top: 24px; font-size: 15px; }
+    .btn-danger-text { background-color: transparent; color: #d32f2f; margin-top: 24px; font-size: 15px; }
 
     .gps-result-card { display: flex; align-items: center; justify-content: space-between; background-color: var(--success-bg); border: 1px solid var(--success-text); padding: 16px; border-radius: 10px; margin-bottom: 20px; }
     .coords-text { color: var(--success-text); font-size: 14px; font-weight: 600; margin-top: 4px; }
@@ -191,6 +191,36 @@
       display: flex; align-items: center; gap: 8px;
     }
     #toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+    /* Custom Modal Styles */
+    .modal-backdrop {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.5); z-index: 9999;
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.3s ease;
+      padding: 24px;
+    }
+    .modal-backdrop.show { opacity: 1; pointer-events: auto; }
+    
+    .modal-card {
+      background: var(--surface-color);
+      width: 100%; max-width: 320px;
+      padding: 24px; border-radius: 16px;
+      transform: scale(0.95); transition: transform 0.3s ease;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    }
+    .modal-backdrop.show .modal-card { transform: scale(1); }
+    
+    .modal-title { font-size: 18px; font-weight: 700; margin-bottom: 8px; color: var(--text-main); }
+    .modal-desc { color: var(--text-sub); font-size: 14px; margin-bottom: 24px; line-height: 1.4; }
+    
+    .modal-actions { display: flex; gap: 12px; }
+    .btn-modal-cancel { flex: 1; background: transparent; border: 1.5px solid var(--border); color: var(--text-main); padding: 12px; border-radius: 10px; font-weight: 600; cursor: pointer; transition: background 0.2s; }
+    .btn-modal-cancel:active { background: var(--input-bg); }
+    
+    .btn-modal-confirm { flex: 1; background: #d32f2f; color: white; border: none; padding: 12px; border-radius: 10px; font-weight: 600; cursor: pointer; display: flex; justify-content: center; align-items: center; transition: background 0.2s; }
+    .btn-modal-confirm:active { background: #b71c1c; }
   </style>
 </head>
 <body>
@@ -299,8 +329,23 @@
       </button>
 
       <!-- Logout Button -->
-      <button class="btn btn-danger" id="logout-btn">Log Out</button>
+      <button class="btn btn-danger-text" id="logout-btn">Log Out</button>
 
+    </div>
+  </div>
+
+  <!-- Custom HTML Modal for Logout -->
+  <div id="logout-modal" class="modal-backdrop">
+    <div class="modal-card">
+      <h3 class="modal-title">Log Out</h3>
+      <p class="modal-desc">Are you sure you want to log out of your account?</p>
+      <div class="modal-actions">
+        <button class="btn-modal-cancel" id="modal-cancel-btn">Cancel</button>
+        <button class="btn-modal-confirm" id="modal-confirm-btn">
+          <span id="modal-confirm-text">Log Out</span>
+          <div class="loader" id="modal-loader" style="border-top-color: #fff;"></div>
+        </button>
+      </div>
     </div>
   </div>
 
@@ -341,8 +386,17 @@
     const saveBtn = document.getElementById('save-btn');
     const saveError = document.getElementById('save-error-msg');
     
+    // Modal UI
+    const logoutBtn = document.getElementById('logout-btn');
+    const logoutModal = document.getElementById('logout-modal');
+    const modalCancelBtn = document.getElementById('modal-cancel-btn');
+    const modalConfirmBtn = document.getElementById('modal-confirm-btn');
+    const modalConfirmText = document.getElementById('modal-confirm-text');
+    const modalLoader = document.getElementById('modal-loader');
+    
     let currentUser = null;
     let userCoordinates = null;
+    let modalOpen = false;
 
     // 1. Fetch Data on Load
     onAuthStateChanged(auth, async (user) => {
@@ -479,12 +533,52 @@
       }
     });
 
-    // 4. Logout Logic
-    document.getElementById('logout-btn').addEventListener('click', async () => {
+    // 4. Custom Modal Logout Logic (Mobile Back Button Supported)
+    function openLogoutModal() {
+      logoutModal.classList.add('show');
+      modalOpen = true;
+      // Push state to browser history to catch the hardware back button
+      history.pushState({ modal: 'logout' }, '', '');
+    }
+
+    function closeLogoutModal() {
+      logoutModal.classList.remove('show');
+      modalOpen = false;
+    }
+
+    logoutBtn.addEventListener('click', () => {
       if (navigator.vibrate) navigator.vibrate(40);
-      if (confirm("Are you sure you want to log out?")) {
+      openLogoutModal();
+    });
+
+    modalCancelBtn.addEventListener('click', () => {
+      if (navigator.vibrate) navigator.vibrate(40);
+      // Firing history.back() automatically triggers the popstate event below
+      history.back();
+    });
+
+    // Listen for mobile hardware back button or browser back button
+    window.addEventListener('popstate', (e) => {
+      if (modalOpen) {
+        closeLogoutModal();
+      }
+    });
+
+    modalConfirmBtn.addEventListener('click', async () => {
+      if (navigator.vibrate) navigator.vibrate(40);
+      modalConfirmBtn.style.pointerEvents = 'none';
+      modalConfirmText.style.display = 'none';
+      modalLoader.style.display = 'block';
+      
+      try {
         await signOut(auth);
         window.top.location.replace("pages/login.html");
+      } catch (error) {
+        console.error("Logout failed", error);
+        modalConfirmBtn.style.pointerEvents = 'auto';
+        modalConfirmText.style.display = 'block';
+        modalLoader.style.display = 'none';
+        closeLogoutModal();
       }
     });
   </script>
