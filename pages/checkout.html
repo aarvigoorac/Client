@@ -210,6 +210,11 @@
       history.back();
     });
 
+    // Bulletproof restore for hardware back button and swipe gestures
+    window.addEventListener('pagehide', () => {
+      toggleParentBottomNav(true);
+    });
+
     // 2. Intercept Session Payload
     function loadSessionData() {
       const payloadString = sessionStorage.getItem('checkout_payload');
@@ -327,8 +332,6 @@
 
         // B. Smart Cart Cleanup (Only if they came from the cart tab)
         if (orderSource === 'cart') {
-          // Delete all items by setting the map to an empty object, or deleting the whole document.
-          // Deleting the document is cleaner.
           const cartRef = doc(db, 'carts', currentUser.uid);
           await updateDoc(cartRef, {
             items: deleteField()
