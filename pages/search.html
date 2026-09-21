@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Search - Aarvi Stores</title>
+  <style>
+    :root {
+      --bg-color: #f4f6f8;
+      --surface-color: #ffffff;
+      --text-main: #111827;
+      --text-sub: #6b7280;
+      --border: #e5e7eb;
+      --primary: #1a56db;
+      --primary-hover: #1e40af;
+      --skeleton-base: #e5e7eb;
+      --skeleton-shine: #f3f4f6;
+    }
+    
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg-color: #111827;
+        --surface-color: #1f2937;
+        --text-main: #f9fafb;
+        --text-sub: #9ca3af;
+        --border: #374151;
+        --primary: #3b82f6;
+        --skeleton-base: #374151;
+        --skeleton-shine: #4b5563;
+      }
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; -webkit-tap-highlight-color: transparent; }
+    
+    ::-webkit-scrollbar { display: none; }
+    html, body, .modal-scroll { -ms-overflow-style: none; scrollbar-width: none; }
+
+    body { background-color: var(--bg-color); color: var(--text-main); padding-bottom: 90px; overflow-x: hidden; display: flex; flex-direction: column; align-items: center; }
+
+    .page-container { width: 100%; max-width: 800px; padding: 0 16px; margin-top: 16px; display: flex; flex-direction: column; }
+
+    /* Sticky Search Bar */
+    .search-header { position: sticky; top: 0; background: var(--bg-color); z-index: 50; padding: 12px 0; margin-bottom: 8px; }
+    .search-input-wrapper { position: relative; width: 100%; display: flex; align-items: center; }
+    .search-input-wrapper svg { position: absolute; left: 16px; width: 20px; height: 20px; stroke: var(--text-sub); stroke-width: 2.5; }
+    .search-input { width: 100%; padding: 16px 16px 16px 48px; border-radius: 16px; border: 1.5px solid var(--border); background: var(--surface-color); color: var(--text-main); font-size: 16px; font-weight: 500; outline: none; transition: border-color 0.2s, box-shadow 0.2s; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
+    .search-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(26, 86, 219, 0.15); }
+    .clear-btn { position: absolute; right: 16px; background: var(--skeleton-base); border: none; width: 24px; height: 24px; border-radius: 50%; display: none; align-items: center; justify-content: center; cursor: pointer; color: var(--text-sub); }
+    .clear-btn svg { left: auto; position: static; width: 14px; height: 14px; stroke: currentColor; }
+
+    /* List View Products */
+    .results-container { display: flex; flex-direction: column; gap: 12px; width: 100%; }
+    
+    .list-card { background: var(--surface-color); border-radius: 16px; overflow: hidden; box-shadow: 0 2px 4px -1px rgba(0,0,0,0.03); cursor: pointer; transition: transform 0.15s, box-shadow 0.15s; border: 1px solid var(--border); display: flex; align-items: center; height: 130px; }
+    .list-card:active { transform: scale(0.97); }
+    
+    .list-img-wrap { width: 130px; height: 100%; background: var(--surface-color); padding: 12px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; border-right: 1px solid var(--border); }
+    .list-img-wrap img { width: 100%; height: 100%; object-fit: contain; mix-blend-mode: multiply; }
+    @media (prefers-color-scheme: dark) { .list-img-wrap img { mix-blend-mode: normal; } }
+
+    .list-info { padding: 12px 16px; display: flex; flex-direction: column; flex: 1; height: 100%; justify-content: center; }
+    .list-title { font-size: 15px; font-weight: 600; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; margin-bottom: 6px; line-height: 1.3; color: var(--text-main); }
+    
+    .list-rating { font-size: 12px; color: #059669; background: #d1fae5; display: inline-flex; align-items: center; padding: 3px 6px; border-radius: 4px; font-weight: 700; gap: 4px; align-self: flex-start; margin-bottom: 6px; }
+    .list-rating svg { width: 10px; height: 10px; fill: currentColor; }
+    @media (prefers-color-scheme: dark) { .list-rating { color: #34d399; background: rgba(5, 150, 105, 0.2); } }
+
+    .list-price { font-size: 18px; font-weight: 800; color: var(--text-main); margin-top: auto; }
+
+    /* Professional Skeleton Loading (List View) */
+    .skeleton { background: linear-gradient(90deg, var(--skeleton-base) 25%, var(--skeleton-shine) 50%, var(--skeleton-base) 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 6px; }
+    @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+    
+    .sk-list-img { width: 130px; height: 100%; border-radius: 0; }
+    .sk-list-title { height: 16px; width: 90%; margin-bottom: 8px; }
+    .sk-list-title.short { width: 60%; margin-bottom: auto; }
+    .sk-list-price { height: 22px; width: 40%; border-radius: 6px; margin-top: 12px; }
+
+    /* States (Idle, Empty, End) */
+    .state-view { display: none; flex-direction: column; align-items: center; justify-content: center; padding: 80px 20px; text-align: center; }
+    .state-view.active { display: flex; }
+    .state-view svg { width: 64px; height: 64px; color: var(--border); margin-bottom: 16px; }
+    .state-view h3 { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
+    .state-view p { color: var(--text-sub); font-size: 14px; line-height: 1.5; }
+
+    .sentinel { height: 20px; width: 100%; margin-top: 20px; }
+    .loading-more { display: none; text-align: center; padding: 20px; color: var(--text-sub); font-size: 14px; font-weight: 600; width: 100%; }
+    .loading-more.active { display: block; }
+    .loading-more svg { animation: spin 1s linear infinite; width: 20px; height: 20px; stroke: currentColor; vertical-align: middle; margin-right: 8px; }
+
+    /* Slide-Up Product Modal (Native Bottom Sheet) */
+    .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 999; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; backdrop-filter: blur(4px); }
+    .modal-overlay.active { opacity: 1; pointer-events: auto; }
+    
+    .product-modal { position: fixed; bottom: 0; left: 0; width: 100%; height: 88vh; max-height: 850px; background: var(--bg-color); border-radius: 24px 24px 0 0; z-index: 1000; transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1); display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 -10px 40px rgba(0,0,0,0.2); }
+    .product-modal.active { transform: translateY(0); }
+    
+    .modal-pull-indicator { width: 40px; height: 4px; background: var(--border); border-radius: 2px; margin: 12px auto; }
+    .modal-header { display: flex; justify-content: flex-end; padding: 0 16px 12px; position: absolute; width: 100%; z-index: 10; pointer-events: none; top: 12px; }
+    .close-btn { background: rgba(255,255,255,0.9); border: none; width: 36px; height: 36px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.1); pointer-events: auto; backdrop-filter: blur(8px); }
+    @media (prefers-color-scheme: dark) { .close-btn { background: rgba(31,41,55,0.9); box-shadow: 0 4px 12px rgba(0,0,0,0.3); } }
+    .close-btn:active { transform: scale(0.9); }
+    .close-btn svg { width: 20px; height: 20px; stroke: var(--text-main); stroke-width: 2.5; }
+
+    .modal-scroll { flex: 1; overflow-y: auto; padding-bottom: 100px; }
+    .modal-img-wrapper { background: var(--surface-color); padding: 40px 20px 20px; display: flex; justify-content: center; align-items: center; }
+    .modal-img { width: 100%; max-width: 300px; aspect-ratio: 1; object-fit: contain; }
+    
+    .modal-details { padding: 24px; background: var(--bg-color); }
+    .m-title { font-size: 22px; font-weight: 800; margin-bottom: 12px; line-height: 1.3; color: var(--text-main); }
+    .m-price { font-size: 28px; font-weight: 800; color: var(--primary); margin-bottom: 20px; display: flex; align-items: baseline; gap: 8px; }
+    .m-desc { font-size: 15px; color: var(--text-sub); line-height: 1.6; }
+
+    /* Sticky Bottom Action Bar */
+    .action-bar { position: absolute; bottom: 0; left: 0; width: 100%; padding: 16px 20px; background: var(--surface-color); border-top: 1px solid var(--border); display: flex; gap: 12px; z-index: 20; padding-bottom: calc(16px + env(safe-area-inset-bottom)); box-shadow: 0 -4px 12px rgba(0,0,0,0.03); }
+    .btn { flex: 1; padding: 16px; border-radius: 14px; font-size: 16px; font-weight: 700; text-align: center; cursor: pointer; border: none; transition: transform 0.2s cubic-bezier(0.32, 0.72, 0, 1); display: flex; justify-content: center; align-items: center; gap: 8px; }
+    .btn:active { transform: scale(0.96); }
+    .btn-add { background: var(--bg-color); color: var(--text-main); border: 1.5px solid var(--border); }
+    .btn-buy { background: var(--primary); color: #fff; box-shadow: 0 4px 12px rgba(26, 86, 219, 0.25); }
+
+    /* Notification Toast */
+    #toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-100px); background: #059669; color: white; padding: 14px 24px; border-radius: 50px; font-size: 15px; font-weight: 600; opacity: 0; transition: all 0.4s cubic-bezier(0.32, 0.72, 0, 1); z-index: 2000; box-shadow: 0 8px 20px rgba(5, 150, 105, 0.25); display: flex; align-items: center; gap: 10px; width: max-content; }
+    #toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+  </style>
+</head>
+<body>
+
+  <div class="page-container">
+    
+    <!-- Sticky Search Bar -->
+    <div class="search-header">
+      <div class="search-input-wrapper">
+        <svg fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" /></svg>
+        <input type="search" id="search-input" class="search-input" placeholder="Search for products..." autocomplete="off" autofocus>
+        <button class="clear-btn" id="clear-btn">
+          <svg fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Idle State -->
+    <div class="state-view active" id="state-idle">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+      </svg>
+      <h3>Find exactly what you need</h3>
+      <p>Search by product name, brand, or category.</p>
+    </div>
+
+    <!-- Empty State -->
+    <div class="state-view" id="state-empty">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+      <h3>No results found</h3>
+      <p>Try checking your spelling or using more general terms.</p>
+    </div>
+
+    <!-- Results Container -->
+    <div class="results-container" id="results-container"></div>
+    
+    <!-- Pagination Indicator -->
+    <div class="loading-more" id="loading-more">
+      <svg fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-opacity="0.25"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 2v4"/></svg>
+      Loading more items...
+    </div>
+    
+    <!-- Intersection Observer Sentinel -->
+    <div class="sentinel" id="sentinel"></div>
+  </div>
+
+  <!-- Slide-Up Product Modal -->
+  <div class="modal-overlay" id="modal-bg"></div>
+  <div class="product-modal" id="product-modal">
+    <div class="modal-pull-indicator"></div>
+    <div class="modal-header">
+      <button class="close-btn" id="close-modal">
+        <svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      </button>
+    </div>
+    
+    <div class="modal-scroll">
+      <div class="modal-img-wrapper">
+        <img id="m-img" class="modal-img" src="" alt="Product">
+      </div>
+      <div class="modal-details">
+        <div id="m-rating" class="list-rating" style="margin-bottom: 12px; display: none;"></div>
+        <h2 id="m-title" class="m-title">Loading...</h2>
+        <div id="m-price" class="m-price">₹0</div>
+        <p id="m-desc" class="m-desc"></p>
+      </div>
+    </div>
+
+    <div class="action-bar">
+      <button class="btn btn-add" id="btn-add-cart">Add to Cart</button>
+      <button class="btn btn-buy" id="btn-buy-now">Buy Now</button>
+    </div>
+  </div>
+
+  <div id="toast">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"></path></svg>
+    Item added to cart
+  </div>
+
+  <script type="module">
+    import { auth, db } from '../config.js';
+    import { collection, query, limit, where, getDocs, startAfter, doc, setDoc, increment } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+    // Elements
+    const searchInput = document.getElementById('search-input');
+    const clearBtn = document.getElementById('clear-btn');
+    const resultsContainer = document.getElementById('results-container');
+    const stateIdle = document.getElementById('state-idle');
+    const stateEmpty = document.getElementById('state-empty');
+    const sentinel = document.getElementById('sentinel');
+    const loadingMore = document.getElementById('loading-more');
+
+    // Modal Elements
+    const modalBg = document.getElementById('modal-bg');
+    const modal = document.getElementById('product-modal');
+    const closeModalBtn = document.getElementById('close-modal');
+    const mImg = document.getElementById('m-img');
+    const mTitle = document.getElementById('m-title');
+    const mPrice = document.getElementById('m-price');
+    const mDesc = document.getElementById('m-desc');
+    const mRating = document.getElementById('m-rating');
+    const btnAddCart = document.getElementById('btn-add-cart');
+    const btnBuyNow = document.getElementById('btn-buy-now');
+    const toast = document.getElementById('toast');
+
+    // State Variables
+    let currentUser = null;
+    let currentSelectedProduct = null;
+    let currentImgUrl = null;
+    let isModalOpen = false;
+    let debounceTimer;
+    let currentSearchTerm = '';
+    let lastVisibleDoc = null;
+    let isFetching = false;
+    let hasMoreDocs = true;
+
+    const placeholderImg = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='400' viewBox='0 0 400 400'><rect width='400' height='400' fill='%23f1f3f6'/><path d='M200 160c-22.1 0-40 17.9-40 40s17.9 40 40 40 40-17.9 40-40-17.9-40-40-40zm0 64c-13.2 0-24-10.8-24-24s10.8-24 24-24 24 10.8 24 24-10.8 24-24 24z' fill='%23cccccc'/><path d='M264 120H136c-13.2 0-24 10.8-24 24v112c0 13.2 10.8 24 24 24h128c13.2 0 24-10.8 24-24V144c0-13.2-10.8-24-24-24zm8 136c0 4.4-3.6 8-8 8H136c-4.4 0-8-3.6-8-8V144c0-4.4 3.6-8 8-8h128c4.4 0 8 3.6 8 8v112z' fill='%23cccccc'/></svg>";
+
+    onAuthStateChanged(auth, (user) => { currentUser = user; });
+
+    // Force keyboard to open immediately on most devices
+    window.addEventListener('DOMContentLoaded', () => {
+      setTimeout(() => searchInput.focus(), 100);
+    });
+
+    // 1. Skeleton Generator (List View)
+    function generateSkeletons(count = 4) {
+      let html = '';
+      for (let i = 0; i < count; i++) {
+        html += `
+          <div class="list-card skeleton-card">
+            <div class="skeleton sk-list-img"></div>
+            <div class="list-info">
+              <div class="skeleton sk-list-title"></div>
+              <div class="skeleton sk-list-title short"></div>
+              <div class="skeleton sk-list-price"></div>
+            </div>
+          </div>
+        `;
+      }
+      return html;
+    }
+
+    // 2. Debounced Search Input
+    searchInput.addEventListener('input', (e) => {
+      clearTimeout(debounceTimer);
+      const val = e.target.value.trim().toLowerCase();
+      
+      if (val.length > 0) {
+        clearBtn.style.display = 'flex';
+      } else {
+        clearBtn.style.display = 'none';
+      }
+
+      if (val === currentSearchTerm) return;
+
+      debounceTimer = setTimeout(() => {
+        currentSearchTerm = val;
+        
+        // Reset states
+        stateIdle.classList.remove('active');
+        stateEmpty.classList.remove('active');
+        resultsContainer.innerHTML = '';
+        lastVisibleDoc = null;
+        hasMoreDocs = true;
+
+        if (val.length === 0) {
+          stateIdle.classList.add('active');
+          return;
+        }
+
+        resultsContainer.innerHTML = generateSkeletons(6);
+        executeSearch(true);
+      }, 300);
+    });
+
+    clearBtn.addEventListener('click', () => {
+      if (navigator.vibrate) navigator.vibrate(40);
+      searchInput.value = '';
+      clearBtn.style.display = 'none';
+      currentSearchTerm = '';
+      resultsContainer.innerHTML = '';
+      stateEmpty.classList.remove('active');
+      stateIdle.classList.add('active');
+      searchInput.focus();
+    });
+
+    // 3. Search Engine Logic (Firebase Array-Contains)
+    async function executeSearch(isNewSearch = false) {
+      if (isFetching || !hasMoreDocs) return;
+      isFetching = true;
+
+      try {
+        let q;
+        if (isNewSearch) {
+          q = query(collection(db, "products"), where("searchKeywords", "array-contains", currentSearchTerm), limit(10));
+        } else {
+          loadingMore.classList.add('active');
+          q = query(collection(db, "products"), where("searchKeywords", "array-contains", currentSearchTerm), startAfter(lastVisibleDoc), limit(10));
+        }
+
+        const querySnapshot = await getDocs(q);
+        
+        if (isNewSearch) {
+          resultsContainer.innerHTML = ''; // Clear initial skeletons
+          if (querySnapshot.empty) {
+            stateEmpty.classList.add('active');
+            isFetching = false;
+            return;
+          }
+        }
+
+        loadingMore.classList.remove('active');
+
+        if (querySnapshot.docs.length < 10) {
+          hasMoreDocs = false; // No more pages to load
+        } else {
+          lastVisibleDoc = querySnapshot.docs[querySnapshot.docs.length - 1];
+        }
+
+        querySnapshot.forEach((docSnap) => {
+          const p = docSnap.data();
+          p.id = docSnap.id;
+          
+          const imgUrl = (p.images && p.images.thumbnail) ? p.images.thumbnail : placeholderImg;
+          
+          let ratingHtml = '';
+          if (p.ratingCount && p.ratingCount > 0) {
+            const avg = (p.ratingSum / p.ratingCount).toFixed(1);
+            ratingHtml = `<div class="list-rating"><svg viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg> ${avg}</div>`;
+          }
+
+          const card = document.createElement('div');
+          card.className = 'list-card';
+          card.innerHTML = `
+            <div class="list-img-wrap">
+              <img src="${imgUrl}" onerror="this.src='${placeholderImg}'" alt="${p.name}">
+            </div>
+            <div class="list-info">
+              <div class="list-title">${p.name}</div>
+              ${ratingHtml}
+              <div class="list-price">₹${(p.price || 0).toLocaleString('en-IN')}</div>
+            </div>
+          `;
+
+          card.addEventListener('click', () => openModal(p, imgUrl));
+          resultsContainer.appendChild(card);
+        });
+
+      } catch (error) {
+        console.error("Search Error:", error);
+        if (isNewSearch) {
+          resultsContainer.innerHTML = `<p style="text-align:center; color:red; padding: 20px;">An error occurred while searching.</p>`;
+        }
+      } finally {
+        isFetching = false;
+      }
+    }
+
+    // 4. Infinite Scroll Pagination (Intersection Observer)
+    const observer = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting && !isFetching && hasMoreDocs && currentSearchTerm.length > 0) {
+        executeSearch(false);
+      }
+    }, { rootMargin: "100px" });
+    
+    observer.observe(sentinel);
+
+    // 5. Modal & Mobile Back Button Controls
+    function openModal(product, imgUrl) {
+      if (navigator.vibrate) navigator.vibrate(40);
+      currentSelectedProduct = product;
+      currentImgUrl = imgUrl;
+      
+      mImg.src = imgUrl;
+      mTitle.innerText = product.name;
+      mPrice.innerText = `₹${(product.price || 0).toLocaleString('en-IN')}`;
+      mDesc.innerText = product.description || "Detailed description coming soon.";
+      
+      if (product.ratingCount && product.ratingCount > 0) {
+        const avg = (product.ratingSum / product.ratingCount).toFixed(1);
+        mRating.innerHTML = `<svg viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg> ${avg} (${product.ratingCount} Ratings)`;
+        mRating.style.display = 'inline-flex';
+      } else {
+        mRating.style.display = 'none';
+      }
+
+      modalBg.classList.add('active');
+      modal.classList.add('active');
+      
+      isModalOpen = true;
+      history.pushState({ modal: 'product' }, '', '');
+    }
+
+    function closeModalLogic() {
+      modalBg.classList.remove('active');
+      modal.classList.remove('active');
+      isModalOpen = false;
+      currentSelectedProduct = null;
+      currentImgUrl = null;
+    }
+
+    function triggerCloseModal() {
+      if (isModalOpen) history.back(); 
+    }
+
+    closeModalBtn.addEventListener('click', () => {
+      if (navigator.vibrate) navigator.vibrate(40);
+      triggerCloseModal();
+    });
+    modalBg.addEventListener('click', triggerCloseModal);
+    window.addEventListener('popstate', (e) => {
+      if (isModalOpen) closeModalLogic();
+    });
+
+    // 6. Add to Cart (Single Document Deep Merge)
+    btnAddCart.addEventListener('click', async () => {
+      if (!currentUser) return alert("Please log in to add items.");
+      if (!currentSelectedProduct) return;
+      if (navigator.vibrate) navigator.vibrate(40);
+      
+      btnAddCart.style.pointerEvents = 'none';
+      btnAddCart.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="animation: spin 1s linear infinite;"><circle cx="12" cy="12" r="10"></circle><path d="M12 2v4"></path></svg>`;
+
+      try {
+        const cartRef = doc(db, 'carts', currentUser.uid);
+        
+        const cartUpdate = {
+          items: {
+            [currentSelectedProduct.id]: {
+              name: currentSelectedProduct.name,
+              price: currentSelectedProduct.price,
+              image: currentImgUrl,
+              qty: increment(1),
+              addedAt: new Date().toISOString()
+            }
+          }
+        };
+
+        await setDoc(cartRef, cartUpdate, { merge: true });
+
+        btnAddCart.innerText = 'Added!';
+        btnAddCart.style.background = 'var(--success-bg)';
+        btnAddCart.style.color = 'var(--success-text)';
+        btnAddCart.style.borderColor = 'var(--success-text)';
+        toast.classList.add('show');
+
+        setTimeout(() => {
+          btnAddCart.innerText = 'Add to Cart';
+          btnAddCart.style = '';
+          toast.classList.remove('show');
+          triggerCloseModal();
+        }, 1500);
+
+      } catch (error) {
+        console.error("Cart error:", error);
+        btnAddCart.innerText = 'Error';
+        btnAddCart.style.pointerEvents = 'auto';
+      }
+    });
+
+    // 7. Buy Now (Express Session Flow)
+    btnBuyNow.addEventListener('click', () => {
+      if (!currentUser) return alert("Please log in to purchase.");
+      if (!currentSelectedProduct) return;
+      if (navigator.vibrate) navigator.vibrate(40);
+      
+      btnBuyNow.style.pointerEvents = 'none';
+      btnBuyNow.innerText = 'Processing...';
+
+      const instantPurchase = [{
+        id: currentSelectedProduct.id,
+        name: currentSelectedProduct.name,
+        price: currentSelectedProduct.price,
+        image: currentImgUrl,
+        qty: 1
+      }];
+
+      sessionStorage.setItem('checkout_payload', JSON.stringify(instantPurchase));
+      sessionStorage.setItem('checkout_source', 'buy_now');
+      
+      window.parent.document.getElementById('content-frame').src = 'pages/checkout.html';
+    });
+  </script>
+</body>
+</html>
