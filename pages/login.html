@@ -3,30 +3,30 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <meta name="theme-color" content="#121212" media="(prefers-color-scheme: dark)">
   <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#121212" media="(prefers-color-scheme: dark)">
   <title>Login - Aarvi Stores</title>
   
   <style>
     :root {
-      --bg-color: #f4f7f6;
+      --bg-color: #ffffff;
       --surface-color: #ffffff;
-      --text-main: #111827;
-      --text-sub: #6b7280;
-      --border: #e5e7eb;
-      --primary: #10B981;
-      --primary-hover: #059669;
-      --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      --text-main: #000000;
+      --text-sub: #666666;
+      --border: #e0e0e0;
+      --primary: #2874f0; /* Flipkart blue style */
+      --primary-hover: #1e5bb8;
+      --input-bg: #f1f3f6;
     }
 
     @media (prefers-color-scheme: dark) {
       :root {
         --bg-color: #121212;
-        --surface-color: #1e1e1e;
-        --text-main: #f9fafb;
-        --text-sub: #9ca3af;
-        --border: #2d3748;
-        --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+        --surface-color: #121212;
+        --text-main: #ffffff;
+        --text-sub: #a0a0a0;
+        --border: #333333;
+        --input-bg: #1e1e1e;
       }
     }
 
@@ -34,17 +34,14 @@
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: system-ui, -apple-system, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       -webkit-tap-highlight-color: transparent;
-      -webkit-touch-callout: none; 
-      -webkit-user-select: none;   
-      user-select: none;           
+      -webkit-touch-callout: none;
+      user-select: none;
     }
 
-    /* Re-enable selection for inputs */
-    input, textarea {
+    input {
       -webkit-touch-callout: default;
-      -webkit-user-select: auto;
       user-select: auto;
     }
 
@@ -53,202 +50,213 @@
       color: var(--text-main);
       height: 100vh;
       height: 100dvh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      overflow: hidden;
+      overflow-x: hidden;
+      overflow-y: auto;
     }
 
-    .card {
-      background-color: var(--surface-color);
-      width: 90%;
-      max-width: 400px;
-      padding: 40px 30px;
-      border-radius: 20px;
-      box-shadow: var(--shadow);
-      border: 1px solid var(--border);
-      text-align: center;
+    /* Container fills screen on mobile */
+    .view-container {
+      width: 100%;
+      min-height: 100%;
+      padding: 24px;
       display: flex;
       flex-direction: column;
-      gap: 30px;
-      animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-      opacity: 0;
-      transform: translateY(20px);
+      animation: fadeIn 0.3s ease forwards;
     }
 
-    @keyframes slideUp {
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
       to { opacity: 1; transform: translateY(0); }
     }
 
-    .branding {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 10px;
-    }
+    /* Typography */
+    h1 { font-size: 24px; font-weight: 700; margin-bottom: 8px; }
+    p.subtitle { color: var(--text-sub); font-size: 14px; margin-bottom: 32px; line-height: 1.4; }
 
-    .brand-icon {
-      width: 64px;
-      height: 64px;
-      background-color: rgba(16, 185, 129, 0.1);
-      color: var(--primary);
-      border-radius: 16px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-bottom: 10px;
-    }
-
-    .brand-icon svg { width: 32px; height: 32px; fill: currentColor; }
-
-    .app-title { font-size: 1.75rem; font-weight: 800; letter-spacing: -0.5px; }
-    .app-title span { color: var(--primary); }
-    .app-subtitle { color: var(--text-sub); font-size: 0.95rem; font-weight: 500; }
-
+    /* Buttons */
     .btn {
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 12px;
       width: 100%;
-      padding: 14px;
-      border-radius: 12px;
-      font-size: 1rem;
+      padding: 16px;
+      border-radius: 8px;
+      font-size: 16px;
       font-weight: 600;
       cursor: pointer;
-      transition: all 0.2s ease;
       border: none;
+      transition: background-color 0.2s;
     }
 
     .btn:active { transform: scale(0.98); }
 
-    .btn-outline {
+    .btn-google {
       background-color: var(--surface-color);
       color: var(--text-main);
       border: 1px solid var(--border);
-      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+      gap: 12px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
     }
-    
-    .btn-outline:active { background-color: var(--bg-color); }
+    .btn-google:active { background-color: var(--input-bg); }
 
     .btn-primary {
       background-color: var(--primary);
       color: #fff;
-      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+      margin-top: auto; /* Pushes button to bottom if space allows */
+      margin-bottom: env(safe-area-inset-bottom, 24px);
     }
-    
     .btn-primary:active { background-color: var(--primary-hover); }
 
+    /* Form Fields Native Style */
+    .form-group {
+      position: relative;
+      margin-bottom: 20px;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 20px 16px 8px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--surface-color);
+      color: var(--text-main);
+      font-size: 16px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .form-input:focus { border-color: var(--primary); }
+
+    .form-label {
+      position: absolute;
+      left: 16px;
+      top: 16px;
+      font-size: 16px;
+      color: var(--text-sub);
+      transition: 0.2s ease all;
+      pointer-events: none;
+    }
+
+    /* Floating Label Logic */
+    .form-input:focus ~ .form-label,
+    .form-input:not(:placeholder-shown) ~ .form-label {
+      top: 6px;
+      font-size: 12px;
+      color: var(--primary);
+    }
+    .form-input:not(:focus):not(:placeholder-shown) ~ .form-label {
+      color: var(--text-sub);
+    }
+
+    /* Setup specific layout */
+    .setup-header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 24px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .profile-dp {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background-color: var(--input-bg);
+      object-fit: cover;
+    }
+
+    .row { display: flex; gap: 12px; }
+    .row .form-group { flex: 1; }
+
+    /* Utilities */
+    .hidden { display: none !important; }
+    .error-text { color: #d32f2f; font-size: 12px; margin-top: 4px; display: none; }
+    
     .loader {
       display: none;
       width: 20px;
       height: 20px;
-      border: 3px solid rgba(16, 185, 129, 0.3);
+      border: 2px solid transparent;
       border-radius: 50%;
-      border-top-color: var(--primary);
-      animation: spin 1s ease-in-out infinite;
+      border-top-color: currentColor;
+      animation: spin 0.8s linear infinite;
     }
-
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    .error-msg { color: #ef4444; font-size: 0.85rem; margin-top: 10px; display: none; }
-
-    /* --- Profile Setup UI --- */
-    #setup-container { display: none; }
-    
-    .profile-dp {
-      width: 80px;
-      height: 80px;
-      border-radius: 50%;
-      border: 3px solid var(--primary);
-      object-fit: cover;
-      margin: 0 auto;
-    }
-
-    .user-name { font-size: 1.25rem; font-weight: 700; margin-top: 10px; }
-    
-    .form-group {
-      display: flex;
-      flex-direction: column;
-      text-align: left;
-      gap: 6px;
-      margin-bottom: 16px;
-    }
-
-    .form-label { font-size: 0.85rem; font-weight: 600; color: var(--text-sub); }
-    
-    .form-input {
-      padding: 12px;
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      background: var(--bg-color);
-      color: var(--text-main);
-      font-size: 1rem;
-      outline: none;
-      transition: border-color 0.2s;
-    }
-    
-    .form-input:focus { border-color: var(--primary); }
-
-    /* Main view toggles */
-    .hidden { display: none !important; }
   </style>
 </head>
 <body>
 
-  <!-- 1. Primary Login View -->
-  <div class="card" id="login-container">
-    <div class="branding">
-      <div class="brand-icon">
-        <svg viewBox="0 0 24 24"><path d="M12 2L2 22h20L12 2zm0 3.8l7.1 14.2H4.9L12 5.8z"/></svg>
-      </div>
-      <h1 class="app-title">Aarvi <span>Stores</span></h1>
-      <p class="app-subtitle">Sign in to manage your orders</p>
+  <!-- 1. Login View -->
+  <div class="view-container" id="login-container">
+    <div style="margin-top: 20vh; margin-bottom: 40px;">
+      <h1>Aarvi Stores</h1>
+      <p class="subtitle">Sign in to experience fast checkout and track your orders seamlessly.</p>
     </div>
 
-    <div>
-      <button class="btn btn-outline" id="google-login-btn">
-        <svg viewBox="0 0 48 48" width="24" height="24" id="google-icon">
-          <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
-          <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
-          <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
-          <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
-        </svg>
-        <span id="btn-text">Continue with Google</span>
-        <div class="loader" id="btn-loader"></div>
-      </button>
-      <p class="error-msg" id="error-msg"></p>
-    </div>
+    <button class="btn btn-google" id="google-login-btn">
+      <svg viewBox="0 0 48 48" width="24" height="24" id="google-icon">
+        <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+        <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+        <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+        <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+      </svg>
+      <span id="btn-text">Continue with Google</span>
+      <div class="loader" id="btn-loader"></div>
+    </button>
+    <p class="error-text" id="error-msg" style="text-align:center; margin-top:16px;"></p>
   </div>
 
-  <!-- 2. New User Setup View -->
-  <div class="card" id="setup-container">
-    <div>
-      <img id="setup-dp" class="profile-dp" src="" alt="Profile">
-      <h2 class="user-name" id="setup-name"></h2>
-      <p class="app-subtitle">Complete your profile to continue</p>
+  <!-- 2. Setup View -->
+  <div class="view-container hidden" id="setup-container">
+    <div class="setup-header">
+      <img id="setup-dp" class="profile-dp" src="" alt="">
+      <div>
+        <h2 id="setup-name" style="font-size: 18px; font-weight: 600;"></h2>
+        <p style="color: var(--text-sub); font-size: 14px;">Complete your delivery details</p>
+      </div>
     </div>
 
-    <div style="margin-top: 10px;">
-      <div class="form-group">
-        <label class="form-label">Mobile Number</label>
-        <input type="tel" id="user-phone" class="form-input" value="+91 ">
-      </div>
-      <div class="form-group">
-        <label class="form-label">Address Line 1</label>
-        <input type="text" id="user-address-1" class="form-input" placeholder="House/Flat No., Street">
-      </div>
-      <div class="form-group" style="margin-bottom: 24px;">
-        <label class="form-label">Address Line 2</label>
-        <input type="text" id="user-address-2" class="form-input" placeholder="City, State, Pincode">
-      </div>
-      
-      <button class="btn btn-primary" id="proceed-btn">
-        <span id="proceed-text">Proceed</span>
-        <div class="loader" id="proceed-loader" style="border-top-color: #fff;"></div>
-      </button>
-      <p class="error-msg" id="setup-error-msg"></p>
+    <div class="form-group">
+      <input type="tel" id="f-phone" class="form-input" placeholder=" " value="+91 ">
+      <label class="form-label">Mobile Number</label>
     </div>
+
+    <h3 style="font-size: 16px; margin: 8px 0 16px; font-weight: 600;">Delivery Address</h3>
+
+    <div class="row">
+      <div class="form-group">
+        <input type="text" id="f-pincode" class="form-input" placeholder=" " inputmode="numeric" maxlength="6">
+        <label class="form-label">Pincode</label>
+      </div>
+      <div class="form-group">
+        <input type="text" id="f-city" class="form-input" placeholder=" ">
+        <label class="form-label">City</label>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <input type="text" id="f-state" class="form-input" placeholder=" ">
+      <label class="form-label">State</label>
+    </div>
+
+    <div class="form-group">
+      <input type="text" id="f-house" class="form-input" placeholder=" ">
+      <label class="form-label">House No., Building Name</label>
+    </div>
+
+    <div class="form-group">
+      <input type="text" id="f-area" class="form-input" placeholder=" ">
+      <label class="form-label">Road Name, Area, Colony</label>
+    </div>
+
+    <p class="error-text" id="setup-error-msg" style="margin-bottom: 16px;"></p>
+
+    <button class="btn btn-primary" id="proceed-btn" style="margin-top: 24px;">
+      <span id="proceed-text">Save & Continue</span>
+      <div class="loader" id="proceed-loader"></div>
+    </button>
   </div>
 
   <script type="module">
@@ -256,68 +264,60 @@
     import { signInWithPopup, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
     import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-    // DOM Elements
-    const loginContainer = document.getElementById('login-container');
-    const setupContainer = document.getElementById('setup-container');
+    const views = {
+      login: document.getElementById('login-container'),
+      setup: document.getElementById('setup-container')
+    };
     
+    // Login UI
     const loginBtn = document.getElementById('google-login-btn');
     const btnText = document.getElementById('btn-text');
     const btnLoader = document.getElementById('btn-loader');
-    const errorMsg = document.getElementById('error-msg');
     const googleIcon = document.getElementById('google-icon');
+    const errorMsg = document.getElementById('error-msg');
 
-    const setupDp = document.getElementById('setup-dp');
-    const setupName = document.getElementById('setup-name');
-    const phoneInput = document.getElementById('user-phone');
-    const address1Input = document.getElementById('user-address-1');
-    const address2Input = document.getElementById('user-address-2');
+    // Setup UI
     const proceedBtn = document.getElementById('proceed-btn');
-    const proceedText = document.getElementById('proceed-text');
-    const proceedLoader = document.getElementById('proceed-loader');
-    const setupErrorMsg = document.getElementById('setup-error-msg');
-
+    const setupError = document.getElementById('setup-error-msg');
+    
     let currentUser = null;
 
-    // 1. Auth State Listener
+    // 1. Auth Listener
     onAuthStateChanged(auth, async (user) => {
       if (user) {
         currentUser = user;
         
-        // Show loading state if triggered by auto-login on page refresh
+        // Show loading state
         loginBtn.style.pointerEvents = 'none';
-        btnText.innerText = "Checking profile...";
+        btnText.innerText = "Loading...";
         googleIcon.style.display = 'none';
         btnLoader.style.display = 'block';
 
         try {
-          // Check if user document exists in Firestore
           const userRef = doc(db, 'users', user.uid);
           const userSnap = await getDoc(userRef);
 
           if (userSnap.exists()) {
-            // Existing user -> Redirect immediately
             window.location.replace("../index.html");
           } else {
-            // New user -> Show profile setup UI
-            loginContainer.classList.add('hidden');
-            setupContainer.style.display = 'flex';
+            // New user - transition to setup view
+            views.login.classList.add('hidden');
+            views.setup.classList.remove('hidden');
             
-            // Populate Google Data
-            setupDp.src = user.photoURL || '';
-            setupName.innerText = user.displayName || 'Welcome';
+            document.getElementById('setup-dp').src = user.photoURL || '';
+            document.getElementById('setup-name').innerText = user.displayName || 'Welcome';
           }
         } catch (error) {
-          console.error("Firestore Check Error:", error);
-          errorMsg.innerText = "Failed to load profile. Please refresh.";
+          console.error(error);
+          errorMsg.innerText = "Connection error. Please refresh.";
           errorMsg.style.display = 'block';
         }
       }
     });
 
-    // 2. Handle Google Login Click
+    // 2. Google Login
     loginBtn.addEventListener('click', async () => {
       if (navigator.vibrate) navigator.vibrate(40);
-
       loginBtn.style.pointerEvents = 'none';
       btnText.innerText = "Signing in...";
       googleIcon.style.display = 'none';
@@ -326,66 +326,69 @@
 
       try {
         await signInWithPopup(auth, googleProvider);
-        // Do nothing else here. onAuthStateChanged will intercept the success 
-        // and route the user based on whether they exist in Firestore.
       } catch (error) {
-        console.error("Authentication Error:", error);
         loginBtn.style.pointerEvents = 'auto';
         btnText.innerText = "Continue with Google";
         googleIcon.style.display = 'block';
         btnLoader.style.display = 'none';
         errorMsg.innerText = error.message.includes('popup-closed') 
-          ? "Login cancelled. Please try again." 
-          : "Failed to sign in. Check your connection.";
+          ? "Login cancelled." 
+          : "Failed to sign in.";
         errorMsg.style.display = 'block';
       }
     });
 
-    // 3. Handle Profile Setup Submission
+    // 3. Save Profile
     proceedBtn.addEventListener('click', async () => {
       if (navigator.vibrate) navigator.vibrate(40);
-      setupErrorMsg.style.display = 'none';
+      setupError.style.display = 'none';
 
-      const phone = phoneInput.value.trim();
-      const line1 = address1Input.value.trim();
-      const line2 = address2Input.value.trim();
+      // Gather input values
+      const phone = document.getElementById('f-phone').value.trim();
+      const pincode = document.getElementById('f-pincode').value.trim();
+      const city = document.getElementById('f-city').value.trim();
+      const state = document.getElementById('f-state').value.trim();
+      const house = document.getElementById('f-house').value.trim();
+      const area = document.getElementById('f-area').value.trim();
 
-      // Basic Validation
-      if (phone.length < 5 || !line1 || !line2) {
-        setupErrorMsg.innerText = "Please fill out all fields.";
-        setupErrorMsg.style.display = 'block';
+      if (phone.length < 5 || !pincode || !city || !state || !house || !area) {
+        setupError.innerText = "Please fill in all address details.";
+        setupError.style.display = 'block';
         return;
       }
 
+      // Format full address string for easy reading later
+      const fullAddress = `${house}, ${area}, ${city}, ${state} - ${pincode}`;
+
       proceedBtn.style.pointerEvents = 'none';
-      proceedText.style.display = 'none';
-      proceedLoader.style.display = 'block';
+      document.getElementById('proceed-text').style.display = 'none';
+      document.getElementById('proceed-loader').style.display = 'block';
 
       try {
-        // Create user document in Firestore
         await setDoc(doc(db, 'users', currentUser.uid), {
           name: currentUser.displayName,
           email: currentUser.email,
           photoURL: currentUser.photoURL,
           phone: phone,
-          address: {
-            line1: line1,
-            line2: line2
+          address: fullAddress, // The combined string you requested
+          address_details: { // Storing individual parts is best practice for future filtering
+            pincode: pincode,
+            city: city,
+            state: state,
+            house: house,
+            area: area
           },
           createdAt: new Date().toISOString()
         });
 
-        // Redirect to App Shell upon successful creation
         window.location.replace("../index.html");
 
       } catch (error) {
-        console.error("Save Error:", error);
-        setupErrorMsg.innerText = "Failed to save profile. Try again.";
-        setupErrorMsg.style.display = 'block';
-        
+        setupError.innerText = "Failed to save details. Try again.";
+        setupError.style.display = 'block';
         proceedBtn.style.pointerEvents = 'auto';
-        proceedText.style.display = 'block';
-        proceedLoader.style.display = 'none';
+        document.getElementById('proceed-text').style.display = 'block';
+        document.getElementById('proceed-loader').style.display = 'none';
       }
     });
   </script>
