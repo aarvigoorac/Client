@@ -100,7 +100,6 @@
 
   <!-- 1. The Grid (Starts with Skeletons) -->
   <div class="grid-2-col" id="product-grid">
-    <!-- Skeleton Template with ₹p - 0 formatting -->
     <div class="product-card skeleton-card">
       <div class="img-container skeleton"></div>
       <div class="card-info">
@@ -188,6 +187,7 @@
 
     let currentUser = null;
     let currentSelectedProduct = null;
+    let currentImgUrl = null;
 
     // Professional SVG Placeholder for missing images
     const placeholderImg = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='400' viewBox='0 0 400 400'><rect width='400' height='400' fill='%23f1f3f6'/><path d='M200 160c-22.1 0-40 17.9-40 40s17.9 40 40 40 40-17.9 40-40-17.9-40-40-40zm0 64c-13.2 0-24-10.8-24-24s10.8-24 24-24 24 10.8 24 24-10.8 24-24 24z' fill='%23ccc'/><path d='M264 120H136c-13.2 0-24 10.8-24 24v112c0 13.2 10.8 24 24 24h128c13.2 0 24-10.8 24-24V144c0-13.2-10.8-24-24-24zm8 136c0 4.4-3.6 8-8 8H136c-4.4 0-8-3.6-8-8V144c0-4.4 3.6-8 8-8h128c4.4 0 8 3.6 8 8v112z' fill='%23ccc'/></svg>";
@@ -196,7 +196,7 @@
       currentUser = user;
     });
 
-    // 1. Fetch & Render
+    // 1. Fetch & Render Products
     async function fetchProducts() {
       try {
         const q = query(collection(db, "products"), limit(12));
@@ -243,6 +243,7 @@
     function openModal(product, imgUrl) {
       if (navigator.vibrate) navigator.vibrate(40);
       currentSelectedProduct = product;
+      currentImgUrl = imgUrl;
       
       mImg.src = imgUrl;
       mTitle.innerText = product.name;
@@ -265,6 +266,7 @@
       modalBg.classList.remove('active');
       modal.classList.remove('active');
       currentSelectedProduct = null;
+      currentImgUrl = null;
     }
 
     closeModalBtn.addEventListener('click', () => {
@@ -273,28 +275,37 @@
     });
     modalBg.addEventListener('click', closeModal);
 
-    // 3. Add to Cart (Database Flow)
+    // 3. Add to Cart (Database Flow using Single Document deep merge)
     btnAddCart.addEventListener('click', async () => {
-      if (!currentUser || !currentSelectedProduct) {
-        alert("Please wait for authentication.");
+      if (!currentUser) {
+        alert("Please log in to add items to cart.");
         return;
       }
+      if (!currentSelectedProduct) return;
       if (navigator.vibrate) navigator.vibrate(40);
       
-      const originalText = btnAddCart.innerText;
       btnAddCart.style.pointerEvents = 'none';
       btnAddCart.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="animation: spin 1s linear infinite;"><circle cx="12" cy="12" r="10"></circle><path d="M12 2v4"></path></svg>`;
 
       try {
-        const cartRef = doc(db, `users/${currentUser.uid}/cart`, currentSelectedProduct.id);
+        // Point to the single 'carts' document for this user
+        const cartRef = doc(db, 'carts', currentUser.uid);
         
-        await setDoc(cartRef, {
-          name: currentSelectedProduct.name,
-          price: currentSelectedProduct.price,
-          image: (currentSelectedProduct.images && currentSelectedProduct.images.thumbnail) ? currentSelectedProduct.images.thumbnail : placeholderImg,
-          qty: increment(1),
-          addedAt: new Date().toISOString()
-        }, { merge: true });
+        // Deep merge the item into the 'items' map object.
+        const cartUpdate = {
+          items: {
+            [currentSelectedProduct.id]: {
+              name: currentSelectedProduct.name,
+              price: currentSelectedProduct.price,
+              image: currentImgUrl,
+              qty: increment(1),
+              addedAt: new Date().toISOString()
+            }
+          }
+        };
+
+        // merge: true merges the items map instead of overwriting the whole document
+        await setDoc(cartRef, cartUpdate, { merge: true });
 
         // Show success state
         btnAddCart.innerText = 'Added!';
@@ -321,28 +332,29 @@
 
     // 4. Buy Now (Express Session Flow)
     btnBuyNow.addEventListener('click', () => {
-      if (!currentUser || !currentSelectedProduct) {
-        alert("Please wait for authentication.");
+      if (!currentUser) {
+        alert("Please log in to purchase items.");
         return;
       }
+      if (!currentSelectedProduct) return;
       if (navigator.vibrate) navigator.vibrate(40);
       
       btnBuyNow.style.pointerEvents = 'none';
       btnBuyNow.innerText = 'Processing...';
 
-      // Package single item payload
+      // Package single item payload for instant checkout
       const instantPurchase = [{
         id: currentSelectedProduct.id,
         name: currentSelectedProduct.name,
         price: currentSelectedProduct.price,
-        image: (currentSelectedProduct.images && currentSelectedProduct.images.thumbnail) ? currentSelectedProduct.images.thumbnail : placeholderImg,
+        image: currentImgUrl,
         qty: 1
       }];
 
       sessionStorage.setItem('checkout_payload', JSON.stringify(instantPurchase));
       sessionStorage.setItem('checkout_source', 'buy_now');
       
-      // Redirect parent iframe
+      // Redirect parent iframe to checkout page
       window.parent.document.getElementById('content-frame').src = 'pages/checkout.html';
     });
 
