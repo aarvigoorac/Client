@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Cart - Aarvi Stores</title>
+  <style>
+    :root {
+      --bg-color: #f1f3f6;
+      --surface-color: #ffffff;
+      --text-main: #000000;
+      --text-sub: #666666;
+      --border: #e0e0e0;
+      --primary: #2874f0;
+      --primary-hover: #1e5bb8;
+      --skeleton-base: #e0e0e0;
+      --skeleton-shine: #f5f5f5;
+      --danger: #ff4d4f;
+    }
+    
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg-color: #121212;
+        --surface-color: #1e1e1e;
+        --text-main: #ffffff;
+        --text-sub: #a0a0a0;
+        --border: #333333;
+        --skeleton-base: #333333;
+        --skeleton-shine: #444444;
+        --danger: #ff7875;
+      }
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; -webkit-tap-highlight-color: transparent; }
+    
+    ::-webkit-scrollbar { display: none; }
+    html, body, .modal-scroll { -ms-overflow-style: none; scrollbar-width: none; }
+
+    body { background-color: var(--bg-color); color: var(--text-main); padding-bottom: 110px; overflow-x: hidden; display: flex; flex-direction: column; align-items: center; }
+
+    .page-container { width: 100%; max-width: 800px; padding: 16px; display: flex; flex-direction: column; gap: 16px; }
+
+    .page-title { font-size: 20px; font-weight: 800; color: var(--text-main); margin-bottom: 4px; }
+
+    /* Cart Items List */
+    .cart-list { display: flex; flex-direction: column; gap: 12px; width: 100%; }
+
+    .cart-card { background: var(--surface-color); border-radius: 16px; overflow: hidden; box-shadow: 0 2px 4px -1px rgba(0,0,0,0.03); border: 1px solid var(--border); display: flex; align-items: center; padding: 12px; gap: 12px; position: relative; }
+    
+    .cart-img-wrap { width: 90px; height: 90px; background: var(--surface-color); flex-shrink: 0; display: flex; align-items: center; justify-content: center; border: 1px solid var(--border); border-radius: 12px; padding: 4px; }
+    .cart-img-wrap img { width: 100%; height: 100%; object-fit: contain; mix-blend-mode: multiply; }
+    @media (prefers-color-scheme: dark) { .cart-img-wrap img { mix-blend-mode: normal; } }
+
+    .cart-info { display: flex; flex-direction: column; flex: 1; justify-content: space-between; height: 90px; }
+    .cart-title-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+    .cart-title { font-size: 14px; font-weight: 600; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; color: var(--text-main); }
+    
+    .delete-icon-btn { background: none; border: none; cursor: pointer; color: var(--text-sub); padding: 2px; display: flex; align-items: center; justify-content: center; }
+    .delete-icon-btn svg { width: 18px; height: 18px; stroke: currentColor; stroke-width: 2; }
+    .delete-icon-btn:active { color: var(--danger); }
+
+    .cart-price-row { display: flex; justify-content: space-between; align-items: center; margin-top: auto; }
+    .cart-price { font-size: 16px; font-weight: 800; color: var(--text-main); }
+
+    /* Stepper Widget */
+    .stepper { display: flex; align-items: center; background: var(--bg-color); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+    .stepper-btn { background: none; border: none; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 16px; font-weight: 700; color: var(--text-main); }
+    .stepper-btn:active { background: var(--border); }
+    .stepper-val { width: 32px; text-align: center; font-size: 14px; font-weight: 700; color: var(--text-main); }
+
+    /* Skeleton Loading */
+    .skeleton { background: linear-gradient(90deg, var(--skeleton-base) 25%, var(--skeleton-shine) 50%, var(--skeleton-base) 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 6px; }
+    @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+    .sk-card { height: 114px; border-radius: 16px; }
+
+    /* Empty State */
+    .empty-state { display: none; flex-direction: column; align-items: center; justify-content: center; padding: 80px 20px; text-align: center; width: 100%; }
+    .empty-state.active { display: flex; }
+    .empty-state svg { width: 80px; height: 80px; color: var(--border); margin-bottom: 16px; }
+    .empty-state h3 { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
+    .empty-state p { color: var(--text-sub); font-size: 14px; margin-bottom: 20px; }
+    .shop-now-btn { background: var(--primary); color: white; border: none; padding: 12px 24px; border-radius: 12px; font-size: 15px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 12px rgba(40, 116, 240, 0.3); }
+
+    /* Sticky Bottom Checkout Bar */
+    .sticky-checkout-bar { position: fixed; bottom: 0; left: 0; width: 100%; background: var(--surface-color); border-top: 1px solid var(--border); padding: 16px 20px; display: none; justify-content: space-between; align-items: center; z-index: 40; box-shadow: 0 -4px 12px rgba(0,0,0,0.03); padding-bottom: calc(16px + env(safe-area-inset-bottom)); }
+    .sticky-checkout-bar.active { display: flex; }
+    .total-label { font-size: 12px; color: var(--text-sub); font-weight: 600; text-transform: uppercase; }
+    .total-amount { font-size: 20px; font-weight: 800; color: var(--text-main); }
+    .checkout-btn { background: var(--primary); color: white; border: none; padding: 14px 28px; border-radius: 14px; font-size: 16px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(40, 116, 240, 0.3); transition: transform 0.15s; }
+    .checkout-btn:active { transform: scale(0.96); }
+    .checkout-btn svg { width: 18px; height: 18px; stroke: currentColor; stroke-width: 2.5; }
+
+    /* Delete Confirmation Modal (Bottom Sheet) */
+    .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 999; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; backdrop-filter: blur(4px); }
+    .modal-overlay.active { opacity: 1; pointer-events: auto; }
+    
+    .confirm-modal { position: fixed; bottom: 0; left: 0; width: 100%; background: var(--bg-color); border-radius: 24px 24px 0 0; z-index: 1000; transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1); display: flex; flex-direction: column; overflow: hidden; padding: 24px; box-shadow: 0 -10px 40px rgba(0,0,0,0.2); }
+    .confirm-modal.active { transform: translateY(0); }
+    
+    .modal-pull { width: 40px; height: 4px; background: var(--border); border-radius: 2px; margin: 0 auto 16px; }
+    .confirm-title { font-size: 18px; font-weight: 800; margin-bottom: 8px; color: var(--text-main); }
+    .confirm-desc { font-size: 14px; color: var(--text-sub); margin-bottom: 24px; line-height: 1.5; }
+    .confirm-actions { display: flex; gap: 12px; }
+    .modal-btn { flex: 1; padding: 14px; border-radius: 12px; font-size: 15px; font-weight: 700; text-align: center; cursor: pointer; border: none; }
+    .modal-btn-cancel { background: var(--surface-color); color: var(--text-main); border: 1.5px solid var(--border); }
+    .modal-btn-delete { background: var(--danger); color: white; box-shadow: 0 4px 12px rgba(255, 77, 79, 0.3); }
+
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+
+  <div class="page-container">
+    <h2 class="page-title">My Cart</h2>
+
+    <!-- Cart Items List Container -->
+    <div class="cart-list" id="cart-list">
+      <!-- Initial Skeletons -->
+      <div class="skeleton sk-card"></div>
+      <div class="skeleton sk-card"></div>
+      <div class="skeleton sk-card"></div>
+    </div>
+
+    <!-- Empty State -->
+    <div class="empty-state" id="empty-state">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.120-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+      </svg>
+      <h3>Your cart is empty</h3>
+      <p>Explore our latest products and add items to your cart.</p>
+      <button class="shop-now-btn" id="shop-now-btn">Explore Products</button>
+    </div>
+  </div>
+
+  <!-- Sticky Bottom Checkout Bar -->
+  <div class="sticky-checkout-bar" id="checkout-bar">
+    <div>
+      <div class="total-label">Total Amount</div>
+      <div class="total-amount" id="total-amount">₹0</div>
+    </div>
+    <button class="checkout-btn" id="checkout-btn">
+      Proceed to Checkout
+      <svg fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" /></svg>
+    </button>
+  </div>
+
+  <!-- Delete Confirmation Modal -->
+  <div class="modal-overlay" id="modal-bg"></div>
+  <div class="confirm-modal" id="confirm-modal">
+    <div class="modal-pull"></div>
+    <h3 class="confirm-title">Remove Item</h3>
+    <p class="confirm-desc" id="confirm-desc">Are you sure you want to remove this item from your cart?</p>
+    <div class="confirm-actions">
+      <button class="modal-btn modal-btn-cancel" id="modal-cancel">Cancel</button>
+      <button class="modal-btn modal-btn-delete" id="modal-confirm">Remove</button>
+    </div>
+  </div>
+
+  <script type="module">
+    import { auth, db } from '../config.js';
+    import { doc, getDoc, updateDoc, deleteField, increment } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+    const cartList = document.getElementById('cart-list');
+    const emptyState = document.getElementById('empty-state');
+    const checkoutBar = document.getElementById('checkout-bar');
+    const totalAmountEl = document.getElementById('total-amount');
+    const checkoutBtn = document.getElementById('checkout-btn');
+    const shopNowBtn = document.getElementById('shop-now-btn');
+
+    // Modal elements
+    const modalBg = document.getElementById('modal-bg');
+    const confirmModal = document.getElementById('confirm-modal');
+    const modalCancel = document.getElementById('modal-cancel');
+    const modalConfirm = document.getElementById('modal-confirm');
+    const confirmDesc = document.getElementById('confirm-desc');
+
+    let currentUser = null;
+    let cartItemsData = {};
+    let itemPendingDeletion = null;
+    let isModalOpen = false;
+
+    const placeholderImg = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='400' viewBox='0 0 400 400'><rect width='400' height='400' fill='%23f1f3f6'/><path d='M200 160c-22.1 0-40 17.9-40 40s17.9 40 40 40 40-17.9 40-40-17.9-40-40-40zm0 64c-13.2 0-24-10.8-24-24s10.8-24 24-24 24 10.8 24 24-10.8 24-24 24z' fill='%23cccccc'/><path d='M264 120H136c-13.2 0-24 10.8-24 24v112c0 13.2 10.8 24 24 24h128c13.2 0 24-10.8 24-24V144c0-13.2-10.8-24-24-24zm8 136c0 4.4-3.6 8-8 8H136c-4.4 0-8-3.6-8-8V144c0-4.4 3.6-8 8-8h128c4.4 0 8 3.6 8 8v112z' fill='%23cccccc'/></svg>";
+
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        currentUser = user;
+        fetchCart();
+      } else {
+        cartList.innerHTML = '';
+        emptyState.classList.add('active');
+      }
+    });
+
+    // 1. Fetch Cart (1 Read Execution)
+    async function fetchCart() {
+      try {
+        const cartRef = doc(db, 'carts', currentUser.uid);
+        const cartSnap = await getDoc(cartRef);
+
+        cartList.innerHTML = '';
+
+        if (!cartSnap.exists() || !cartSnap.data().items || Object.keys(cartSnap.data().items).length === 0) {
+          emptyState.classList.add('active');
+          checkoutBar.classList.remove('active');
+          return;
+        }
+
+        cartItemsData = cartSnap.data().items;
+        renderCartUI();
+
+      } catch (error) {
+        console.error("Error fetching cart:", error);
+        cartList.innerHTML = `<p style="padding:24px; text-align:center; color: var(--text-sub);">Failed to load cart.</p>`;
+      }
+    }
+
+    // 2. Render Cart UI & Calculate Subtotal
+    function renderCartUI() {
+      cartList.innerHTML = '';
+      let grandTotal = 0;
+      let itemCount = 0;
+
+      Object.entries(cartItemsData).forEach(([id, item]) => {
+        itemCount++;
+        const itemTotal = (item.price || 0) * (item.qty || 1);
+        grandTotal += itemTotal;
+
+        const imgUrl = item.image || placeholderImg;
+
+        const card = document.createElement('div');
+        card.className = 'cart-card';
+        card.innerHTML = `
+          <div class="cart-img-wrap">
+            <img src="${imgUrl}" onerror="this.src='${placeholderImg}'" alt="${item.name}">
+          </div>
+          <div class="cart-info">
+            <div class="cart-title-row">
+              <div class="cart-title">${item.name}</div>
+              <button class="delete-icon-btn" data-id="${id}" title="Remove">
+                <svg fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+              </button>
+            </div>
+            <div class="cart-price-row">
+              <div class="cart-price">₹${itemTotal.toLocaleString('en-IN')}</div>
+              <div class="stepper">
+                <button class="stepper-btn" data-action="dec" data-id="${id}">-</button>
+                <div class="stepper-val">${item.qty}</div>
+                <button class="stepper-btn" data-action="inc" data-id="${id}">+</button>
+              </div>
+            </div>
+          </div>
+        `;
+
+        // Event Listeners for actions inside card
+        card.querySelector('.delete-icon-btn').addEventListener('click', () => promptDelete(id, item.name));
+        card.querySelector('[data-action="inc"]').addEventListener('click', () => updateQuantity(id, 1));
+        card.querySelector('[data-action="dec"]').addEventListener('click', () => {
+          if (item.qty === 1) {
+            promptDelete(id, item.name);
+          } else {
+            updateQuantity(id, -1);
+          }
+        });
+
+        cartList.appendChild(card);
+      });
+
+      if (itemCount > 0) {
+        emptyState.classList.remove('active');
+        checkoutBar.classList.add('active');
+        totalAmountEl.innerText = `₹${grandTotal.toLocaleString('en-IN')}`;
+      } else {
+        emptyState.classList.add('active');
+        checkoutBar.classList.remove('active');
+      }
+    }
+
+    // 3. Update Quantity (Zero-Read Increment Math)
+    async function updateQuantity(productId, delta) {
+      if (navigator.vibrate) navigator.vibrate(30);
+      try {
+        const cartRef = doc(db, 'carts', currentUser.uid);
+        await updateDoc(cartRef, {
+          [`items.${productId}.qty`]: increment(delta)
+        });
+
+        // Optimistic local update
+        cartItemsData[productId].qty += delta;
+        renderCartUI();
+      } catch (error) {
+        console.error("Failed to update qty:", error);
+        fetchCart(); // Fallback sync
+      }
+    }
+
+    // 4. Modal & Deletion Handlers
+    function promptDelete(productId, productName) {
+      if (navigator.vibrate) navigator.vibrate(40);
+      itemPendingDeletion = productId;
+      confirmDesc.innerText = `Are you sure you want to remove "${productName}" from your cart?`;
+      
+      modalBg.classList.add('active');
+      confirmModal.classList.add('active');
+      isModalOpen = true;
+      history.pushState({ modal: 'delete_confirm' }, '', '');
+    }
+
+    function closeModalLogic() {
+      modalBg.classList.remove('active');
+      confirmModal.classList.remove('active');
+      isModalOpen = false;
+      itemPendingDeletion = null;
+    }
+
+    modalCancel.addEventListener('click', () => {
+      if (isModalOpen) history.back();
+    });
+
+    modalBg.addEventListener('click', () => {
+      if (isModalOpen) history.back();
+    });
+
+    window.addEventListener('popstate', () => {
+      if (isModalOpen) closeModalLogic();
+    });
+
+    modalConfirm.addEventListener('click', async () => {
+      if (!itemPendingDeletion) return;
+      if (navigator.vibrate) navigator.vibrate(40);
+
+      modalConfirm.innerText = 'Removing...';
+      modalConfirm.style.pointerEvents = 'none';
+
+      try {
+        const cartRef = doc(db, 'carts', currentUser.uid);
+        await updateDoc(cartRef, {
+          [`items.${itemPendingDeletion}`]: deleteField()
+        });
+
+        delete cartItemsData[itemPendingDeletion];
+        closeModalLogic();
+        renderCartUI();
+      } catch (error) {
+        console.error("Failed to delete item:", error);
+      } finally {
+        modalConfirm.innerText = 'Remove';
+        modalConfirm.style.pointerEvents = 'auto';
+      }
+    });
+
+    // 5. Proceed to Checkout Hand-off
+    checkoutBtn.addEventListener('click', () => {
+      if (navigator.vibrate) navigator.vibrate(40);
+      
+      const checkoutPayload = Object.entries(cartItemsData).map(([id, item]) => ({
+        id: id,
+        name: item.name,
+        price: item.price,
+        image: item.image,
+        qty: item.qty
+      }));
+
+      sessionStorage.setItem('checkout_payload', JSON.stringify(checkoutPayload));
+      sessionStorage.setItem('checkout_source', 'cart');
+
+      window.parent.document.getElementById('content-frame').src = 'pages/checkout.html';
+    });
+
+    shopNowBtn.addEventListener('click', () => {
+      window.parent.document.getElementById('content-frame').src = 'pages/home.html';
+    });
+  </script>
+</body>
+</html>
