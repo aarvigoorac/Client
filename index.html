@@ -74,10 +74,15 @@
       color: var(--text-main);
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 10px;
     }
 
-    .brand svg { width: 24px; height: 24px; fill: var(--primary); }
+    .brand img { 
+      width: 28px; 
+      height: 28px; 
+      object-fit: contain; 
+      border-radius: 6px; 
+    }
 
     .dp-wrapper {
       width: 36px;
@@ -87,6 +92,7 @@
       overflow: hidden;
       cursor: pointer;
       display: block; /* Acts as a link wrapper */
+      background-color: var(--border);
     }
 
     .dp-wrapper img {
@@ -151,6 +157,10 @@
 
     /* --- Mobile Bottom Nav --- */
     .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
       display: none;
       height: var(--nav-height);
       min-height: calc(var(--nav-height) + env(safe-area-inset-bottom));
@@ -215,6 +225,8 @@
     @media (max-width: 768px) {
       aside { display: none; }
       .bottom-nav { display: block; }
+      /* THE FIX: Prevents the iframe from slipping underneath the floating mobile nav */
+      .layout-wrapper { margin-bottom: calc(var(--nav-height) + env(safe-area-inset-bottom)); }
     }
     @media (min-width: 769px) {
       #install-pill { bottom: 40px; }
@@ -226,12 +238,12 @@
   <!-- App Header -->
   <header>
     <div class="brand">
-      <svg viewBox="0 0 24 24"><path d="M12 2L2 22h20L12 2zm0 3.8l7.1 14.2H4.9L12 5.8z"/></svg>
+      <img src="images/icon.png" alt="Aarvi Logo" onerror="this.style.display='none'">
       Aarvi
     </div>
     
     <!-- Profile Picture acts as a direct link to the account page -->
-    <a href="pages/account.html" target="content-frame" class="dp-wrapper" onclick="handleNavClick(-1)">
+    <a href="pages/account.html" target="content-frame" class="dp-wrapper" id="profile-btn" onclick="handleNavClick(-1)">
       <img id="user-dp" src="" alt="Profile">
     </a>
   </header>
@@ -267,7 +279,7 @@
   </div>
 
   <!-- Mobile Bottom Navigation -->
-  <nav class="bottom-nav">
+  <nav class="bottom-nav" id="bottom-nav">
     <div class="bottom-nav-inner">
       <a href="pages/home.html" class="b-item active" target="content-frame" onclick="handleNavClick(0)">
         <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
@@ -307,18 +319,30 @@
       });
     }
 
-    // 2. Auth Protection & UI State
+    // 2. Auth Protection, UI State & 0ms Profile Picture Load
     const dpImg = document.getElementById('user-dp');
+    
+    // Instantly load DP from local storage if available (0ms load)
+    const localDpUrl = localStorage.getItem('aarvi_dp');
+    if (localDpUrl) {
+      dpImg.src = localDpUrl;
+      dpImg.style.opacity = '1';
+    }
 
     onAuthStateChanged(auth, (user) => {
       if (!user) {
         // TOP-LEVEL REDIRECT: Ensure login screen takes over the full browser
         window.location.replace("pages/login.html");
       } else {
-        // Populate profile picture in header
-        if (user.photoURL) {
-          dpImg.src = user.photoURL;
-          dpImg.style.opacity = '1';
+        // User logged in. Update DP if it's new or wasn't in local storage
+        if (user.photoURL && user.photoURL !== localDpUrl) {
+          const tempImg = new Image();
+          tempImg.onload = () => {
+            dpImg.src = tempImg.src;
+            dpImg.style.opacity = '1';
+            localStorage.setItem('aarvi_dp', tempImg.src); // Save for next 0ms load
+          };
+          tempImg.src = user.photoURL;
         }
       }
     });
