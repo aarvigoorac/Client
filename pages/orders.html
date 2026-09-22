@@ -461,7 +461,7 @@
           <div class="detail-title">Delivery Address</div>
           <div class="address-text">
             <div class="address-name">${addr.name || 'Not provided'}</div>
-            <div>${addr.street || ''}${addr.street && addr.area ? ', ' : ''}${addr.area || ''}</div>
+            <div>${addr.house || ''}${addr.house && addr.area ? ', ' : ''}${addr.area || ''}</div>
             <div>${addr.city || ''}${addr.city && addr.state ? ', ' : ''}${addr.state || ''} - ${addr.pincode || ''}</div>
             <div style="margin-top: 6px;">Phone: ${addr.phone || 'N/A'}</div>
           </div>
