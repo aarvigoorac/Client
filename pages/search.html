@@ -272,7 +272,9 @@
     // 2. Debounced Search Input
     searchInput.addEventListener('input', (e) => {
       clearTimeout(debounceTimer);
-      const val = e.target.value.trim().toLowerCase();
+      
+      // Strip special characters that break Firestore map queries
+      const val = e.target.value.trim().toLowerCase().replace(/[\.\#\$\[\]]/g, '');
       
       if (val.length > 0) {
         clearBtn.style.display = 'flex';
@@ -315,18 +317,28 @@
       searchInput.focus();
     });
 
-    // 3. Search Engine Logic (Firebase Array-Contains)
+    // 3. Search Engine Logic (Firebase Map Query)
     async function executeSearch(isNewSearch = false) {
       if (isFetching || !hasMoreDocs) return;
       isFetching = true;
 
       try {
         let q;
+        // Using string interpolation for the map path (searchKeywords.term)
         if (isNewSearch) {
-          q = query(collection(db, "products"), where("searchKeywords", "array-contains", currentSearchTerm), limit(10));
+          q = query(
+            collection(db, "products"), 
+            where(`searchKeywords.${currentSearchTerm}`, "==", true), 
+            limit(10)
+          );
         } else {
           loadingMore.classList.add('active');
-          q = query(collection(db, "products"), where("searchKeywords", "array-contains", currentSearchTerm), startAfter(lastVisibleDoc), limit(10));
+          q = query(
+            collection(db, "products"), 
+            where(`searchKeywords.${currentSearchTerm}`, "==", true), 
+            startAfter(lastVisibleDoc), 
+            limit(10)
+          );
         }
 
         const querySnapshot = await getDocs(q);
