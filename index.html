@@ -12,12 +12,12 @@
   
   <style>
     :root {
-      --bg-color: #f1f3f6;
+      --bg-color: #f1f3f6; 
       --surface-color: #ffffff;
       --text-main: #000000;
       --text-sub: #666666;
       --border: #e0e0e0;
-      --primary: #2874f0;
+      --primary: #2874f0; 
       --header-height: 60px;
       --nav-height: 65px;
       --sidebar-width: 250px;
@@ -59,7 +59,7 @@
       height: var(--header-height);
       background-color: var(--surface-color);
       border-bottom: 1px solid var(--border);
-      display: flex;
+      display: flex; /* Visible by default */
       align-items: center;
       justify-content: space-between;
       padding: 0 20px;
@@ -224,19 +224,19 @@
     /* --- Responsive Switching --- */
     @media (max-width: 768px) {
       aside { display: none !important; }
-      .bottom-nav.shell-active { display: block; } 
+      .bottom-nav.shell-active { display: block; } /* Optimistic load: active by default in HTML */
       .layout-wrapper.shell-active { margin-bottom: calc(var(--nav-height) + env(safe-area-inset-bottom)); }
     }
     @media (min-width: 769px) {
       #install-pill { bottom: 40px; }
-      aside.shell-active { display: flex; }
+      aside.shell-active { display: flex; } /* Optimistic load: active by default in HTML */
     }
   </style>
 </head>
 <body>
 
-  <!-- App Header -->
-  <header id="app-header" style="display: none;">
+  <!-- App Header (Visible by default) -->
+  <header id="app-header">
     <div class="brand">
       <img src="images/icon.png" alt="Aarvi Logo" onerror="this.style.display='none'">
       Aarvi
@@ -247,9 +247,10 @@
     </a>
   </header>
 
-  <div class="layout-wrapper" id="layout-wrapper">
+  <!-- Shell elements have 'shell-active' class by default for optimistic loading -->
+  <div class="layout-wrapper shell-active" id="layout-wrapper">
     <!-- Desktop Side Navigation -->
-    <aside id="app-sidebar">
+    <aside id="app-sidebar" class="shell-active">
       <div class="nav-list">
         <a href="pages/home.html" class="nav-item active" target="content-frame" onclick="handleNavClick(0)">
           <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
@@ -270,14 +271,14 @@
       </div>
     </aside>
 
-    <!-- Main Content Frame -->
+    <!-- Main Content Frame (Loads home.html instantly by default) -->
     <main>
-      <iframe src="about:blank" id="content-frame" name="content-frame" title="App Content"></iframe>
+      <iframe src="pages/home.html" id="content-frame" name="content-frame" title="App Content"></iframe>
     </main>
   </div>
 
-  <!-- Mobile Bottom Navigation -->
-  <nav class="bottom-nav" id="bottom-nav">
+  <!-- Mobile Bottom Navigation (Visible by default) -->
+  <nav class="bottom-nav shell-active" id="bottom-nav">
     <div class="bottom-nav-inner">
       <a href="pages/home.html" class="b-item active" target="content-frame" onclick="handleNavClick(0)">
         <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
@@ -325,7 +326,7 @@
     const contentFrame = document.getElementById('content-frame');
     const dpImg = document.getElementById('user-dp');
 
-    // 0ms Profile Picture Load (Retained for performance)
+    // 0ms Profile Picture Load (Retained purely for image caching)
     const localDpUrl = localStorage.getItem('aarvi_dp');
     if (localDpUrl) {
       dpImg.src = localDpUrl;
@@ -335,6 +336,7 @@
     // 2. Auth Protection, UI State & Routing Guard
     onAuthStateChanged(auth, async (user) => {
       if (!user) {
+        // NOT LOGGED IN: Hide shell, load login page
         appHeader.style.display = 'none';
         appSidebar.classList.remove('shell-active');
         bottomNav.classList.remove('shell-active');
@@ -342,27 +344,28 @@
         
         contentFrame.src = "pages/login.html";
       } else {
-        // ALWAYS check the database to ensure the user document exists before revealing the UI
+        // LOGGED IN: Check if user document exists
         const userSnap = await getDoc(doc(db, 'users', user.uid));
         
         if (!userSnap.exists()) {
-           contentFrame.src = "pages/login.html";
+           // USER DOCUMENT MISSING: Shell remains visible, route to Account for form filling
+           contentFrame.src = "pages/account.html";
            return; 
         }
 
-        // Reveal UI only after DB confirmation
+        // USER EXISTS AND LOGGED IN: Ensure shell is visible (in case they just logged in)
         appHeader.style.display = 'flex';
         appSidebar.classList.add('shell-active');
         bottomNav.classList.add('shell-active');
         layoutWrapper.classList.add('shell-active');
 
-        // INCEPTION KILLER
+        // INCEPTION KILLER: If iframe is stuck on login after success, force home
         const currentSrc = contentFrame.src || "";
-        if (currentSrc.includes('login.html') || currentSrc.includes('index.html') || currentSrc === "about:blank") {
+        if (currentSrc.includes('login.html')) {
             contentFrame.src = "pages/home.html";
         }
 
-        // Update DP
+        // Update DP securely
         if (user.photoURL && user.photoURL !== localDpUrl) {
           const tempImg = new Image();
           tempImg.onload = () => {
@@ -375,11 +378,10 @@
       }
     });
 
-    // Sub-Frame Navigation Guard
+    // Sub-Frame Navigation Guard (Blocks login.html/index.html from hijacking)
     contentFrame.addEventListener('load', () => {
       try {
         const frameUrl = contentFrame.contentWindow.location.href;
-        // Simplified guard: If logged in, block login.html/index.html from hijacking
         if (auth.currentUser && (frameUrl.includes('login.html') || frameUrl.includes('index.html'))) {
            contentFrame.src = "pages/home.html";
         }
