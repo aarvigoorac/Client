@@ -225,7 +225,7 @@
     @media (max-width: 768px) {
       aside { display: none !important; }
       .bottom-nav.shell-active { display: block; } /* Optimistic load: active by default in HTML */
-      .layout-wrapper.shell-active { margin-bottom: calc(var(--nav-height) + env(safe-area-inset-bottom)); }
+      .layout-wrapper.shell-active { padding-bottom: calc(var(--nav-height) + env(safe-area-inset-bottom)); }
     }
     @media (min-width: 769px) {
       #install-pill { bottom: 40px; }
@@ -326,6 +326,14 @@
     const contentFrame = document.getElementById('content-frame');
     const dpImg = document.getElementById('user-dp');
 
+    // Expose UI reveal to child frames for seamless transitions without reloading
+    window.revealAppShell = function() {
+      appHeader.style.display = 'flex';
+      appSidebar.classList.add('shell-active');
+      bottomNav.classList.add('shell-active');
+      layoutWrapper.classList.add('shell-active');
+    };
+
     // 0ms Profile Picture Load (Retained purely for image caching)
     const localDpUrl = localStorage.getItem('aarvi_dp');
     if (localDpUrl) {
@@ -380,10 +388,7 @@
         }
 
         // USER EXISTS AND LOGGED IN: Ensure shell is visible
-        appHeader.style.display = 'flex';
-        appSidebar.classList.add('shell-active');
-        bottomNav.classList.add('shell-active');
-        layoutWrapper.classList.add('shell-active');
+        window.revealAppShell();
 
         // INCEPTION KILLER: Force to home.html ONLY if they are stuck on login 
         // (and we didn't return early above to let them fill out the setup form).
