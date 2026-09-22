@@ -12,12 +12,12 @@
   
   <style>
     :root {
-      --bg-color: #f1f3f6; /* Subtle gray background for main shell */
+      --bg-color: #f1f3f6;
       --surface-color: #ffffff;
       --text-main: #000000;
       --text-sub: #666666;
       --border: #e0e0e0;
-      --primary: #2874f0; /* Brand Blue */
+      --primary: #2874f0;
       --header-height: 60px;
       --nav-height: 65px;
       --sidebar-width: 250px;
@@ -47,7 +47,7 @@
       background-color: var(--bg-color);
       color: var(--text-main);
       height: 100vh;
-      height: 100dvh; /* Fix for mobile browser URL bars */
+      height: 100dvh; 
       width: 100vw;
       overflow: hidden;
       display: flex;
@@ -91,7 +91,7 @@
       border: 2px solid var(--primary);
       overflow: hidden;
       cursor: pointer;
-      display: block; /* Acts as a link wrapper */
+      display: block; 
       background-color: var(--border);
     }
 
@@ -223,20 +223,20 @@
 
     /* --- Responsive Switching --- */
     @media (max-width: 768px) {
-      aside { display: none; }
-      .bottom-nav { display: block; }
-      /* THE FIX: Prevents the iframe from slipping underneath the floating mobile nav */
-      .layout-wrapper { margin-bottom: calc(var(--nav-height) + env(safe-area-inset-bottom)); }
+      aside { display: none !important; } /* Hard hidden on mobile */
+      .bottom-nav.shell-active { display: block; } /* Controlled by JS */
+      .layout-wrapper.shell-active { margin-bottom: calc(var(--nav-height) + env(safe-area-inset-bottom)); }
     }
     @media (min-width: 769px) {
       #install-pill { bottom: 40px; }
+      aside.shell-active { display: flex; } /* Controlled by JS */
     }
   </style>
 </head>
 <body>
 
   <!-- App Header -->
-  <header>
+  <header id="app-header">
     <div class="brand">
       <img src="images/icon.png" alt="Aarvi Logo" onerror="this.style.display='none'">
       Aarvi
@@ -248,9 +248,9 @@
     </a>
   </header>
 
-  <div class="layout-wrapper">
+  <div class="layout-wrapper" id="layout-wrapper">
     <!-- Desktop Side Navigation -->
-    <aside>
+    <aside id="app-sidebar">
       <div class="nav-list">
         <a href="pages/home.html" class="nav-item active" target="content-frame" onclick="handleNavClick(0)">
           <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
@@ -273,8 +273,7 @@
 
     <!-- Main Content Frame -->
     <main>
-      <!-- Starts on home.html by default -->
-      <iframe src="pages/home.html" id="content-frame" name="content-frame" title="App Content"></iframe>
+      <iframe src="about:blank" id="content-frame" name="content-frame" title="App Content"></iframe>
     </main>
   </div>
 
@@ -319,11 +318,15 @@
       });
     }
 
-    // 2. Auth Protection, UI State & 0ms Profile Picture Load
-    const dpImg = document.getElementById('user-dp');
+    // UI Shell Elements
+    const appHeader = document.getElementById('app-header');
+    const appSidebar = document.getElementById('app-sidebar');
+    const bottomNav = document.getElementById('bottom-nav');
+    const layoutWrapper = document.getElementById('layout-wrapper');
     const contentFrame = document.getElementById('content-frame');
-    
-    // Instantly load DP from local storage if available (0ms load)
+    const dpImg = document.getElementById('user-dp');
+
+    // 2. Auth Protection, UI State & Routing Guard
     const localDpUrl = localStorage.getItem('aarvi_dp');
     if (localDpUrl) {
       dpImg.src = localDpUrl;
@@ -332,35 +335,62 @@
 
     onAuthStateChanged(auth, (user) => {
       if (!user) {
-        // IN-SHELL ROUTING: Load login page inside the iframe smoothly without top-level redirect flicker
+        // HIDE THE SHELL completely so the iframe has 100% space
+        appHeader.style.display = 'none';
+        appSidebar.classList.remove('shell-active');
+        bottomNav.classList.remove('shell-active');
+        layoutWrapper.classList.remove('shell-active');
+        
+        // Safely push login to the iframe
         contentFrame.src = "pages/login.html";
       } else {
-        // User logged in. Update DP if it's new or wasn't in local storage
+        // REVEAL THE SHELL
+        appHeader.style.display = 'flex';
+        appSidebar.classList.add('shell-active');
+        bottomNav.classList.add('shell-active');
+        layoutWrapper.classList.add('shell-active');
+
+        // INCEPTION KILLER: If iframe is stuck on login or trying to load index inside itself, force home.
+        const currentSrc = contentFrame.src || "";
+        if (currentSrc.includes('login.html') || currentSrc.includes('index.html') || currentSrc === "about:blank") {
+            contentFrame.src = "pages/home.html";
+        }
+
+        // Update DP
         if (user.photoURL && user.photoURL !== localDpUrl) {
           const tempImg = new Image();
           tempImg.onload = () => {
             dpImg.src = tempImg.src;
             dpImg.style.opacity = '1';
-            localStorage.setItem('aarvi_dp', tempImg.src); // Save for next 0ms load
+            localStorage.setItem('aarvi_dp', tempImg.src);
           };
           tempImg.src = user.photoURL;
         }
       }
     });
 
+    // Sub-Frame Navigation Guard (Blocks login.html from hijacking the parent window)
+    contentFrame.addEventListener('load', () => {
+      try {
+        const frameUrl = contentFrame.contentWindow.location.href;
+        if (auth.currentUser && (frameUrl.includes('login.html') || frameUrl.includes('index.html'))) {
+           contentFrame.src = "pages/home.html";
+        }
+      } catch (e) {
+        // Cross-origin restriction block - safe to ignore
+      }
+    });
+
     // 3. Navigation Sync & Haptics
     window.handleNavClick = function(index) {
-      // Trigger native device vibration
       if (navigator.vibrate) navigator.vibrate(40);
       
       const sidebarItems = document.querySelectorAll('.nav-list .nav-item');
       const bottomNavItems = document.querySelectorAll('.b-item');
       
-      // Clear all active states
       sidebarItems.forEach(item => item.classList.remove('active'));
       bottomNavItems.forEach(item => item.classList.remove('active'));
       
-      // If index is -1 (Profile Picture clicked), leave all tabs deselected
       if (index >= 0) {
         if (sidebarItems[index]) sidebarItems[index].classList.add('active');
         if (bottomNavItems[index]) bottomNavItems[index].classList.add('active');
@@ -372,13 +402,9 @@
     const installPill = document.getElementById('install-pill');
 
     window.addEventListener('beforeinstallprompt', (e) => {
-      e.preventDefault(); // Stop native mini-infobar
+      e.preventDefault(); 
       deferredPrompt = e;
-      
-      // Delay showing the pill slightly for better UX
-      setTimeout(() => {
-        installPill.classList.add('show');
-      }, 3000);
+      setTimeout(() => installPill.classList.add('show'), 3000);
     });
 
     installPill.addEventListener('click', async () => {
@@ -386,15 +412,12 @@
       if (deferredPrompt) {
         deferredPrompt.prompt();
         const { outcome } = await deferredPrompt.userChoice;
-        if (outcome === 'accepted') {
-          console.log('User installed the PWA');
-        }
+        if (outcome === 'accepted') console.log('User installed the PWA');
         deferredPrompt = null;
         installPill.classList.remove('show');
       }
     });
 
-    // Hide pill if already installed
     window.addEventListener('appinstalled', () => {
       installPill.classList.remove('show');
       deferredPrompt = null;
