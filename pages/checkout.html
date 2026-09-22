@@ -206,12 +206,19 @@
     let finalTotal = 0;
     let savedAddress = null;
 
-    // 1. Isolate the View: Hide parent bottom navigation
+    // 1. Isolate the View: Hide parent bottom navigation and reset parent margin
     function toggleParentBottomNav(show) {
       try {
         const parentNav = window.parent.document.getElementById('bottom-nav');
+        const layoutWrapper = window.parent.document.querySelector('.layout-wrapper');
+        
         if (parentNav) {
           parentNav.style.display = show ? 'flex' : 'none';
+        }
+        
+        if (layoutWrapper) {
+          // If hiding nav, remove margin. If showing nav, restore the dynamic CSS margin.
+          layoutWrapper.style.marginBottom = show ? '' : '0px';
         }
       } catch (e) { console.warn("Could not access parent navigation."); }
     }
@@ -281,7 +288,7 @@
             <div style="color:var(--danger); font-weight: 600; padding-top: 4px;">
               Address missing. Please update your profile.
             </div>
-            <button onclick="window.parent.document.getElementById('content-frame').src='pages/account.html'; window.parent.document.getElementById('bottom-nav').style.display='flex';" 
+            <button onclick="window.parent.document.getElementById('content-frame').src='pages/account.html'; window.parent.document.getElementById('bottom-nav').style.display='flex'; window.parent.document.querySelector('.layout-wrapper').style.marginBottom='';" 
                     style="margin-top: 12px; background: var(--primary); color: white; border: none; padding: 10px 16px; border-radius: 8px; font-weight: bold; cursor: pointer;">
               Go to Account Settings
             </button>
