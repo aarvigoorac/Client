@@ -347,40 +347,47 @@
         
         contentFrame.src = "pages/login.html";
       } else {
-        // LOGGED IN: Check localStorage for zero-read optimization
         const isSetupComplete = localStorage.getItem('aarvi_setup_complete');
+        const currentSrc = contentFrame.src || "";
         
         if (!isSetupComplete) {
           const userRef = doc(db, 'users', user.uid);
           const userSnap = await getDoc(userRef);
           
           if (!userSnap.exists()) {
-             // LAZY REGISTRATION: Silently create the document in the background.
-             // { merge: true } guarantees it will NEVER overwrite existing data.
-             try {
-               await setDoc(userRef, {
-                 name: user.displayName || 'User',
-                 email: user.email || '',
-                 photoURL: user.photoURL || '',
-                 createdAt: new Date().toISOString()
-               }, { merge: true });
-             } catch (error) {
-               console.error("Failed to silently create user document", error);
+             // SITUATIONAL AWARENESS CHECK
+             if (currentSrc.includes('login.html')) {
+                 // Scenario A: The user is actively logging in. 
+                 // DO NOTHING. Step back and let login.html handle the setup form.
+                 return;
+             } else {
+                 // Scenario B: The user reopened the app (iframe defaulted to home.html).
+                 // LAZY REGISTRATION: Silently create the document in the background.
+                 try {
+                   await setDoc(userRef, {
+                     name: user.displayName || 'User',
+                     email: user.email || '',
+                     photoURL: user.photoURL || '',
+                     createdAt: new Date().toISOString()
+                   }, { merge: true });
+                 } catch (error) {
+                   console.error("Failed to silently create user document", error);
+                 }
              }
           }
           // Mark as complete in local storage so we never do this read again
           localStorage.setItem('aarvi_setup_complete', 'true');
         }
 
-        // USER EXISTS AND LOGGED IN: Ensure shell is visible (in case they just logged in)
+        // USER EXISTS AND LOGGED IN: Ensure shell is visible
         appHeader.style.display = 'flex';
         appSidebar.classList.add('shell-active');
         bottomNav.classList.add('shell-active');
         layoutWrapper.classList.add('shell-active');
 
-        // INCEPTION KILLER: If iframe is stuck on login after success, force home
-        const currentSrc = contentFrame.src || "";
-        if (currentSrc.includes('login.html')) {
+        // INCEPTION KILLER: Force to home.html ONLY if they are stuck on login 
+        // (and we didn't return early above to let them fill out the setup form).
+        if (currentSrc.includes('login.html') || currentSrc.includes('index.html') || currentSrc === "about:blank") {
             contentFrame.src = "pages/home.html";
         }
 
@@ -401,7 +408,8 @@
     contentFrame.addEventListener('load', () => {
       try {
         const frameUrl = contentFrame.contentWindow.location.href;
-        if (auth.currentUser && (frameUrl.includes('login.html') || frameUrl.includes('index.html'))) {
+        // Only guard against inception if setup is definitively completed
+        if (auth.currentUser && localStorage.getItem('aarvi_setup_complete') && (frameUrl.includes('login.html') || frameUrl.includes('index.html'))) {
            contentFrame.src = "pages/home.html";
         }
       } catch (e) {}
