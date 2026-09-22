@@ -379,13 +379,23 @@
           const userSnap = await getDoc(userRef);
 
           if (userSnap.exists()) {
-            window.location.replace("../index.html");
+            // FIX: Simply load home.html inside the iframe instead of replacing the parent window
+            window.location.replace("home.html");
           } else {
+            // New user: Show setup screen
             views.login.classList.add('hidden');
             views.setup.classList.remove('hidden');
             
             document.getElementById('setup-dp').src = user.photoURL || '';
             document.getElementById('setup-name').innerText = user.displayName || 'Welcome';
+            
+            // FIX: Force the parent shell to remain completely hidden during setup
+            try {
+              window.parent.document.getElementById('app-header').style.display = 'none';
+              window.parent.document.getElementById('app-sidebar').classList.remove('shell-active');
+              window.parent.document.getElementById('bottom-nav').classList.remove('shell-active');
+              window.parent.document.getElementById('layout-wrapper').classList.remove('shell-active');
+            } catch(e) { console.warn("Could not target parent shell elements."); }
           }
         } catch (error) {
           console.error(error);
@@ -511,7 +521,8 @@
           createdAt: new Date().toISOString()
         });
 
-        window.location.replace("../index.html");
+        // FIX: Cleanly command the parent shell to restart and reveal the app
+        window.parent.location.reload();
 
       } catch (error) {
         setupError.innerText = "Failed to save details. Try again.";
