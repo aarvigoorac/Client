@@ -58,13 +58,14 @@
     header {
       height: var(--header-height);
       background-color: var(--surface-color);
-      border-bottom: 1px solid var(--border);
-      display: flex; /* Visible by default */
+      /* Border removed per request */
+      display: flex; 
       align-items: center;
       justify-content: space-between;
       padding: 0 20px;
       z-index: 50;
       flex-shrink: 0;
+      transition: opacity 0.4s ease, transform 0.4s ease;
     }
 
     .brand {
@@ -120,7 +121,16 @@
       display: flex;
       flex-direction: column;
       z-index: 40;
-      transition: opacity 0.3s, filter 0.3s;
+      opacity: 0;
+      transform: translateX(-20px);
+      pointer-events: none;
+      transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    aside.shell-active {
+      opacity: 1;
+      transform: translateX(0);
+      pointer-events: auto;
     }
 
     .nav-list { display: flex; flex-direction: column; padding: 16px 12px; gap: 8px; }
@@ -163,15 +173,25 @@
       bottom: 0;
       left: 0;
       width: 100%;
-      display: none;
       height: var(--nav-height);
       min-height: calc(var(--nav-height) + env(safe-area-inset-bottom));
       background-color: var(--surface-color);
-      border-top: 1px solid var(--border);
+      /* Border removed per request */
       z-index: 50;
       flex-shrink: 0;
       padding-bottom: env(safe-area-inset-bottom);
-      transition: opacity 0.3s, filter 0.3s;
+      
+      /* Animation properties instead of display: none */
+      opacity: 0;
+      transform: translateY(100%);
+      pointer-events: none;
+      transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .bottom-nav.shell-active {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
     }
 
     .bottom-nav-inner {
@@ -200,7 +220,7 @@
     .b-item.active { color: var(--primary); }
     .b-item.active svg { transform: scale(1.15); }
 
-    /* --- Navigation Locked State (Disables buttons seamlessly) --- */
+    /* --- Navigation Locked State --- */
     .nav-locked {
       pointer-events: none !important;
       opacity: 0.4 !important;
@@ -236,18 +256,17 @@
     /* --- Responsive Switching --- */
     @media (max-width: 768px) {
       aside { display: none !important; }
-      .bottom-nav.shell-active { display: block; } /* Optimistic load: active by default in HTML */
       .layout-wrapper.shell-active { margin-bottom: calc(var(--nav-height) + env(safe-area-inset-bottom)); }
     }
     @media (min-width: 769px) {
+      .bottom-nav { display: none !important; } /* Hide bottom nav completely on desktop */
       #install-pill { bottom: 40px; }
-      aside.shell-active { display: flex; } /* Optimistic load: active by default in HTML */
     }
   </style>
 </head>
 <body>
 
-  <!-- App Header (Visible by default) -->
+  <!-- App Header -->
   <header id="app-header">
     <div class="brand">
       <img src="images/icon.png" alt="Aarvi Logo" onerror="this.style.display='none'">
@@ -283,13 +302,13 @@
       </div>
     </aside>
 
-    <!-- Main Content Frame (Loads home.html instantly by default) -->
+    <!-- Main Content Frame -->
     <main>
       <iframe src="pages/home.html" id="content-frame" name="content-frame" title="App Content"></iframe>
     </main>
   </div>
 
-  <!-- Mobile Bottom Navigation (Visible by default) -->
+  <!-- Mobile Bottom Navigation -->
   <nav class="bottom-nav shell-active" id="bottom-nav">
     <div class="bottom-nav-inner">
       <a href="pages/home.html" class="b-item active" target="content-frame" onclick="handleNavClick(0)">
@@ -352,7 +371,7 @@
       }
     }
 
-    // 0ms Profile Picture Load (Retained purely for image caching)
+    // 0ms Profile Picture Load
     const localDpUrl = localStorage.getItem('aarvi_dp');
     if (localDpUrl) {
       dpImg.src = localDpUrl;
@@ -362,20 +381,21 @@
     // 2. Auth Protection, UI State & Routing Guard
     onAuthStateChanged(auth, async (user) => {
       if (!user) {
-        // NOT LOGGED IN: Hide shell, load login page
-        appHeader.style.display = 'none';
+        // NOT LOGGED IN: Slide shell components out smoothly, load login page
+        appHeader.style.opacity = '0';
+        appHeader.style.pointerEvents = 'none';
         appSidebar.classList.remove('shell-active');
         bottomNav.classList.remove('shell-active');
         layoutWrapper.classList.remove('shell-active');
         
-        // Clear local storage on logout & ensure buttons are unlocked
         localStorage.removeItem('aarvi_setup_complete');
         setNavigationLock(false);
         
         contentFrame.src = "pages/login.html";
       } else {
-        // LOGGED IN: Ensure shell is visible
-        appHeader.style.display = 'flex';
+        // LOGGED IN: Slide shell components in smoothly
+        appHeader.style.opacity = '1';
+        appHeader.style.pointerEvents = 'auto';
         appSidebar.classList.add('shell-active');
         bottomNav.classList.add('shell-active');
         layoutWrapper.classList.add('shell-active');
@@ -388,17 +408,14 @@
             const userSnap = await getDoc(userRef);
 
             if (userSnap.exists()) {
-              // Document exists in Firestore -> Save flag locally so we never perform this read again
               localStorage.setItem('aarvi_setup_complete', 'true');
               setNavigationLock(false);
             } else {
-              // Document DOES NOT exist -> Lock navigation buttons & load setup page
               setNavigationLock(true);
               if (!contentFrame.src.includes('setup.html')) {
                 contentFrame.src = "pages/setup.html";
               }
 
-              // Update DP image if available
               if (user.photoURL && user.photoURL !== localDpUrl) {
                 const tempImg = new Image();
                 tempImg.onload = () => {
@@ -408,7 +425,7 @@
                 };
                 tempImg.src = user.photoURL;
               }
-              return; // Halt further routing until setup is finished
+              return; 
             }
           } catch (error) {
             console.error("Error verifying user document status:", error);
@@ -417,13 +434,11 @@
           setNavigationLock(false);
         }
 
-        // USER EXISTS & SETUP IS DONE: Route away from login, setup, or blank pages
         const currentSrc = contentFrame.src || "";
         if (currentSrc.includes('login.html') || currentSrc.includes('index.html') || currentSrc.includes('setup.html') || currentSrc === "about:blank") {
           contentFrame.src = "pages/home.html";
         }
 
-        // Update DP securely
         if (user.photoURL && user.photoURL !== localDpUrl) {
           const tempImg = new Image();
           tempImg.onload = () => {
@@ -436,26 +451,22 @@
       }
     });
 
-    // Sub-Frame Navigation Guard & Dynamic Lock Monitor
     contentFrame.addEventListener('load', () => {
       try {
         const frameUrl = contentFrame.contentWindow.location.href;
 
-        // Lock buttons if iframe is displaying setup page, otherwise unlock if setup complete
         if (frameUrl.includes('setup.html')) {
           setNavigationLock(true);
         } else if (localStorage.getItem('aarvi_setup_complete')) {
           setNavigationLock(false);
         }
 
-        // Blocks login/index pages from hijacking iframe when logged in
         if (auth.currentUser && localStorage.getItem('aarvi_setup_complete') && (frameUrl.includes('login.html') || frameUrl.includes('index.html'))) {
            contentFrame.src = "pages/home.html";
         }
       } catch (e) {}
     });
 
-    // Seamless PostMessage Listener (Allows setup.html to notify index.html directly without page reloads)
     window.addEventListener('message', (event) => {
       if (event.data === 'SETUP_COMPLETE' || (event.data && event.data.type === 'SETUP_COMPLETE')) {
         localStorage.setItem('aarvi_setup_complete', 'true');
@@ -464,7 +475,6 @@
       }
     });
 
-    // Cross-Tab/Cross-Frame Storage Listener for real-time unlock synchronization
     window.addEventListener('storage', (e) => {
       if (e.key === 'aarvi_setup_complete' && e.newValue === 'true') {
         setNavigationLock(false);
@@ -474,7 +484,6 @@
       }
     });
 
-    // 3. Navigation Sync & Haptics
     window.handleNavClick = function(index) {
       if (navigator.vibrate) navigator.vibrate(40);
       
@@ -490,7 +499,6 @@
       }
     };
 
-    // 4. PWA Install Logic
     let deferredPrompt;
     const installPill = document.getElementById('install-pill');
 
