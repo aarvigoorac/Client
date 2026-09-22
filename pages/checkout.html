@@ -231,22 +231,45 @@
       return true;
     }
 
-    // 3. Fetch User Address
+    // 3. Fetch User Address (Matches account.html perfectly)
     async function fetchUserAddress() {
       try {
         const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
-        if (userDoc.exists() && userDoc.data().address) {
-          savedAddress = userDoc.data().address;
+        
+        if (userDoc.exists() && userDoc.data().name && userDoc.data().address_details) {
+          const data = userDoc.data();
+          
+          // Package the scattered data into one clean object for the order payload
+          savedAddress = {
+            name: data.name || '',
+            phone: data.phone || '',
+            house: data.address_details.house || '',
+            area: data.address_details.area || '',
+            city: data.address_details.city || '',
+            state: data.address_details.state || '',
+            pincode: data.address_details.pincode || ''
+          };
+
+          // Render it to the screen
           addressContainer.innerHTML = `
             <div class="address-details">
               <div class="address-name">${savedAddress.name}</div>
-              <div>${savedAddress.street}, ${savedAddress.area}</div>
+              <div>${savedAddress.house}, ${savedAddress.area}</div>
               <div>${savedAddress.city}, ${savedAddress.state} - ${savedAddress.pincode}</div>
-              <div style="margin-top: 4px;">Phone: ${savedAddress.phone}</div>
+              <div style="margin-top: 6px; font-weight: 500;">Phone: ${savedAddress.phone}</div>
             </div>
           `;
         } else {
-          addressContainer.innerHTML = `<div style="color:var(--danger); font-weight: 600;">No address found. Please update in Account settings.</div>`;
+          // If they haven't filled out the Account page yet
+          addressContainer.innerHTML = `
+            <div style="color:var(--danger); font-weight: 600; padding-top: 4px;">
+              Address missing. Please update your profile.
+            </div>
+            <button onclick="window.parent.document.getElementById('content-frame').src='pages/account.html'; window.parent.document.getElementById('bottom-nav').style.display='flex';" 
+                    style="margin-top: 12px; background: var(--primary); color: white; border: none; padding: 10px 16px; border-radius: 8px; font-weight: bold; cursor: pointer;">
+              Go to Account Settings
+            </button>
+          `;
           btnPlaceOrder.style.opacity = '0.5';
           btnPlaceOrder.style.pointerEvents = 'none';
         }
