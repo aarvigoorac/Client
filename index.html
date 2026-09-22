@@ -12,12 +12,12 @@
   
   <style>
     :root {
-      --bg-color: #f1f3f6; /* Subtle gray background for main shell */
+      --bg-color: #f1f3f6;
       --surface-color: #ffffff;
       --text-main: #000000;
       --text-sub: #666666;
       --border: #e0e0e0;
-      --primary: #2874f0; /* Brand Blue */
+      --primary: #2874f0;
       --header-height: 60px;
       --nav-height: 65px;
       --sidebar-width: 250px;
@@ -223,26 +223,25 @@
 
     /* --- Responsive Switching --- */
     @media (max-width: 768px) {
-      aside { display: none !important; } /* Hard hidden on mobile */
-      .bottom-nav.shell-active { display: block; } /* Controlled by JS */
+      aside { display: none !important; }
+      .bottom-nav.shell-active { display: block; } 
       .layout-wrapper.shell-active { margin-bottom: calc(var(--nav-height) + env(safe-area-inset-bottom)); }
     }
     @media (min-width: 769px) {
       #install-pill { bottom: 40px; }
-      aside.shell-active { display: flex; } /* Controlled by JS */
+      aside.shell-active { display: flex; }
     }
   </style>
 </head>
 <body>
 
   <!-- App Header -->
-  <header id="app-header">
+  <header id="app-header" style="display: none;">
     <div class="brand">
       <img src="images/icon.png" alt="Aarvi Logo" onerror="this.style.display='none'">
       Aarvi
     </div>
     
-    <!-- Profile Picture acts as a direct link to the account page -->
     <a href="pages/account.html" target="content-frame" class="dp-wrapper" id="profile-btn" onclick="handleNavClick(-1)">
       <img id="user-dp" src="" alt="Profile">
     </a>
@@ -314,7 +313,6 @@
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('./sw.js')
-          .then(reg => console.log('SW Registered'))
           .catch(err => console.error('SW Failed', err));
       });
     }
@@ -327,51 +325,50 @@
     const contentFrame = document.getElementById('content-frame');
     const dpImg = document.getElementById('user-dp');
 
-    // 2. Auth Protection, UI State & Routing Guard
+    // --- ZERO-MS UI REVEAL (NO FLICKER) ---
+    const isSetupComplete = localStorage.getItem('aarvi_setup_complete');
+    if (isSetupComplete === 'true') {
+      appHeader.style.display = 'flex';
+      appSidebar.classList.add('shell-active');
+      bottomNav.classList.add('shell-active');
+      layoutWrapper.classList.add('shell-active');
+    }
+
+    // 0ms Profile Picture Load
     const localDpUrl = localStorage.getItem('aarvi_dp');
     if (localDpUrl) {
       dpImg.src = localDpUrl;
       dpImg.style.opacity = '1';
     }
 
+    // 2. Auth Protection, UI State & Routing Guard
     onAuthStateChanged(auth, async (user) => {
       if (!user) {
-        // HIDE THE SHELL completely so the iframe has 100% space
         appHeader.style.display = 'none';
         appSidebar.classList.remove('shell-active');
         bottomNav.classList.remove('shell-active');
         layoutWrapper.classList.remove('shell-active');
         
-        // Clear cached setup state on logout
         localStorage.removeItem('aarvi_setup_complete');
-        
-        // Safely push login to the iframe
         contentFrame.src = "pages/login.html";
       } else {
-        // --- THE ZERO-READ OPTIMIZATION & SETUP DELEGATION ---
-        const isSetupComplete = localStorage.getItem('aarvi_setup_complete');
-        
         if (!isSetupComplete) {
-          // Only costs 1 read the VERY FIRST time they open the app on a new device
           const userSnap = await getDoc(doc(db, 'users', user.uid));
           
           if (!userSnap.exists()) {
-             // User has not completed setup. 
-             // DO NOTHING. Leave the shell hidden so login.html inside the iframe can show the setup screen.
+             contentFrame.src = "pages/login.html";
              return; 
           } else {
-             // User exists. Cache it so we never do this database read again.
              localStorage.setItem('aarvi_setup_complete', 'true');
+             // Reveal UI since it wasn't revealed at 0ms
+             appHeader.style.display = 'flex';
+             appSidebar.classList.add('shell-active');
+             bottomNav.classList.add('shell-active');
+             layoutWrapper.classList.add('shell-active');
           }
         }
 
-        // REVEAL THE SHELL (Executes instantly for returning users)
-        appHeader.style.display = 'flex';
-        appSidebar.classList.add('shell-active');
-        bottomNav.classList.add('shell-active');
-        layoutWrapper.classList.add('shell-active');
-
-        // INCEPTION KILLER: If iframe is stuck on login or trying to load index inside itself, force home.
+        // INCEPTION KILLER
         const currentSrc = contentFrame.src || "";
         if (currentSrc.includes('login.html') || currentSrc.includes('index.html') || currentSrc === "about:blank") {
             contentFrame.src = "pages/home.html";
@@ -390,16 +387,14 @@
       }
     });
 
-    // Sub-Frame Navigation Guard (Blocks login.html from hijacking the parent window)
+    // Sub-Frame Navigation Guard
     contentFrame.addEventListener('load', () => {
       try {
         const frameUrl = contentFrame.contentWindow.location.href;
         if (auth.currentUser && localStorage.getItem('aarvi_setup_complete') && (frameUrl.includes('login.html') || frameUrl.includes('index.html'))) {
            contentFrame.src = "pages/home.html";
         }
-      } catch (e) {
-        // Cross-origin restriction block - safe to ignore
-      }
+      } catch (e) {}
     });
 
     // 3. Navigation Sync & Haptics
