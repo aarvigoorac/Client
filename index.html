@@ -25,7 +25,7 @@
 
     @media (prefers-color-scheme: dark) {
       :root {
-        --bg-color: #121212; /* Aligned with login page dark theme background */
+        --bg-color: #121212; /* Fixed: Changed from #000000 to match app surface */
         --surface-color: #1e1e1e;
         --text-main: #ffffff;
         --text-sub: #a0a0a0;
@@ -58,7 +58,7 @@
     header {
       height: var(--header-height);
       background-color: var(--surface-color);
-      display: none; /* Completely removed from layout flow when unauthenticated */
+      display: none; /* Hidden by default until auth state is confirmed */
       align-items: center;
       justify-content: space-between;
       padding: 0 20px;
@@ -178,7 +178,6 @@
       flex-shrink: 0;
       padding-bottom: env(safe-area-inset-bottom);
       
-      /* Smooth bottom slide transition */
       opacity: 0;
       transform: translateY(100%);
       pointer-events: none;
@@ -377,7 +376,7 @@
     // 2. Auth Protection & UI Shell Handler
     onAuthStateChanged(auth, async (user) => {
       if (!user) {
-        // NOT LOGGED IN: Completely remove header from DOM flow to remove the top black gap
+        // NOT LOGGED IN: Completely remove header from DOM flow to remove the black gap
         appHeader.style.display = 'none';
         appSidebar.classList.remove('shell-active');
         bottomNav.classList.remove('shell-active');
@@ -388,7 +387,7 @@
         
         contentFrame.src = "pages/login.html";
       } else {
-        // LOGGED IN: Bring header back into document layout
+        // LOGGED IN: Bring header back into layout
         appHeader.style.display = 'flex';
         appSidebar.classList.add('shell-active');
         bottomNav.classList.add('shell-active');
