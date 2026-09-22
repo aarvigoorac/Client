@@ -60,7 +60,7 @@
 
     .view-container {
       width: 100%;
-      padding: 24px 24px 100px 24px; /* Extra bottom padding for mobile nav */
+      padding: 24px 24px 100px 24px;
       max-width: 600px;
       margin: 0 auto;
       animation: fadeIn 0.3s ease forwards;
@@ -533,11 +533,10 @@
       }
     });
 
-    // 4. Custom Modal Logout Logic (Mobile Back Button Supported)
+    // 4. Custom Modal Logout Logic
     function openLogoutModal() {
       logoutModal.classList.add('show');
       modalOpen = true;
-      // Push state to browser history to catch the hardware back button
       history.pushState({ modal: 'logout' }, '', '');
     }
 
@@ -553,11 +552,9 @@
 
     modalCancelBtn.addEventListener('click', () => {
       if (navigator.vibrate) navigator.vibrate(40);
-      // Firing history.back() automatically triggers the popstate event below
       history.back();
     });
 
-    // Listen for mobile hardware back button or browser back button
     window.addEventListener('popstate', (e) => {
       if (modalOpen) {
         closeLogoutModal();
@@ -572,7 +569,9 @@
       
       try {
         await signOut(auth);
-        window.top.location.replace("pages/login.html");
+        // By reloading the parent window, we instantly hit the !user state 
+        // in index.html, securely wiping all caches and loading login.html
+        window.parent.location.reload();
       } catch (error) {
         console.error("Logout failed", error);
         modalConfirmBtn.style.pointerEvents = 'auto';
