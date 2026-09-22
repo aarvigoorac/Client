@@ -417,6 +417,7 @@
 
       modalBg.classList.add('active');
       modal.classList.add('active');
+      document.body.style.overflow = 'hidden'; // FIX: Lock background scrolling
       
       isModalOpen = true;
       history.pushState({ modal: 'product' }, '', '');
@@ -425,6 +426,7 @@
     function closeModalLogic() {
       modalBg.classList.remove('active');
       modal.classList.remove('active');
+      document.body.style.overflow = ''; // FIX: Restore background scrolling
       isModalOpen = false;
       currentSelectedProduct = null;
       currentImgUrl = null;
