@@ -14,11 +14,7 @@
       --text-main: #000000;
       --text-sub: #666666;
       --border: #e0e0e0;
-      --primary: #2874f0;
-      --primary-hover: #1e5bb8;
       --input-bg: #f1f3f6;
-      --success-bg: #e6f4ea;
-      --success-text: #137333;
     }
 
     @media (prefers-color-scheme: dark) {
@@ -29,8 +25,6 @@
         --text-sub: #a0a0a0;
         --border: #333333;
         --input-bg: #2a2a2a;
-        --success-bg: #1e3a29;
-        --success-text: #81c995;
       }
     }
 
@@ -44,11 +38,6 @@
       user-select: none;
     }
 
-    input {
-      -webkit-touch-callout: default;
-      user-select: auto;
-    }
-
     body, html {
       background-color: var(--bg-color);
       color: var(--text-main);
@@ -60,13 +49,13 @@
     .view-container {
       width: 100%;
       height: 100%;
-      overflow-y: auto;
       padding: 48px 24px 24px 24px;
       display: flex;
       flex-direction: column;
       animation: fadeIn 0.3s ease forwards;
       max-width: 600px;
       margin: 0 auto;
+      position: relative;
     }
 
     @keyframes fadeIn {
@@ -74,8 +63,8 @@
       to { opacity: 1; transform: translateY(0); }
     }
 
-    h1 { font-size: 24px; font-weight: 700; margin-bottom: 8px; }
-    p.subtitle { color: var(--text-sub); font-size: 14px; margin-bottom: 32px; line-height: 1.4; }
+    h1 { font-size: 26px; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 8px; }
+    p.subtitle { font-size: 15px; color: var(--text-sub); line-height: 1.5; padding: 0 10px; margin-bottom: 32px; }
 
     .btn {
       display: flex;
@@ -100,130 +89,10 @@
       gap: 12px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.05);
     }
+    
     .btn-google:active { background-color: var(--input-bg); }
 
-    .btn-primary {
-      background-color: var(--primary);
-      color: #fff;
-      margin-top: 32px;
-      margin-bottom: env(safe-area-inset-bottom, 24px);
-      box-shadow: 0 4px 12px rgba(40, 116, 240, 0.2);
-    }
-    .btn-primary:active { background-color: var(--primary-hover); }
-
-    .btn-outline {
-      background-color: transparent;
-      color: var(--primary);
-      border: 2px solid var(--primary);
-      padding: 14px;
-      border-radius: 10px;
-      gap: 8px;
-    }
-    .btn-outline:active { background-color: rgba(40, 116, 240, 0.1); }
-
-    .form-group {
-      position: relative;
-      margin-bottom: 20px;
-    }
-
-    .form-input {
-      width: 100%;
-      padding: 20px 16px 8px;
-      border: 1.5px solid var(--border);
-      border-radius: 10px;
-      background: var(--surface-color);
-      color: var(--text-main);
-      font-size: 16px;
-      outline: none;
-      transition: border-color 0.2s;
-    }
-
-    .form-input:focus { border-color: var(--primary); }
-
-    .form-label {
-      position: absolute;
-      left: 16px;
-      top: 16px;
-      font-size: 16px;
-      color: var(--text-sub);
-      transition: 0.2s ease all;
-      pointer-events: none;
-    }
-
-    .form-input:focus ~ .form-label,
-    .form-input:not(:placeholder-shown) ~ .form-label {
-      top: 6px;
-      font-size: 12px;
-      color: var(--primary);
-    }
-    .form-input:not(:focus):not(:placeholder-shown) ~ .form-label {
-      color: var(--text-sub);
-    }
-
-    .setup-header {
-      display: flex;
-      align-items: center;
-      gap: 20px;
-      margin-bottom: 32px;
-      background: var(--input-bg);
-      padding: 20px;
-      border-radius: 16px;
-    }
-
-    .profile-dp {
-      width: 64px;
-      height: 64px;
-      border-radius: 50%;
-      background-color: var(--surface-color);
-      object-fit: cover;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    }
-
-    .section-title {
-      font-size: 18px;
-      margin: 16px 0 20px;
-      font-weight: 700;
-      color: var(--text-main);
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .row { display: flex; gap: 16px; }
-    .row .form-group { flex: 1; }
-
-    /* GPS Result UI */
-    .gps-result-card {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      background-color: var(--success-bg);
-      border: 1px solid var(--success-text);
-      padding: 16px;
-      border-radius: 10px;
-      margin-bottom: 20px;
-    }
-
-    .gps-result-card .coords-text {
-      color: var(--success-text);
-      font-size: 14px;
-      font-weight: 600;
-      margin-top: 4px;
-    }
-
-    .retake-btn {
-      background: none;
-      border: none;
-      color: var(--text-main);
-      font-weight: 600;
-      font-size: 14px;
-      cursor: pointer;
-      padding: 8px;
-      text-decoration: underline;
-    }
-
-    .hidden { display: none !important; }
-    .error-text { color: #d32f2f; font-size: 14px; margin-top: 8px; display: none; text-align: center; }
+    .error-text { color: #d32f2f; font-size: 14px; margin-top: 12px; display: none; text-align: center; }
     
     .loader {
       display: none;
@@ -240,14 +109,13 @@
 </head>
 <body>
 
-  <!-- 1. Login View (Native App Splash Screen Style) -->
-  <div class="view-container" id="login-container" style="position: relative;">
+  <div class="view-container" id="login-container">
     
     <!-- Centered Branding Content -->
     <div style="margin-top: 15vh; display: flex; flex-direction: column; align-items: center; text-align: center;">
       <img src="../images/icon.png" alt="Aarvi Stores Logo" style="width: 80px; height: 80px; border-radius: 20px; box-shadow: 0 10px 24px rgba(0,0,0,0.12); margin-bottom: 24px;">
-      <h1 style="font-size: 26px; font-weight: 800; letter-spacing: -0.5px;">Aarvi Stores</h1>
-      <p class="subtitle" style="font-size: 15px; color: var(--text-sub); line-height: 1.5; padding: 0 10px;">Sign in to experience fast checkout and track your orders seamlessly.</p>
+      <h1>Aarvi Stores</h1>
+      <p class="subtitle">Sign in to experience fast checkout and track your orders seamlessly.</p>
     </div>
 
     <!-- Pinned Button at 75vh Thumb Zone -->
@@ -266,170 +134,28 @@
     </div>
   </div>
 
-  <!-- 2. Setup View -->
-  <div class="view-container hidden" id="setup-container">
-    
-    <div class="setup-header">
-      <img id="setup-dp" class="profile-dp" src="" alt="">
-      <div>
-        <h2 id="setup-name" style="font-size: 20px; font-weight: 700; margin-bottom: 4px;"></h2>
-        <p style="color: var(--text-sub); font-size: 14px;">Complete your profile to continue</p>
-      </div>
-    </div>
-
-    <!-- Personal & Contact Details Seamlessly Stacked -->
-    <h3 class="section-title">Personal Details</h3>
-    <div class="form-group">
-      <input type="text" id="f-name" class="form-input" placeholder=" ">
-      <label class="form-label">Full Name</label>
-    </div>
-
-    <!-- Removed Contact Details heading to smoothly stack Mobile Number field -->
-    <!-- <h3 class="section-title">Contact Details</h3> -->
-    <div class="form-group">
-      <input type="tel" id="f-phone" class="form-input" placeholder=" " value="+91 ">
-      <label class="form-label">Mobile Number</label>
-    </div>
-
-    <h3 class="section-title">Delivery Address</h3>
-    
-    <!-- GPS Integration -->
-    <button type="button" class="btn btn-outline" id="gps-btn" style="margin-bottom: 20px;">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
-      <span id="gps-btn-text">Use Current Location</span>
-      <div class="loader" id="gps-loader" style="border-top-color: var(--primary);"></div>
-    </button>
-
-    <div id="gps-result" class="gps-result-card hidden">
-      <div style="display: flex; gap: 12px; align-items: center;">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--success-text)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
-        <div>
-          <div style="font-size: 12px; color: var(--success-text); opacity: 0.8;">Location Captured</div>
-          <div class="coords-text" id="coords-display"></div>
-        </div>
-      </div>
-      <button type="button" class="retake-btn" id="retry-gps">Retake</button>
-    </div>
-
-    <!-- Manual Address Fields -->
-    <div class="form-group">
-      <input type="text" id="f-house" class="form-input" placeholder=" ">
-      <label class="form-label">House No., Building Name</label>
-    </div>
-
-    <div class="form-group">
-      <input type="text" id="f-area" class="form-input" placeholder=" ">
-      <label class="form-label">Road Name, Area, Colony</label>
-    </div>
-
-    <div class="row">
-      <div class="form-group">
-        <input type="text" id="f-pincode" class="form-input" placeholder=" " inputmode="numeric" maxlength="6">
-        <label class="form-label">Pincode</label>
-      </div>
-      <div class="form-group">
-        <input type="text" id="f-city" class="form-input" placeholder=" ">
-        <label class="form-label">City</label>
-      </div>
-    </div>
-
-    <div class="form-group">
-      <input type="text" id="f-state" class="form-input" placeholder=" ">
-      <label class="form-label">State</label>
-    </div>
-
-    <p class="error-text" id="setup-error-msg"></p>
-
-    <button class="btn btn-primary" id="proceed-btn">
-      <span id="proceed-text">Save Details & Continue</span>
-      <div class="loader" id="proceed-loader"></div>
-    </button>
-  </div>
-
   <script type="module">
-    import { auth, db, googleProvider } from '../config.js';
+    import { auth, googleProvider } from '../config.js';
     import { signInWithPopup, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-    import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-    const views = {
-      login: document.getElementById('login-container'),
-      setup: document.getElementById('setup-container')
-    };
-    
-    // Login UI
     const loginBtn = document.getElementById('google-login-btn');
     const btnText = document.getElementById('btn-text');
     const btnLoader = document.getElementById('btn-loader');
     const googleIcon = document.getElementById('google-icon');
     const errorMsg = document.getElementById('error-msg');
 
-    // Setup UI
-    const proceedBtn = document.getElementById('proceed-btn');
-    const setupError = document.getElementById('setup-error-msg');
-    const setupName = document.getElementById('setup-name');
-    const fName = document.getElementById('f-name');
-    
-    // GPS UI
-    const gpsBtn = document.getElementById('gps-btn');
-    const gpsBtnText = document.getElementById('gps-btn-text');
-    const gpsLoader = document.getElementById('gps-loader');
-    const gpsResult = document.getElementById('gps-result');
-    const coordsDisplay = document.getElementById('coords-display');
-    const retryGps = document.getElementById('retry-gps');
-    
-    let currentUser = null;
-    let userCoordinates = null; // Store fetched coordinates
-
-    // 1. Auth Listener
-    onAuthStateChanged(auth, async (user) => {
+    // 1. Auth Listener - Triggers the redirect once Firebase confirms the session
+    onAuthStateChanged(auth, (user) => {
       if (user) {
-        currentUser = user;
-        
-        loginBtn.style.pointerEvents = 'none';
-        btnText.innerText = "Loading...";
-        googleIcon.style.display = 'none';
-        btnLoader.style.display = 'block';
-
-        try {
-          const userRef = doc(db, 'users', user.uid);
-          const userSnap = await getDoc(userRef);
-
-          if (userSnap.exists()) {
-            // Existing user: Set storage flag first, then redirect instantly
-            try {
-              localStorage.setItem('aarvi_setup_complete', 'true');
-            } catch (e) {
-              console.warn("Could not save setup flag to localStorage:", e);
-            }
-            window.location.replace("home.html");
-          } else {
-            // New user: Show setup screen
-            views.login.classList.add('hidden');
-            views.setup.classList.remove('hidden');
-            
-            // Pre-fill the top card and the new name input field
-            setupName.innerText = user.displayName || 'Welcome';
-            fName.value = user.displayName || '';
-            document.getElementById('setup-dp').src = user.photoURL || '';
-            
-            try {
-              window.parent.document.getElementById('app-header').style.display = 'none';
-              window.parent.document.getElementById('app-sidebar').classList.remove('shell-active');
-              window.parent.document.getElementById('bottom-nav').classList.remove('shell-active');
-              window.parent.document.getElementById('layout-wrapper').classList.remove('shell-active');
-            } catch(e) { console.warn("Could not target parent shell elements."); }
-          }
-        } catch (error) {
-          console.error(error);
-          errorMsg.innerText = "Connection error. Please refresh.";
-          errorMsg.style.display = 'block';
-        }
+        window.location.replace("home.html");
       }
     });
 
-    // 2. Google Login
+    // 2. Google Login Trigger
     loginBtn.addEventListener('click', async () => {
       if (navigator.vibrate) navigator.vibrate(40);
+      
+      // UI Loading State
       loginBtn.style.pointerEvents = 'none';
       btnText.innerText = "Signing in...";
       googleIcon.style.display = 'none';
@@ -438,7 +164,9 @@
 
       try {
         await signInWithPopup(auth, googleProvider);
+        // Success logic is intentionally empty here; onAuthStateChanged handles the redirect automatically
       } catch (error) {
+        // Revert UI on failure
         loginBtn.style.pointerEvents = 'auto';
         btnText.innerText = "Continue with Google";
         googleIcon.style.display = 'block';
@@ -447,123 +175,6 @@
           ? "Login cancelled." 
           : "Failed to sign in.";
         errorMsg.style.display = 'block';
-      }
-    });
-
-    // 3. Live Data Binding for Name Field
-    fName.addEventListener('input', (e) => {
-      setupName.innerText = e.target.value.trim() || 'Welcome';
-    });
-
-    // 4. GPS Location Logic
-    gpsBtn.addEventListener('click', () => {
-      if (navigator.vibrate) navigator.vibrate(40);
-      
-      if (!navigator.geolocation) {
-        alert("Geolocation is not supported by your browser.");
-        return;
-      }
-
-      gpsBtn.style.pointerEvents = 'none';
-      gpsBtnText.innerText = "Fetching GPS...";
-      gpsBtn.querySelector('svg').style.display = 'none';
-      gpsLoader.style.display = 'block';
-
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          userCoordinates = {
-            latitude: position.coords.latitude,
-            longitude: position.coords.longitude,
-            accuracy: position.coords.accuracy
-          };
-          
-          gpsBtn.classList.add('hidden');
-          gpsResult.classList.remove('hidden');
-          coordsDisplay.innerText = `${userCoordinates.latitude.toFixed(5)}, ${userCoordinates.longitude.toFixed(5)}`;
-          
-          // Reset button state for next time
-          gpsBtn.style.pointerEvents = 'auto';
-          gpsBtnText.innerText = "Use Current Location";
-          gpsBtn.querySelector('svg').style.display = 'block';
-          gpsLoader.style.display = 'none';
-        },
-        (error) => {
-          console.error(error);
-          alert("Unable to fetch location. Please ensure GPS permissions are allowed.");
-          gpsBtn.style.pointerEvents = 'auto';
-          gpsBtnText.innerText = "Use Current Location";
-          gpsBtn.querySelector('svg').style.display = 'block';
-          gpsLoader.style.display = 'none';
-        },
-        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
-      );
-    });
-
-    retryGps.addEventListener('click', () => {
-      if (navigator.vibrate) navigator.vibrate(40);
-      userCoordinates = null;
-      gpsResult.classList.add('hidden');
-      gpsBtn.classList.remove('hidden');
-    });
-
-    // 5. Save Profile
-    proceedBtn.addEventListener('click', async () => {
-      if (navigator.vibrate) navigator.vibrate(40);
-      setupError.style.display = 'none';
-
-      const name = fName.value.trim();
-      const phone = document.getElementById('f-phone').value.trim();
-      const house = document.getElementById('f-house').value.trim();
-      const area = document.getElementById('f-area').value.trim();
-      const pincode = document.getElementById('f-pincode').value.trim();
-      const city = document.getElementById('f-city').value.trim();
-      const state = document.getElementById('f-state').value.trim();
-
-      if (!name || phone.length < 5 || !house || !area || !pincode || !city || !state) {
-        setupError.innerText = "Please fill out your name, contact, and address details.";
-        setupError.style.display = 'block';
-        return;
-      }
-
-      const fullAddress = `${house}, ${area}, ${city}, ${state} - ${pincode}`;
-
-      proceedBtn.style.pointerEvents = 'none';
-      document.getElementById('proceed-text').style.display = 'none';
-      document.getElementById('proceed-loader').style.display = 'block';
-
-      try {
-        await setDoc(doc(db, 'users', currentUser.uid), {
-          name: name,
-          email: currentUser.email,
-          photoURL: currentUser.photoURL,
-          phone: phone,
-          address: fullAddress, 
-          address_details: { 
-            house: house,
-            area: area,
-            city: city,
-            state: state,
-            pincode: pincode
-          },
-          coordinates: userCoordinates, 
-          createdAt: new Date().toISOString()
-        });
-
-        // New user setup saved: Write local storage flag before reloading parent window
-        try {
-          localStorage.setItem('aarvi_setup_complete', 'true');
-        } catch (e) {
-          console.warn("Could not save setup flag to localStorage:", e);
-        }
-
-        window.parent.location.reload();
-
-      } catch (error) {
-        setupError.innerText = "Failed to save details. Try again.";
-        setupError.style.display = 'block';
-        proceedBtn.style.pointerEvents = 'auto';
-        document.getElementById('proceed-text').style.display = 'block';
-        document.getElementById('proceed-loader').style.display = 'none';
       }
     });
   </script>
