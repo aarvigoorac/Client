@@ -317,25 +317,29 @@
       searchInput.focus();
     });
 
-    // 3. Search Engine Logic (Firebase Map Query)
+    // 3. Search Engine Logic (Firebase Map Query with Multi-Word AND Chaining)
     async function executeSearch(isNewSearch = false) {
       if (isFetching || !hasMoreDocs) return;
       isFetching = true;
 
       try {
         let q;
-        // Using string interpolation for the map path (searchKeywords.term)
+        
+        // Split the search term into multiple words and build an array of where() clauses
+        const searchWords = currentSearchTerm.split(' ').filter(word => word.trim().length > 0);
+        const queryConstraints = searchWords.map(word => where(`searchKeywords.${word}`, "==", true));
+
         if (isNewSearch) {
           q = query(
             collection(db, "products"), 
-            where(`searchKeywords.${currentSearchTerm}`, "==", true), 
+            ...queryConstraints, 
             limit(10)
           );
         } else {
           loadingMore.classList.add('active');
           q = query(
             collection(db, "products"), 
-            where(`searchKeywords.${currentSearchTerm}`, "==", true), 
+            ...queryConstraints, 
             startAfter(lastVisibleDoc), 
             limit(10)
           );
