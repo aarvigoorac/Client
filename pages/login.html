@@ -271,6 +271,12 @@
       </div>
     </div>
 
+    <h3 class="section-title">Personal Details</h3>
+    <div class="form-group">
+      <input type="text" id="f-name" class="form-input" placeholder=" ">
+      <label class="form-label">Full Name</label>
+    </div>
+
     <h3 class="section-title">Contact Details</h3>
     <div class="form-group">
       <input type="tel" id="f-phone" class="form-input" placeholder=" " value="+91 ">
@@ -352,6 +358,8 @@
     // Setup UI
     const proceedBtn = document.getElementById('proceed-btn');
     const setupError = document.getElementById('setup-error-msg');
+    const setupName = document.getElementById('setup-name');
+    const fName = document.getElementById('f-name');
     
     // GPS UI
     const gpsBtn = document.getElementById('gps-btn');
@@ -379,17 +387,17 @@
           const userSnap = await getDoc(userRef);
 
           if (userSnap.exists()) {
-            // FIX: Simply load home.html inside the iframe instead of replacing the parent window
             window.location.replace("home.html");
           } else {
             // New user: Show setup screen
             views.login.classList.add('hidden');
             views.setup.classList.remove('hidden');
             
+            // Pre-fill the top card and the new name input field
+            setupName.innerText = user.displayName || 'Welcome';
+            fName.value = user.displayName || '';
             document.getElementById('setup-dp').src = user.photoURL || '';
-            document.getElementById('setup-name').innerText = user.displayName || 'Welcome';
             
-            // FIX: Force the parent shell to remain completely hidden during setup
             try {
               window.parent.document.getElementById('app-header').style.display = 'none';
               window.parent.document.getElementById('app-sidebar').classList.remove('shell-active');
@@ -428,7 +436,12 @@
       }
     });
 
-    // 3. GPS Location Logic
+    // 3. Live Data Binding for Name Field
+    fName.addEventListener('input', (e) => {
+      setupName.innerText = e.target.value.trim() || 'Welcome';
+    });
+
+    // 4. GPS Location Logic
     gpsBtn.addEventListener('click', () => {
       if (navigator.vibrate) navigator.vibrate(40);
       
@@ -479,11 +492,12 @@
       gpsBtn.classList.remove('hidden');
     });
 
-    // 4. Save Profile
+    // 5. Save Profile
     proceedBtn.addEventListener('click', async () => {
       if (navigator.vibrate) navigator.vibrate(40);
       setupError.style.display = 'none';
 
+      const name = fName.value.trim();
       const phone = document.getElementById('f-phone').value.trim();
       const house = document.getElementById('f-house').value.trim();
       const area = document.getElementById('f-area').value.trim();
@@ -491,8 +505,8 @@
       const city = document.getElementById('f-city').value.trim();
       const state = document.getElementById('f-state').value.trim();
 
-      if (phone.length < 5 || !house || !area || !pincode || !city || !state) {
-        setupError.innerText = "Please fill out all contact and address details.";
+      if (!name || phone.length < 5 || !house || !area || !pincode || !city || !state) {
+        setupError.innerText = "Please fill out your name, contact, and address details.";
         setupError.style.display = 'block';
         return;
       }
@@ -505,7 +519,7 @@
 
       try {
         await setDoc(doc(db, 'users', currentUser.uid), {
-          name: currentUser.displayName,
+          name: name,
           email: currentUser.email,
           photoURL: currentUser.photoURL,
           phone: phone,
@@ -517,11 +531,10 @@
             state: state,
             pincode: pincode
           },
-          coordinates: userCoordinates, // Stores {latitude, longitude, accuracy} or null
+          coordinates: userCoordinates, 
           createdAt: new Date().toISOString()
         });
 
-        // FIX: Cleanly command the parent shell to restart and reveal the app
         window.parent.location.reload();
 
       } catch (error) {
