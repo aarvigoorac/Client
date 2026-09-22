@@ -307,7 +307,7 @@
 
   <script type="module">
     import { auth, db } from './config.js';
-    import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
     import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
     // 1. Service Worker Registration
@@ -342,15 +342,34 @@
         bottomNav.classList.remove('shell-active');
         layoutWrapper.classList.remove('shell-active');
         
+        // Clear local storage on logout
+        localStorage.removeItem('aarvi_setup_complete');
+        
         contentFrame.src = "pages/login.html";
       } else {
-        // LOGGED IN: Check if user document exists
-        const userSnap = await getDoc(doc(db, 'users', user.uid));
+        // LOGGED IN: Check localStorage for zero-read optimization
+        const isSetupComplete = localStorage.getItem('aarvi_setup_complete');
         
-        if (!userSnap.exists()) {
-           // USER DOCUMENT MISSING: Shell remains visible, route to Account for form filling
-           contentFrame.src = "pages/account.html";
-           return; 
+        if (!isSetupComplete) {
+          const userRef = doc(db, 'users', user.uid);
+          const userSnap = await getDoc(userRef);
+          
+          if (!userSnap.exists()) {
+             // LAZY REGISTRATION: Silently create the document in the background.
+             // { merge: true } guarantees it will NEVER overwrite existing data.
+             try {
+               await setDoc(userRef, {
+                 name: user.displayName || 'User',
+                 email: user.email || '',
+                 photoURL: user.photoURL || '',
+                 createdAt: new Date().toISOString()
+               }, { merge: true });
+             } catch (error) {
+               console.error("Failed to silently create user document", error);
+             }
+          }
+          // Mark as complete in local storage so we never do this read again
+          localStorage.setItem('aarvi_setup_complete', 'true');
         }
 
         // USER EXISTS AND LOGGED IN: Ensure shell is visible (in case they just logged in)
