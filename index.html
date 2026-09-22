@@ -58,7 +58,7 @@
     header {
       height: var(--header-height);
       background-color: var(--surface-color);
-      display: none; /* Hidden by default until auth state is confirmed */
+      display: flex; /* Visible by default for optimistic loading */
       align-items: center;
       justify-content: space-between;
       padding: 0 20px;
@@ -252,7 +252,7 @@
     /* --- Responsive Switching --- */
     @media (max-width: 768px) {
       aside { display: none !important; }
-      .layout-wrapper.shell-active { margin-bottom: calc(var(--nav-height) + env(safe-area-inset-bottom)); }
+      .layout-wrapper.shell-active { padding-bottom: calc(var(--nav-height) + env(safe-area-inset-bottom)); }
     }
     @media (min-width: 769px) {
       .bottom-nav { display: none !important; }
