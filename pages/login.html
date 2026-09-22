@@ -46,25 +46,56 @@
       overflow: hidden;
     }
 
+    /* Enhanced Entrance Animation */
     .view-container {
       width: 100%;
       height: 100%;
       padding: 48px 24px 24px 24px;
       display: flex;
       flex-direction: column;
-      animation: fadeIn 0.3s ease forwards;
+      animation: slideUpFade 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
       max-width: 600px;
       margin: 0 auto;
       position: relative;
     }
 
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
+    @keyframes slideUpFade {
+      from { opacity: 0; transform: translateY(20px); }
       to { opacity: 1; transform: translateY(0); }
+    }
+
+    .branding-section {
+      margin-top: 15vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+
+    /* Logo Scale-in */
+    .app-logo {
+      width: 80px; 
+      height: 80px; 
+      border-radius: 20px; 
+      box-shadow: 0 10px 24px rgba(0,0,0,0.12); 
+      margin-bottom: 24px;
+      animation: scaleIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    }
+
+    @keyframes scaleIn {
+      from { opacity: 0; transform: scale(0.8); }
+      to { opacity: 1; transform: scale(1); }
     }
 
     h1 { font-size: 26px; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 8px; }
     p.subtitle { font-size: 15px; color: var(--text-sub); line-height: 1.5; padding: 0 10px; margin-bottom: 32px; }
+
+    .action-container {
+      position: absolute; 
+      top: 75vh; 
+      left: 24px; 
+      right: 24px;
+    }
 
     .btn {
       display: flex;
@@ -77,20 +108,27 @@
       font-weight: 600;
       cursor: pointer;
       border: none;
-      transition: all 0.2s;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     }
-
-    .btn:active { transform: scale(0.98); }
 
     .btn-google {
       background-color: var(--surface-color);
       color: var(--text-main);
       border: 1px solid var(--border);
       gap: 12px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.06);
     }
     
-    .btn-google:active { background-color: var(--input-bg); }
+    /* Interactive Hover & Tap Physics */
+    .btn-google:hover {
+      box-shadow: 0 6px 16px rgba(0,0,0,0.1);
+      transform: translateY(-2px);
+    }
+    
+    .btn-google:active { 
+      background-color: var(--input-bg); 
+      transform: scale(0.96); 
+    }
 
     .error-text { color: #d32f2f; font-size: 14px; margin-top: 12px; display: none; text-align: center; }
     
@@ -112,14 +150,14 @@
   <div class="view-container" id="login-container">
     
     <!-- Centered Branding Content -->
-    <div style="margin-top: 15vh; display: flex; flex-direction: column; align-items: center; text-align: center;">
-      <img src="../images/icon.png" alt="Aarvi Stores Logo" style="width: 80px; height: 80px; border-radius: 20px; box-shadow: 0 10px 24px rgba(0,0,0,0.12); margin-bottom: 24px;">
+    <div class="branding-section">
+      <img src="../images/icon.png" alt="Aarvi Stores Logo" class="app-logo">
       <h1>Aarvi Stores</h1>
       <p class="subtitle">Sign in to experience fast checkout and track your orders seamlessly.</p>
     </div>
 
     <!-- Pinned Button at 75vh Thumb Zone -->
-    <div style="position: absolute; top: 75vh; left: 24px; right: 24px;">
+    <div class="action-container">
       <button class="btn btn-google" id="google-login-btn">
         <svg viewBox="0 0 48 48" width="24" height="24" id="google-icon">
           <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
@@ -136,7 +174,7 @@
 
   <script type="module">
     import { auth, googleProvider } from '../config.js';
-    import { signInWithPopup, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { signInWithPopup } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
     const loginBtn = document.getElementById('google-login-btn');
     const btnText = document.getElementById('btn-text');
@@ -144,14 +182,7 @@
     const googleIcon = document.getElementById('google-icon');
     const errorMsg = document.getElementById('error-msg');
 
-    // 1. Auth Listener - Triggers the redirect once Firebase confirms the session
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        window.location.replace("home.html");
-      }
-    });
-
-    // 2. Google Login Trigger
+    // Google Login Trigger - Routing is completely delegated to index.html's auth listener
     loginBtn.addEventListener('click', async () => {
       if (navigator.vibrate) navigator.vibrate(40);
       
@@ -164,7 +195,7 @@
 
       try {
         await signInWithPopup(auth, googleProvider);
-        // Success logic is intentionally empty here; onAuthStateChanged handles the redirect automatically
+        // index.html will detect the auth state change and instantly handle iframe routing and nav unlocking
       } catch (error) {
         // Revert UI on failure
         loginBtn.style.pointerEvents = 'auto';
