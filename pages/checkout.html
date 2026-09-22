@@ -16,6 +16,7 @@
       --skeleton-base: #e0e0e0;
       --skeleton-shine: #f5f5f5;
       --success: #137333;
+      --danger: #d32f2f;
     }
     
     @media (prefers-color-scheme: dark) {
@@ -28,6 +29,7 @@
         --skeleton-base: #333333;
         --skeleton-shine: #444444;
         --success: #81c995;
+        --danger: #f28b82;
       }
     }
 
@@ -65,13 +67,18 @@
 
     /* Price Breakdown */
     .price-row { display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 12px; color: var(--text-sub); }
-    .price-row.total { font-size: 16px; font-weight: 800; color: var(--text-main); margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--border); margin-bottom: 0; }
-    .text-success { color: var(--success); font-weight: 600; }
+    .price-row.total { font-size: 16px; font-weight: 800; color: var(--text-main); margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--border); margin-bottom: 4px; }
+    
+    .tax-label { font-size: 11px; color: var(--success); text-align: right; display: block; font-weight: 600;}
 
     /* Payment Option */
     .payment-option { display: flex; align-items: center; gap: 12px; padding: 12px; border: 1.5px solid var(--primary); border-radius: 12px; background: rgba(40, 116, 240, 0.05); }
     .radio-circle { width: 20px; height: 20px; border-radius: 50%; border: 6px solid var(--primary); }
     .payment-text { font-weight: 600; font-size: 14px; }
+
+    /* Warnings */
+    .warning-box { background: rgba(211, 47, 47, 0.1); color: var(--danger); border: 1px solid rgba(211, 47, 47, 0.3); padding: 12px; border-radius: 12px; font-size: 13px; font-weight: 600; display: none; align-items: center; gap: 8px; margin-bottom: 16px;}
+    .warning-box svg { width: 18px; height: 18px; stroke: currentColor; flex-shrink: 0; }
 
     /* Skeletons */
     .skeleton { background: linear-gradient(90deg, var(--skeleton-base) 25%, var(--skeleton-shine) 50%, var(--skeleton-base) 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 4px; }
@@ -86,6 +93,7 @@
     
     .btn-place-order { background: var(--primary); color: #fff; border: none; padding: 14px 24px; border-radius: 14px; font-size: 16px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 12px rgba(40, 116, 240, 0.25); transition: transform 0.1s; }
     .btn-place-order:active { transform: scale(0.96); }
+    .btn-place-order:disabled { background: var(--border); color: var(--text-sub); box-shadow: none; cursor: not-allowed; transform: none; }
     
     .spinner { animation: spin 1s linear infinite; width: 20px; height: 20px; stroke: currentColor; display: none; }
     @keyframes spin { 100% { transform: rotate(360deg); } }
@@ -102,6 +110,12 @@
 
   <div class="container">
     
+    <!-- Warning Box for Minimum Order -->
+    <div class="warning-box" id="min-order-warning">
+      <svg fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+      <span>Minimum order amount is ₹450 to proceed with checkout.</span>
+    </div>
+
     <!-- Delivery Address Card -->
     <div class="card">
       <div class="card-title">
@@ -162,12 +176,13 @@
       </div>
       <div class="price-row">
         <span>Delivery Fee</span>
-        <span class="text-success" id="ui-delivery">FREE</span>
+        <span id="ui-delivery">₹40</span>
       </div>
       <div class="price-row total">
         <span>Grand Total</span>
         <span id="ui-total">₹0</span>
       </div>
+      <span class="tax-label">(All taxes included)</span>
     </div>
 
   </div>
@@ -189,16 +204,20 @@
     import { doc, getDoc, setDoc, deleteField, updateDoc, collection } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
     import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
+    // Constants
+    const MINIMUM_ORDER_VALUE = 450;
+    const DELIVERY_FEE = 40;
+
     // UI Elements
     const btnBack = document.getElementById('btn-back');
     const addressContainer = document.getElementById('address-container');
     const itemsContainer = document.getElementById('items-container');
     const uiSubtotal = document.getElementById('ui-subtotal');
-    const uiDelivery = document.getElementById('ui-delivery');
     const uiTotal = document.getElementById('ui-total');
     const barTotal = document.getElementById('bar-total');
     const btnPlaceOrder = document.getElementById('btn-place-order');
     const btnSpinner = document.getElementById('btn-spinner');
+    const minOrderWarning = document.getElementById('min-order-warning');
 
     let currentUser = null;
     let orderPayload = [];
@@ -206,7 +225,7 @@
     let finalTotal = 0;
     let savedAddress = null;
 
-    // 1. Isolate the View: Hide parent bottom navigation and reset parent margin
+    // 1. Isolate the View: Safely toggle parent navigation and correct padding attribute
     function toggleParentBottomNav(show) {
       try {
         const parentNav = window.parent.document.getElementById('bottom-nav');
@@ -217,8 +236,8 @@
         }
         
         if (layoutWrapper) {
-          // If hiding nav, remove margin. If showing nav, restore the dynamic CSS margin.
-          layoutWrapper.style.marginBottom = show ? '' : '0px';
+          // Changed to paddingBottom to match index.html CSS architecture fix
+          layoutWrapper.style.paddingBottom = show ? '' : '0px';
         }
       } catch (e) { console.warn("Could not access parent navigation."); }
     }
@@ -233,7 +252,6 @@
       history.back();
     });
 
-    // Bulletproof restore for hardware back button and swipe gestures
     window.addEventListener('pagehide', () => {
       toggleParentBottomNav(true);
     });
@@ -244,7 +262,6 @@
       orderSource = sessionStorage.getItem('checkout_source');
 
       if (!payloadString) {
-        // No data found, boot them back to home
         toggleParentBottomNav(true);
         window.parent.document.getElementById('content-frame').src = 'pages/home.html';
         return false;
@@ -254,7 +271,7 @@
       return true;
     }
 
-    // 3. Fetch User Address (Matches account.html perfectly)
+    // 3. Fetch User Address
     async function fetchUserAddress() {
       try {
         const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
@@ -262,7 +279,6 @@
         if (userDoc.exists() && userDoc.data().name && userDoc.data().address_details) {
           const data = userDoc.data();
           
-          // Package the scattered data into one clean object for the order payload
           savedAddress = {
             name: data.name || '',
             phone: data.phone || '',
@@ -273,7 +289,6 @@
             pincode: data.address_details.pincode || ''
           };
 
-          // Render it to the screen
           addressContainer.innerHTML = `
             <div class="address-details">
               <div class="address-name">${savedAddress.name}</div>
@@ -283,18 +298,16 @@
             </div>
           `;
         } else {
-          // If they haven't filled out the Account page yet
           addressContainer.innerHTML = `
             <div style="color:var(--danger); font-weight: 600; padding-top: 4px;">
               Address missing. Please update your profile.
             </div>
-            <button onclick="window.parent.document.getElementById('content-frame').src='pages/account.html'; window.parent.document.getElementById('bottom-nav').style.display='flex'; window.parent.document.querySelector('.layout-wrapper').style.marginBottom='';" 
+            <button onclick="window.parent.document.getElementById('content-frame').src='pages/setup.html'; window.parent.document.getElementById('bottom-nav').style.display='flex'; window.parent.document.querySelector('.layout-wrapper').style.paddingBottom='';" 
                     style="margin-top: 12px; background: var(--primary); color: white; border: none; padding: 10px 16px; border-radius: 8px; font-weight: bold; cursor: pointer;">
-              Go to Account Settings
+              Complete Profile Setup
             </button>
           `;
-          btnPlaceOrder.style.opacity = '0.5';
-          btnPlaceOrder.style.pointerEvents = 'none';
+          btnPlaceOrder.disabled = true;
         }
       } catch (error) {
         console.error("Error fetching address:", error);
@@ -323,19 +336,24 @@
         `;
       });
 
-      // Delivery Logic (e.g., Free above 500, else 40)
-      let deliveryFee = subTotal > 500 ? 0 : 40;
-      finalTotal = subTotal + deliveryFee;
+      finalTotal = subTotal + DELIVERY_FEE;
 
       uiSubtotal.innerText = `₹${subTotal.toLocaleString('en-IN')}`;
-      uiDelivery.innerText = deliveryFee === 0 ? 'FREE' : `₹${deliveryFee}`;
-      uiDelivery.className = deliveryFee === 0 ? 'text-success' : '';
-      
       uiTotal.innerText = `₹${finalTotal.toLocaleString('en-IN')}`;
       barTotal.innerText = `₹${finalTotal.toLocaleString('en-IN')}`;
+
+      // Enforce Minimum Order Logic
+      if (subTotal < MINIMUM_ORDER_VALUE) {
+        minOrderWarning.style.display = 'flex';
+        btnPlaceOrder.disabled = true;
+        btnPlaceOrder.querySelector('span').innerText = `Add ₹${(MINIMUM_ORDER_VALUE - subTotal)} more`;
+      } else {
+        minOrderWarning.style.display = 'none';
+        // Only re-enable if address also exists (handled implicitly by sequence)
+      }
     }
 
-    // Init logic when Auth resolves
+    // Init logic
     onAuthStateChanged(auth, async (user) => {
       if (user) {
         currentUser = user;
@@ -344,27 +362,24 @@
           await fetchUserAddress();
         }
       } else {
-        // Boot out unauthenticated users
         toggleParentBottomNav(true);
         window.parent.document.getElementById('content-frame').src = 'pages/home.html';
       }
     });
 
-    // 5. The Order Execution & Smart Cleanup
+    // 5. Place Order Execution
     btnPlaceOrder.addEventListener('click', async () => {
-      if (!savedAddress || orderPayload.length === 0) return;
+      // Final security block
+      if (!savedAddress || orderPayload.length === 0 || btnPlaceOrder.disabled) return;
       if (navigator.vibrate) navigator.vibrate(40);
       
-      // UI Loading State
       btnPlaceOrder.style.pointerEvents = 'none';
       btnPlaceOrder.querySelector('span').innerText = 'Processing...';
       btnSpinner.style.display = 'block';
 
       try {
-        // Generate a random order ID (e.g., ORD-123456789)
         const orderId = `ORD-${Math.floor(100000000 + Math.random() * 900000000)}`;
         
-        // A. Write to global Orders collection
         const newOrderRef = doc(collection(db, 'orders'), orderId);
         await setDoc(newOrderRef, {
           userId: currentUser.uid,
@@ -376,20 +391,15 @@
           createdAt: new Date().toISOString()
         });
 
-        // B. Smart Cart Cleanup (Only if they came from the cart tab)
         if (orderSource === 'cart') {
           const cartRef = doc(db, 'carts', currentUser.uid);
-          await updateDoc(cartRef, {
-            items: deleteField()
-          });
+          await updateDoc(cartRef, { items: deleteField() });
         }
 
-        // C. Session Wipe
         sessionStorage.removeItem('checkout_payload');
         sessionStorage.removeItem('checkout_source');
 
-        // D. Success Redirect
-        toggleParentBottomNav(true); // Restore navigation for the orders page
+        toggleParentBottomNav(true); 
         window.parent.document.getElementById('content-frame').src = 'pages/orders.html';
 
       } catch (error) {
