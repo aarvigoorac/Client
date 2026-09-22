@@ -106,26 +106,30 @@
       logContainer.scrollTop = logContainer.scrollHeight;
     }
 
-    // Helper: Generate Firestore compatible search keyword prefixes
-    // E.g. "Red Shirt" -> [r, re, red, s, sh, shi, shir, shirt, red shirt]
+    // High-Performance Map Generator for Firestore
     function generateSearchKeywords(productName) {
-      const keywords = [];
-      const words = productName.toLowerCase().split(' ');
+      const keywordsMap = {};
+      // Strip out characters that Firestore doesn't allow in map keys
+      const fullStr = productName.toLowerCase().replace(/[\.\#\$\[\]]/g, '');
       
-      // Add prefix array for each individual word
+      // 1. Generate prefixes for the FULL string
+      let currentString = '';
+      for (let i = 0; i < fullStr.length; i++) {
+        currentString += fullStr[i];
+        keywordsMap[currentString] = true;
+      }
+      
+      // 2. Generate prefixes for individual words
+      const words = fullStr.split(' ');
       words.forEach(word => {
-        let currentString = '';
+        let currentWordStr = '';
         for (let i = 0; i < word.length; i++) {
-          currentString += word[i];
-          keywords.push(currentString);
+          currentWordStr += word[i];
+          keywordsMap[currentWordStr] = true;
         }
       });
       
-      // Add the exact full phrase
-      keywords.push(productName.toLowerCase());
-      
-      // Return unique array
-      return [...new Set(keywords)];
+      return keywordsMap;
     }
 
     // Helper: Procedural Data Generators
@@ -196,7 +200,7 @@
             },
             ratingCount: ratingCount,
             ratingSum: ratingSum,
-            searchKeywords: generateSearchKeywords(fullName),
+            searchKeywords: generateSearchKeywords(fullName), // Now returns a Map
             createdAt: new Date().toISOString()
           };
 
