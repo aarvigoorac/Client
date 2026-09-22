@@ -321,6 +321,7 @@
 
     // 2. Auth Protection, UI State & 0ms Profile Picture Load
     const dpImg = document.getElementById('user-dp');
+    const contentFrame = document.getElementById('content-frame');
     
     // Instantly load DP from local storage if available (0ms load)
     const localDpUrl = localStorage.getItem('aarvi_dp');
@@ -331,8 +332,8 @@
 
     onAuthStateChanged(auth, (user) => {
       if (!user) {
-        // TOP-LEVEL REDIRECT: Ensure login screen takes over the full browser
-        window.location.replace("pages/login.html");
+        // IN-SHELL ROUTING: Load login page inside the iframe smoothly without top-level redirect flicker
+        contentFrame.src = "pages/login.html";
       } else {
         // User logged in. Update DP if it's new or wasn't in local storage
         if (user.photoURL && user.photoURL !== localDpUrl) {
