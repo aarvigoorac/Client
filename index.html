@@ -25,8 +25,8 @@
 
     @media (prefers-color-scheme: dark) {
       :root {
-        --bg-color: #000000;
-        --surface-color: #121212;
+        --bg-color: #121212; /* Aligned with login page dark theme background */
+        --surface-color: #1e1e1e;
         --text-main: #ffffff;
         --text-sub: #a0a0a0;
         --border: #333333;
@@ -58,14 +58,12 @@
     header {
       height: var(--header-height);
       background-color: var(--surface-color);
-      /* Border removed per request */
-      display: flex; 
+      display: none; /* Completely removed from layout flow when unauthenticated */
       align-items: center;
       justify-content: space-between;
       padding: 0 20px;
       z-index: 50;
       flex-shrink: 0;
-      transition: opacity 0.4s ease, transform 0.4s ease;
     }
 
     .brand {
@@ -176,12 +174,11 @@
       height: var(--nav-height);
       min-height: calc(var(--nav-height) + env(safe-area-inset-bottom));
       background-color: var(--surface-color);
-      /* Border removed per request */
       z-index: 50;
       flex-shrink: 0;
       padding-bottom: env(safe-area-inset-bottom);
       
-      /* Animation properties instead of display: none */
+      /* Smooth bottom slide transition */
       opacity: 0;
       transform: translateY(100%);
       pointer-events: none;
@@ -259,7 +256,7 @@
       .layout-wrapper.shell-active { margin-bottom: calc(var(--nav-height) + env(safe-area-inset-bottom)); }
     }
     @media (min-width: 769px) {
-      .bottom-nav { display: none !important; } /* Hide bottom nav completely on desktop */
+      .bottom-nav { display: none !important; }
       #install-pill { bottom: 40px; }
     }
   </style>
@@ -278,7 +275,6 @@
     </a>
   </header>
 
-  <!-- Shell elements have 'shell-active' class by default for optimistic loading -->
   <div class="layout-wrapper shell-active" id="layout-wrapper">
     <!-- Desktop Side Navigation -->
     <aside id="app-sidebar" class="shell-active">
@@ -378,12 +374,11 @@
       dpImg.style.opacity = '1';
     }
 
-    // 2. Auth Protection, UI State & Routing Guard
+    // 2. Auth Protection & UI Shell Handler
     onAuthStateChanged(auth, async (user) => {
       if (!user) {
-        // NOT LOGGED IN: Slide shell components out smoothly, load login page
-        appHeader.style.opacity = '0';
-        appHeader.style.pointerEvents = 'none';
+        // NOT LOGGED IN: Completely remove header from DOM flow to remove the top black gap
+        appHeader.style.display = 'none';
         appSidebar.classList.remove('shell-active');
         bottomNav.classList.remove('shell-active');
         layoutWrapper.classList.remove('shell-active');
@@ -393,9 +388,8 @@
         
         contentFrame.src = "pages/login.html";
       } else {
-        // LOGGED IN: Slide shell components in smoothly
-        appHeader.style.opacity = '1';
-        appHeader.style.pointerEvents = 'auto';
+        // LOGGED IN: Bring header back into document layout
+        appHeader.style.display = 'flex';
         appSidebar.classList.add('shell-active');
         bottomNav.classList.add('shell-active');
         layoutWrapper.classList.add('shell-active');
