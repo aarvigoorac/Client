@@ -47,13 +47,6 @@
 
     body { background-color: var(--bg-color); color: var(--text-main); padding-bottom: 90px; overflow-x: hidden; display: flex; flex-direction: column; align-items: center; }
 
-    /* Header */
-    .header { position: sticky; top: 0; background: var(--surface-color); padding: 16px; display: flex; align-items: center; gap: 16px; z-index: 50; width: 100%; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
-    .btn-back { background: none; border: none; color: var(--text-main); cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 4px; border-radius: 50%; }
-    .btn-back:active { background: var(--bg-color); }
-    .btn-back svg { width: 24px; height: 24px; stroke: currentColor; stroke-width: 2.5; }
-    .header-title { font-size: 18px; font-weight: 800; }
-
     .page-container { width: 100%; max-width: 800px; padding: 16px; display: flex; flex-direction: column; gap: 16px; }
 
     /* Order Cards */
@@ -92,6 +85,14 @@
     .empty-state p { color: var(--text-sub); font-size: 14px; line-height: 1.5; margin-bottom: 24px; }
     .btn-shop { background: var(--primary); color: white; border: none; padding: 12px 24px; border-radius: 12px; font-size: 15px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 12px rgba(40, 116, 240, 0.25); }
 
+    /* Firebase Index Error Pill */
+    .index-alert { background: var(--warning-bg); border: 1px solid var(--warning); color: var(--warning); border-radius: 16px; padding: 16px; margin-bottom: 16px; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 4px 12px rgba(179, 38, 30, 0.1); }
+    .index-alert-header { display: flex; align-items: center; gap: 8px; font-weight: 800; font-size: 15px; }
+    .index-alert-header svg { width: 22px; height: 22px; stroke: currentColor; stroke-width: 2.5; }
+    .index-alert-desc { font-size: 13px; opacity: 0.9; line-height: 1.5; font-weight: 500; }
+    .btn-index { background: var(--warning); color: var(--surface-color); border: none; padding: 12px 20px; border-radius: 10px; font-weight: 700; font-size: 14px; cursor: pointer; align-self: flex-start; text-decoration: none; display: inline-flex; transition: transform 0.1s; }
+    .btn-index:active { transform: scale(0.96); }
+
     /* Skeletons */
     .skeleton { background: linear-gradient(90deg, var(--skeleton-base) 25%, var(--skeleton-shine) 50%, var(--skeleton-base) 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 6px; }
     @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
@@ -115,6 +116,7 @@
     .btn-close-modal { background: none; border: none; color: var(--text-main); cursor: pointer; padding: 4px; display: flex; align-items: center; justify-content: center; border-radius: 50%; }
     .btn-close-modal:active { background: var(--bg-color); }
     .btn-close-modal svg { width: 24px; height: 24px; stroke: currentColor; stroke-width: 2.5; }
+    .header-title { font-size: 18px; font-weight: 800; }
     
     .modal-scroll { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 16px; padding-bottom: 40px; }
 
@@ -142,14 +144,6 @@
   </style>
 </head>
 <body>
-
-  <!-- Main Header -->
-  <div class="header">
-    <button class="btn-back" id="btn-back">
-      <svg fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" /></svg>
-    </button>
-    <div class="header-title">My Orders</div>
-  </div>
 
   <div class="page-container">
     
@@ -215,7 +209,6 @@
     import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
     // Elements
-    const btnBack = document.getElementById('btn-back');
     const skeletonContainer = document.getElementById('skeleton-container');
     const emptyState = document.getElementById('empty-state');
     const orderContainer = document.getElementById('order-container');
@@ -237,24 +230,18 @@
 
     const placeholderImg = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='400' viewBox='0 0 400 400'><rect width='400' height='400' fill='%23f1f3f6'/><path d='M200 160c-22.1 0-40 17.9-40 40s17.9 40 40 40 40-17.9 40-40-17.9-40-40-40zm0 64c-13.2 0-24-10.8-24-24s10.8-24 24-24 24 10.8 24 24-10.8 24-24 24z' fill='%23cccccc'/></svg>";
 
-    // Navigation (Back to Account or Home)
-    btnBack.addEventListener('click', () => {
-      if (navigator.vibrate) navigator.vibrate(20);
-      window.parent.document.getElementById('content-frame').src = 'pages/account.html';
-    });
-
     onAuthStateChanged(auth, (user) => {
       if (user) {
         currentUser = user;
         fetchOrders(true);
       } else {
-        // Unauthenticated, redirect to home
         window.parent.document.getElementById('content-frame').src = 'pages/home.html';
       }
     });
 
     // Formatting Helpers
     function formatDate(isoString) {
+      if (!isoString) return 'Date unknown';
       const options = { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' };
       return new Date(isoString).toLocaleDateString('en-IN', options);
     }
@@ -274,7 +261,6 @@
 
       try {
         let q;
-        // NOTE: Requires a Composite Index in Firestore (userId ASC, createdAt DESC)
         if (isNewFetch) {
           q = query(
             collection(db, "orders"), 
@@ -345,7 +331,7 @@
             <div class="order-body">
               <div class="img-stack">${imgStackHtml}</div>
               <div>
-                <div class="order-total">₹${order.totalAmount.toLocaleString('en-IN')}</div>
+                <div class="order-total">₹${(order.totalAmount || 0).toLocaleString('en-IN')}</div>
                 <div class="order-items-count">${totalQty} Item${totalQty > 1 ? 's' : ''}</div>
               </div>
             </div>
@@ -357,8 +343,26 @@
 
       } catch (error) {
         console.error("Error fetching orders:", error);
+        
         if (isNewFetch) {
-          skeletonContainer.innerHTML = `<p style="text-align:center; color: var(--warning); padding: 20px;">Failed to load orders. An index might be building.</p>`;
+          // Detect Firebase Index requirement error and extract link
+          const errorStr = error.toString();
+          const urlMatch = errorStr.match(/(https:\/\/console\.firebase\.google\.com[^\s]+)/);
+
+          if (urlMatch) {
+            skeletonContainer.innerHTML = `
+              <div class="index-alert">
+                <div class="index-alert-header">
+                  <svg fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                  Database Index Required
+                </div>
+                <div class="index-alert-desc">Firestore requires a composite index to sort your orders. Click the link below to create it automatically.</div>
+                <a href="${urlMatch[0]}" target="_blank" class="btn-index">Open Link & Create Index</a>
+              </div>
+            `;
+          } else {
+            skeletonContainer.innerHTML = `<p style="text-align:center; color: var(--warning); padding: 20px; font-weight: 600;">Failed to load orders.</p>`;
+          }
         }
       } finally {
         isFetching = false;
@@ -385,7 +389,7 @@
       let itemsHtml = '';
       let subTotal = 0;
       order.items.forEach(item => {
-        const itemTotal = item.price * item.qty;
+        const itemTotal = item.price * (item.qty || 1);
         subTotal += itemTotal;
         itemsHtml += `
           <div class="detail-item">
@@ -393,7 +397,7 @@
             <div class="d-item-info">
               <div class="d-item-name">${item.name}</div>
               <div class="d-item-meta">
-                <span>Qty: ${item.qty}</span>
+                <span>Qty: ${item.qty || 1}</span>
                 <span class="d-item-price">₹${itemTotal.toLocaleString('en-IN')}</span>
               </div>
             </div>
@@ -403,6 +407,9 @@
 
       // Calculate Delivery Fee derived from total
       const deliveryFee = order.totalAmount - subTotal;
+
+      // Safe address check
+      const addr = order.deliveryAddress || {};
 
       // Inject Content
       modalContent.innerHTML = `
@@ -437,11 +444,11 @@
           </div>
           <div class="detail-row">
             <span>Delivery Fee</span>
-            <span style="color: ${deliveryFee === 0 ? 'var(--success)' : 'inherit'}">${deliveryFee === 0 ? 'FREE' : '₹' + deliveryFee}</span>
+            <span style="color: ${deliveryFee <= 0 ? 'var(--success)' : 'inherit'}; font-weight: ${deliveryFee <= 0 ? '700' : 'normal'};">${deliveryFee <= 0 ? 'FREE' : '₹' + deliveryFee}</span>
           </div>
           <div class="detail-row bold">
             <span>Total Amount</span>
-            <span style="color: var(--primary);">₹${order.totalAmount.toLocaleString('en-IN')}</span>
+            <span style="color: var(--primary);">₹${(order.totalAmount || 0).toLocaleString('en-IN')}</span>
           </div>
         </div>
 
@@ -449,10 +456,10 @@
         <div class="detail-card">
           <div class="detail-title">Delivery Address</div>
           <div class="address-text">
-            <div class="address-name">${order.deliveryAddress.name}</div>
-            <div>${order.deliveryAddress.street}, ${order.deliveryAddress.area}</div>
-            <div>${order.deliveryAddress.city}, ${order.deliveryAddress.state} - ${order.deliveryAddress.pincode}</div>
-            <div style="margin-top: 6px;">Phone: ${order.deliveryAddress.phone}</div>
+            <div class="address-name">${addr.name || 'Not provided'}</div>
+            <div>${addr.street || ''}${addr.street && addr.area ? ', ' : ''}${addr.area || ''}</div>
+            <div>${addr.city || ''}${addr.city && addr.state ? ', ' : ''}${addr.state || ''} - ${addr.pincode || ''}</div>
+            <div style="margin-top: 6px;">Phone: ${addr.phone || 'N/A'}</div>
           </div>
         </div>
       `;
@@ -471,7 +478,7 @@
 
     function triggerCloseModal() {
       if (isModalOpen) {
-        history.back(); // Triggers popstate
+        history.back();
       }
     }
 
