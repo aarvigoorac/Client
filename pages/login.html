@@ -395,6 +395,12 @@
           const userSnap = await getDoc(userRef);
 
           if (userSnap.exists()) {
+            // Existing user: Set storage flag first, then redirect instantly
+            try {
+              localStorage.setItem('aarvi_setup_complete', 'true');
+            } catch (e) {
+              console.warn("Could not save setup flag to localStorage:", e);
+            }
             window.location.replace("home.html");
           } else {
             // New user: Show setup screen
@@ -542,6 +548,13 @@
           coordinates: userCoordinates, 
           createdAt: new Date().toISOString()
         });
+
+        // New user setup saved: Write local storage flag before reloading parent window
+        try {
+          localStorage.setItem('aarvi_setup_complete', 'true');
+        } catch (e) {
+          console.warn("Could not save setup flag to localStorage:", e);
+        }
 
         window.parent.location.reload();
 
