@@ -93,6 +93,7 @@
       cursor: pointer;
       display: block; 
       background-color: var(--border);
+      transition: opacity 0.3s, filter 0.3s;
     }
 
     .dp-wrapper img {
@@ -119,6 +120,7 @@
       display: flex;
       flex-direction: column;
       z-index: 40;
+      transition: opacity 0.3s, filter 0.3s;
     }
 
     .nav-list { display: flex; flex-direction: column; padding: 16px 12px; gap: 8px; }
@@ -169,6 +171,7 @@
       z-index: 50;
       flex-shrink: 0;
       padding-bottom: env(safe-area-inset-bottom);
+      transition: opacity 0.3s, filter 0.3s;
     }
 
     .bottom-nav-inner {
@@ -196,6 +199,15 @@
     
     .b-item.active { color: var(--primary); }
     .b-item.active svg { transform: scale(1.15); }
+
+    /* --- Navigation Locked State (Disables buttons seamlessly) --- */
+    .nav-locked {
+      pointer-events: none !important;
+      opacity: 0.4 !important;
+      cursor: not-allowed !important;
+      filter: grayscale(0.6) !important;
+      user-select: none !important;
+    }
 
     /* --- PWA Install Pill --- */
     #install-pill {
@@ -307,7 +319,7 @@
 
   <script type="module">
     import { auth, db } from './config.js';
-    import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
     import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
     // 1. Service Worker Registration
@@ -325,6 +337,20 @@
     const layoutWrapper = document.getElementById('layout-wrapper');
     const contentFrame = document.getElementById('content-frame');
     const dpImg = document.getElementById('user-dp');
+    const profileBtn = document.getElementById('profile-btn');
+
+    // Button Lock Controller
+    function setNavigationLock(locked) {
+      if (locked) {
+        appSidebar.classList.add('nav-locked');
+        bottomNav.classList.add('nav-locked');
+        profileBtn.classList.add('nav-locked');
+      } else {
+        appSidebar.classList.remove('nav-locked');
+        bottomNav.classList.remove('nav-locked');
+        profileBtn.classList.remove('nav-locked');
+      }
+    }
 
     // 0ms Profile Picture Load (Retained purely for image caching)
     const localDpUrl = localStorage.getItem('aarvi_dp');
@@ -342,53 +368,59 @@
         bottomNav.classList.remove('shell-active');
         layoutWrapper.classList.remove('shell-active');
         
-        // Clear local storage on logout
+        // Clear local storage on logout & ensure buttons are unlocked
         localStorage.removeItem('aarvi_setup_complete');
+        setNavigationLock(false);
         
         contentFrame.src = "pages/login.html";
       } else {
-        const isSetupComplete = localStorage.getItem('aarvi_setup_complete');
-        const currentSrc = contentFrame.src || "";
-        
-        if (!isSetupComplete) {
-          const userRef = doc(db, 'users', user.uid);
-          const userSnap = await getDoc(userRef);
-          
-          if (!userSnap.exists()) {
-             // SITUATIONAL AWARENESS CHECK
-             if (currentSrc.includes('login.html')) {
-                 // Scenario A: The user is actively logging in. 
-                 // DO NOTHING. Step back and let login.html handle the setup form.
-                 return;
-             } else {
-                 // Scenario B: The user reopened the app (iframe defaulted to home.html).
-                 // LAZY REGISTRATION: Silently create the document in the background.
-                 try {
-                   await setDoc(userRef, {
-                     name: user.displayName || 'User',
-                     email: user.email || '',
-                     photoURL: user.photoURL || '',
-                     createdAt: new Date().toISOString()
-                   }, { merge: true });
-                 } catch (error) {
-                   console.error("Failed to silently create user document", error);
-                 }
-             }
-          }
-          // Mark as complete in local storage so we never do this read again
-          localStorage.setItem('aarvi_setup_complete', 'true');
-        }
-
-        // USER EXISTS AND LOGGED IN: Ensure shell is visible
+        // LOGGED IN: Ensure shell is visible
         appHeader.style.display = 'flex';
         appSidebar.classList.add('shell-active');
         bottomNav.classList.add('shell-active');
         layoutWrapper.classList.add('shell-active');
 
-        // INCEPTION KILLER: Force to home.html ONLY if they are stuck on login 
-        // (and we didn't return early above to let them fill out the setup form).
-        if (currentSrc.includes('login.html') || currentSrc.includes('index.html') || currentSrc === "about:blank") {
-            contentFrame.src = "pages/home.html";
+        let isSetupComplete = localStorage.getItem('aarvi_setup_complete');
+
+        if (!isSetupComplete) {
+          try {
+            const userRef = doc(db, 'users', user.uid);
+            const userSnap = await getDoc(userRef);
+
+            if (userSnap.exists()) {
+              // Document exists in Firestore -> Save flag locally so we never perform this read again
+              localStorage.setItem('aarvi_setup_complete', 'true');
+              setNavigationLock(false);
+            } else {
+              // Document DOES NOT exist -> Lock navigation buttons & load setup page
+              setNavigationLock(true);
+              if (!contentFrame.src.includes('setup.html')) {
+                contentFrame.src = "pages/setup.html";
+              }
+
+              // Update DP image if available
+              if (user.photoURL && user.photoURL !== localDpUrl) {
+                const tempImg = new Image();
+                tempImg.onload = () => {
+                  dpImg.src = tempImg.src;
+                  dpImg.style.opacity = '1';
+                  localStorage.setItem('aarvi_dp', tempImg.src);
+                };
+                tempImg.src = user.photoURL;
+              }
+              return; // Halt further routing until setup is finished
+            }
+          } catch (error) {
+            console.error("Error verifying user document status:", error);
+          }
+        } else {
+          setNavigationLock(false);
+        }
+
+        // USER EXISTS & SETUP IS DONE: Route away from login, setup, or blank pages
+        const currentSrc = contentFrame.src || "";
+        if (currentSrc.includes('login.html') || currentSrc.includes('index.html') || currentSrc.includes('setup.html') || currentSrc === "about:blank") {
+          contentFrame.src = "pages/home.html";
         }
 
         // Update DP securely
@@ -404,15 +436,42 @@
       }
     });
 
-    // Sub-Frame Navigation Guard (Blocks login.html/index.html from hijacking)
+    // Sub-Frame Navigation Guard & Dynamic Lock Monitor
     contentFrame.addEventListener('load', () => {
       try {
         const frameUrl = contentFrame.contentWindow.location.href;
-        // Only guard against inception if setup is definitively completed
+
+        // Lock buttons if iframe is displaying setup page, otherwise unlock if setup complete
+        if (frameUrl.includes('setup.html')) {
+          setNavigationLock(true);
+        } else if (localStorage.getItem('aarvi_setup_complete')) {
+          setNavigationLock(false);
+        }
+
+        // Blocks login/index pages from hijacking iframe when logged in
         if (auth.currentUser && localStorage.getItem('aarvi_setup_complete') && (frameUrl.includes('login.html') || frameUrl.includes('index.html'))) {
            contentFrame.src = "pages/home.html";
         }
       } catch (e) {}
+    });
+
+    // Seamless PostMessage Listener (Allows setup.html to notify index.html directly without page reloads)
+    window.addEventListener('message', (event) => {
+      if (event.data === 'SETUP_COMPLETE' || (event.data && event.data.type === 'SETUP_COMPLETE')) {
+        localStorage.setItem('aarvi_setup_complete', 'true');
+        setNavigationLock(false);
+        contentFrame.src = "pages/home.html";
+      }
+    });
+
+    // Cross-Tab/Cross-Frame Storage Listener for real-time unlock synchronization
+    window.addEventListener('storage', (e) => {
+      if (e.key === 'aarvi_setup_complete' && e.newValue === 'true') {
+        setNavigationLock(false);
+        if (contentFrame.src.includes('setup.html')) {
+          contentFrame.src = "pages/home.html";
+        }
+      }
     });
 
     // 3. Navigation Sync & Haptics
