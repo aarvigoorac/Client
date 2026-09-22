@@ -127,6 +127,8 @@
     .detail-row { display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 8px; }
     .detail-row.bold { font-weight: 700; color: var(--text-main); font-size: 16px; margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--border); }
     
+    .tax-label { font-size: 11px; color: var(--success); text-align: right; display: block; font-weight: 600; margin-top: 4px; }
+
     .address-text { font-size: 14px; line-height: 1.5; color: var(--text-main); }
     .address-name { font-weight: 700; font-size: 15px; margin-bottom: 4px; }
 
@@ -387,10 +389,10 @@
 
       // Build Items HTML
       let itemsHtml = '';
-      let subTotal = 0;
+      let calculatedSubTotal = 0;
       order.items.forEach(item => {
         const itemTotal = item.price * (item.qty || 1);
-        subTotal += itemTotal;
+        calculatedSubTotal += itemTotal;
         itemsHtml += `
           <div class="detail-item">
             <div class="d-item-img"><img src="${item.image || placeholderImg}"></div>
@@ -405,8 +407,9 @@
         `;
       });
 
-      // Calculate Delivery Fee derived from total
-      const deliveryFee = order.totalAmount - subTotal;
+      // Use explicit DB fields if they exist, otherwise fallback to manual calculations
+      const subTotal = order.subTotal !== undefined ? order.subTotal : calculatedSubTotal;
+      const deliveryFee = order.deliveryFee !== undefined ? order.deliveryFee : (order.totalAmount - calculatedSubTotal);
 
       // Safe address check
       const addr = order.deliveryAddress || {};
@@ -450,6 +453,7 @@
             <span>Total Amount</span>
             <span style="color: var(--primary);">₹${(order.totalAmount || 0).toLocaleString('en-IN')}</span>
           </div>
+          <span class="tax-label">(All taxes included)</span>
         </div>
 
         <!-- Delivery Address -->
