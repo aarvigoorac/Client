@@ -222,6 +222,7 @@
     let currentUser = null;
     let orderPayload = [];
     let orderSource = '';
+    let finalSubtotal = 0;
     let finalTotal = 0;
     let savedAddress = null;
 
@@ -336,6 +337,7 @@
         `;
       });
 
+      finalSubtotal = subTotal;
       finalTotal = subTotal + DELIVERY_FEE;
 
       uiSubtotal.innerText = `₹${subTotal.toLocaleString('en-IN')}`;
@@ -384,6 +386,8 @@
         await setDoc(newOrderRef, {
           userId: currentUser.uid,
           items: orderPayload,
+          subTotal: finalSubtotal,
+          deliveryFee: DELIVERY_FEE,
           totalAmount: finalTotal,
           deliveryAddress: savedAddress,
           paymentMethod: 'COD',
