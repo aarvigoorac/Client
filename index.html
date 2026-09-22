@@ -325,16 +325,7 @@
     const contentFrame = document.getElementById('content-frame');
     const dpImg = document.getElementById('user-dp');
 
-    // --- ZERO-MS UI REVEAL (NO FLICKER) ---
-    const isSetupComplete = localStorage.getItem('aarvi_setup_complete');
-    if (isSetupComplete === 'true') {
-      appHeader.style.display = 'flex';
-      appSidebar.classList.add('shell-active');
-      bottomNav.classList.add('shell-active');
-      layoutWrapper.classList.add('shell-active');
-    }
-
-    // 0ms Profile Picture Load
+    // 0ms Profile Picture Load (Retained for performance)
     const localDpUrl = localStorage.getItem('aarvi_dp');
     if (localDpUrl) {
       dpImg.src = localDpUrl;
@@ -349,24 +340,21 @@
         bottomNav.classList.remove('shell-active');
         layoutWrapper.classList.remove('shell-active');
         
-        localStorage.removeItem('aarvi_setup_complete');
         contentFrame.src = "pages/login.html";
       } else {
-        if (!isSetupComplete) {
-          const userSnap = await getDoc(doc(db, 'users', user.uid));
-          
-          if (!userSnap.exists()) {
-             contentFrame.src = "pages/login.html";
-             return; 
-          } else {
-             localStorage.setItem('aarvi_setup_complete', 'true');
-             // Reveal UI since it wasn't revealed at 0ms
-             appHeader.style.display = 'flex';
-             appSidebar.classList.add('shell-active');
-             bottomNav.classList.add('shell-active');
-             layoutWrapper.classList.add('shell-active');
-          }
+        // ALWAYS check the database to ensure the user document exists before revealing the UI
+        const userSnap = await getDoc(doc(db, 'users', user.uid));
+        
+        if (!userSnap.exists()) {
+           contentFrame.src = "pages/login.html";
+           return; 
         }
+
+        // Reveal UI only after DB confirmation
+        appHeader.style.display = 'flex';
+        appSidebar.classList.add('shell-active');
+        bottomNav.classList.add('shell-active');
+        layoutWrapper.classList.add('shell-active');
 
         // INCEPTION KILLER
         const currentSrc = contentFrame.src || "";
@@ -391,7 +379,8 @@
     contentFrame.addEventListener('load', () => {
       try {
         const frameUrl = contentFrame.contentWindow.location.href;
-        if (auth.currentUser && localStorage.getItem('aarvi_setup_complete') && (frameUrl.includes('login.html') || frameUrl.includes('index.html'))) {
+        // Simplified guard: If logged in, block login.html/index.html from hijacking
+        if (auth.currentUser && (frameUrl.includes('login.html') || frameUrl.includes('index.html'))) {
            contentFrame.src = "pages/home.html";
         }
       } catch (e) {}
