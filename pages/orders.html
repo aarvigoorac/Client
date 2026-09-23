@@ -59,10 +59,13 @@
     .order-id { font-size: 15px; font-weight: 800; margin-bottom: 4px; }
     .order-date { font-size: 13px; color: var(--text-sub); }
     
-    .status-pill { font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 50px; }
+    .status-pill { font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 50px; text-transform: capitalize; }
     .status-processing { background: var(--processing-bg); color: var(--processing); }
     .status-delivered { background: var(--success-bg); color: var(--success); }
     .status-cancelled { background: var(--warning-bg); color: var(--warning); }
+    .status-approved { background: #e9f2ff; color: #0c66e4; }
+    .status-assigned { background: #f0eaff; color: #5e4db2; }
+    .status-out { background: #ffe4c4; color: #854800; }
 
     .order-body { display: flex; justify-content: space-between; align-items: center; }
     
@@ -112,7 +115,11 @@
     .side-modal { position: fixed; top: 0; right: 0; width: 100%; max-width: 500px; height: 100%; background: var(--bg-color); z-index: 1000; transform: translateX(100%); transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1); display: flex; flex-direction: column; overflow: hidden; box-shadow: -10px 0 40px rgba(0,0,0,0.1); }
     .side-modal.active { transform: translateX(0); }
     
-    .modal-header { display: flex; align-items: center; padding: 16px; background: var(--surface-color); border-bottom: 1px solid var(--border); gap: 12px; }
+    /* Tracking Bottom Sheet (75% height) */
+    .track-modal { position: fixed; bottom: 0; left: 0; width: 100%; height: 75vh; background: var(--bg-color); z-index: 2000; border-radius: 24px 24px 0 0; transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1); display: flex; flex-direction: column; box-shadow: 0 -10px 40px rgba(0,0,0,0.2); }
+    .track-modal.active { transform: translateY(0); }
+
+    .modal-header { display: flex; align-items: center; justify-content: space-between; padding: 16px; background: var(--surface-color); border-bottom: 1px solid var(--border); gap: 12px; }
     .btn-close-modal { background: none; border: none; color: var(--text-main); cursor: pointer; padding: 4px; display: flex; align-items: center; justify-content: center; border-radius: 50%; }
     .btn-close-modal:active { background: var(--bg-color); }
     .btn-close-modal svg { width: 24px; height: 24px; stroke: currentColor; stroke-width: 2.5; }
@@ -142,6 +149,32 @@
     .d-item-name { font-size: 14px; font-weight: 600; line-height: 1.3; margin-bottom: 4px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
     .d-item-meta { display: flex; justify-content: space-between; font-size: 13px; color: var(--text-sub); }
     .d-item-price { font-weight: 700; color: var(--text-main); }
+
+    /* Track Order Button */
+    .btn-track { width: 100%; background: var(--surface-color); color: var(--primary); border: 2px solid var(--primary); padding: 14px; border-radius: 12px; font-size: 15px; font-weight: 800; cursor: pointer; transition: background 0.2s, transform 0.1s; margin-top: 16px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+    .btn-track:active { transform: scale(0.97); background: var(--bg-color); }
+    .btn-track svg { width: 20px; height: 20px; stroke: currentColor; stroke-width: 2.5; }
+
+    /* Tracking Timeline CSS */
+    .timeline { position: relative; padding-left: 24px; margin-top: 8px; margin-bottom: 8px; }
+    .timeline::before { content: ''; position: absolute; left: 7px; top: 8px; bottom: 8px; width: 2px; background: var(--border); border-radius: 2px; }
+    .tl-item { position: relative; margin-bottom: 28px; display: flex; flex-direction: column; }
+    .tl-item:last-child { margin-bottom: 0; }
+    
+    .tl-dot { position: absolute; left: -24px; width: 16px; height: 16px; border-radius: 50%; background: var(--bg-color); border: 3px solid var(--border); top: 2px; z-index: 2; transition: all 0.3s ease; }
+    .tl-item.active .tl-dot { border-color: var(--primary); background: var(--primary); box-shadow: 0 0 0 4px rgba(40,116,240,0.15); }
+    .tl-item.rejected .tl-dot { border-color: var(--warning); background: var(--warning); box-shadow: 0 0 0 4px rgba(179,38,30,0.15); }
+    
+    /* Fills the line dynamically for past steps */
+    .tl-item.active::after { content: ''; position: absolute; left: -17px; top: 18px; width: 2px; height: calc(100% + 10px); background: var(--primary); z-index: 1; }
+    .tl-item:last-child::after { display: none; }
+    .tl-item.current::after { display: none; } /* Don't fill line below the current active step */
+
+    .tl-content { padding-left: 12px; }
+    .tl-title { font-size: 15px; font-weight: 700; color: var(--text-sub); margin-bottom: 4px; transition: color 0.3s; }
+    .tl-item.active .tl-title { color: var(--text-main); }
+    .tl-item.rejected .tl-title { color: var(--warning); }
+    .tl-time { font-size: 12px; color: var(--text-sub); font-weight: 500; }
 
   </style>
 </head>
@@ -190,18 +223,37 @@
     <div class="sentinel" id="sentinel"></div>
   </div>
 
-  <!-- Slide-In Side Modal for Order Details -->
+  <!-- Slide-In Side Modal for Order Details (Layer 1) -->
   <div class="modal-overlay" id="modal-bg"></div>
   <div class="side-modal" id="side-modal">
     <div class="modal-header">
-      <button class="btn-close-modal" id="btn-close-modal">
-        <svg fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" /></svg>
-      </button>
       <div class="header-title">Order Details</div>
+      <button class="btn-close-modal" id="btn-close-modal">
+        <svg fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+      </button>
     </div>
     
     <div class="modal-scroll" id="modal-content">
       <!-- Injected via JS -->
+    </div>
+  </div>
+
+  <!-- Slide-Up Tracking Bottom Sheet (Layer 2) -->
+  <div class="modal-overlay" id="track-bg" style="z-index: 1999;"></div>
+  <div class="track-modal" id="track-modal">
+    <div class="modal-header" style="border-radius: 24px 24px 0 0;">
+      <div class="header-title">Track Order</div>
+      <button class="btn-close-modal" id="btn-close-track">
+        <svg fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+      </button>
+    </div>
+    <div class="modal-scroll">
+      <div class="detail-card">
+        <div class="detail-title" style="margin-bottom: 20px;">Order Status</div>
+        <div class="timeline" id="track-timeline">
+          <!-- Timeline injected here -->
+        </div>
+      </div>
     </div>
   </div>
 
@@ -217,18 +269,25 @@
     const loadingMore = document.getElementById('loading-more');
     const sentinel = document.getElementById('sentinel');
     
+    // Layer 1 (Order Details)
     const modalBg = document.getElementById('modal-bg');
     const sideModal = document.getElementById('side-modal');
     const btnCloseModal = document.getElementById('btn-close-modal');
     const modalContent = document.getElementById('modal-content');
+
+    // Layer 2 (Tracking Sheet)
+    const trackBg = document.getElementById('track-bg');
+    const trackModal = document.getElementById('track-modal');
+    const btnCloseTrack = document.getElementById('btn-close-track');
+    const trackTimeline = document.getElementById('track-timeline');
 
     // State Variables
     let currentUser = null;
     let lastVisibleDoc = null;
     let isFetching = false;
     let hasMoreDocs = true;
-    let isModalOpen = false;
-    let allOrdersData = {}; // Stores fetched orders for quick modal access
+    let modalStack = [];
+    let allOrdersData = {}; 
 
     const placeholderImg = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='400' viewBox='0 0 400 400'><rect width='400' height='400' fill='%23f1f3f6'/><path d='M200 160c-22.1 0-40 17.9-40 40s17.9 40 40 40 40-17.9 40-40-17.9-40-40-40zm0 64c-13.2 0-24-10.8-24-24s10.8-24 24-24 24 10.8 24 24-10.8 24-24 24z' fill='%23cccccc'/></svg>";
 
@@ -247,12 +306,25 @@
       const options = { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' };
       return new Date(isoString).toLocaleDateString('en-IN', options);
     }
+    
+    function formatTime(isoString) {
+      if (!isoString) return '';
+      return new Date(isoString).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', month: 'short', day: 'numeric' });
+    }
+
+    function capitalizeFirstLetter(string) {
+      if (!string) return 'Processing';
+      return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
+    }
 
     function getStatusClass(status) {
       if (!status) return 'status-processing';
       const s = status.toLowerCase();
       if (s.includes('deliver')) return 'status-delivered';
-      if (s.includes('cancel')) return 'status-cancelled';
+      if (s.includes('cancel') || s.includes('reject')) return 'status-cancelled';
+      if (s.includes('assign')) return 'status-assigned';
+      if (s.includes('out')) return 'status-out';
+      if (s.includes('approv')) return 'status-approved';
       return 'status-processing';
     }
 
@@ -305,7 +377,6 @@
           const orderId = docSnap.id;
           allOrdersData[orderId] = order; // Cache for modal
 
-          // Generate Overlapping Images (Max 3)
           let imgStackHtml = '';
           const maxImgs = Math.min(order.items.length, 3);
           for (let i = 0; i < maxImgs; i++) {
@@ -316,9 +387,8 @@
             imgStackHtml += `<div class="img-circle img-more">+${order.items.length - 3}</div>`;
           }
 
-          // Calculate total items count
           const totalQty = order.items.reduce((sum, item) => sum + (item.qty || 1), 0);
-          const statusTxt = order.status || 'Processing';
+          const statusTxt = capitalizeFirstLetter(order.status);
           
           const card = document.createElement('div');
           card.className = 'order-card';
@@ -328,7 +398,7 @@
                 <div class="order-id">${orderId}</div>
                 <div class="order-date">${formatDate(order.createdAt)}</div>
               </div>
-              <div class="status-pill ${getStatusClass(statusTxt)}">${statusTxt}</div>
+              <div class="status-pill ${getStatusClass(order.status)}">${statusTxt}</div>
             </div>
             <div class="order-body">
               <div class="img-stack">${imgStackHtml}</div>
@@ -345,26 +415,8 @@
 
       } catch (error) {
         console.error("Error fetching orders:", error);
-        
         if (isNewFetch) {
-          // Detect Firebase Index requirement error and extract link
-          const errorStr = error.toString();
-          const urlMatch = errorStr.match(/(https:\/\/console\.firebase\.google\.com[^\s]+)/);
-
-          if (urlMatch) {
-            skeletonContainer.innerHTML = `
-              <div class="index-alert">
-                <div class="index-alert-header">
-                  <svg fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
-                  Database Index Required
-                </div>
-                <div class="index-alert-desc">Firestore requires a composite index to sort your orders. Click the link below to create it automatically.</div>
-                <a href="${urlMatch[0]}" target="_blank" class="btn-index">Open Link & Create Index</a>
-              </div>
-            `;
-          } else {
-            skeletonContainer.innerHTML = `<p style="text-align:center; color: var(--warning); padding: 20px; font-weight: 600;">Failed to load orders.</p>`;
-          }
+          skeletonContainer.innerHTML = `<p style="text-align:center; color: var(--warning); padding: 20px; font-weight: 600;">Failed to load orders.</p>`;
         }
       } finally {
         isFetching = false;
@@ -378,16 +430,14 @@
         fetchOrders(false);
       }
     }, { rootMargin: "100px" });
-    
     observer.observe(sentinel);
 
-    // 3. Side Modal Engine & Hardware Back Support
+    // 3. Side Modal Engine (Layer 1)
     function openSideModal(orderId) {
       if (navigator.vibrate) navigator.vibrate(40);
       const order = allOrdersData[orderId];
       if (!order) return;
 
-      // Build Items HTML
       let itemsHtml = '';
       let calculatedSubTotal = 0;
       order.items.forEach(item => {
@@ -407,26 +457,26 @@
         `;
       });
 
-      // Use explicit DB fields if they exist, otherwise fallback to manual calculations
       const subTotal = order.subTotal !== undefined ? order.subTotal : calculatedSubTotal;
       const deliveryFee = order.deliveryFee !== undefined ? order.deliveryFee : (order.totalAmount - calculatedSubTotal);
-
-      // Safe address check
       const addr = order.deliveryAddress || {};
+      const statusTxt = capitalizeFirstLetter(order.status);
 
-      // Inject Content
       modalContent.innerHTML = `
-        <!-- Status Summary -->
         <div class="detail-card">
           <div class="detail-title">Order Status</div>
           <div style="display: flex; justify-content: space-between; align-items: center;">
             <div style="font-weight: 800; font-size: 16px;">${orderId}</div>
-            <div class="status-pill ${getStatusClass(order.status)}">${order.status || 'Processing'}</div>
+            <div class="status-pill ${getStatusClass(order.status)}">${statusTxt}</div>
           </div>
           <div style="font-size: 13px; color: var(--text-sub); margin-top: 8px;">Placed on: ${formatDate(order.createdAt)}</div>
+          
+          <button class="btn-track" onclick="window.openTrackModal('${orderId}')">
+            <svg fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" /></svg>
+            Track Order
+          </button>
         </div>
 
-        <!-- Items -->
         <div class="detail-card">
           <div class="detail-title">Items Ordered</div>
           <div style="display: flex; flex-direction: column;">
@@ -434,29 +484,15 @@
           </div>
         </div>
 
-        <!-- Price Breakdown -->
         <div class="detail-card">
           <div class="detail-title">Payment Summary</div>
-          <div class="detail-row">
-            <span>Payment Method</span>
-            <span style="font-weight:600;">${order.paymentMethod || 'COD'}</span>
-          </div>
-          <div class="detail-row">
-            <span>Item Total</span>
-            <span>₹${subTotal.toLocaleString('en-IN')}</span>
-          </div>
-          <div class="detail-row">
-            <span>Delivery Fee</span>
-            <span style="color: ${deliveryFee <= 0 ? 'var(--success)' : 'inherit'}; font-weight: ${deliveryFee <= 0 ? '700' : 'normal'};">${deliveryFee <= 0 ? 'FREE' : '₹' + deliveryFee}</span>
-          </div>
-          <div class="detail-row bold">
-            <span>Total Amount</span>
-            <span style="color: var(--primary);">₹${(order.totalAmount || 0).toLocaleString('en-IN')}</span>
-          </div>
+          <div class="detail-row"><span>Payment Method</span><span style="font-weight:600;">${order.paymentMethod || 'COD'}</span></div>
+          <div class="detail-row"><span>Item Total</span><span>₹${subTotal.toLocaleString('en-IN')}</span></div>
+          <div class="detail-row"><span>Delivery Fee</span><span style="color: ${deliveryFee <= 0 ? 'var(--success)' : 'inherit'}; font-weight: ${deliveryFee <= 0 ? '700' : 'normal'};">${deliveryFee <= 0 ? 'FREE' : '₹' + deliveryFee}</span></div>
+          <div class="detail-row bold"><span>Total Amount</span><span style="color: var(--primary);">₹${(order.totalAmount || 0).toLocaleString('en-IN')}</span></div>
           <span class="tax-label">(All taxes included)</span>
         </div>
 
-        <!-- Delivery Address -->
         <div class="detail-card">
           <div class="detail-title">Delivery Address</div>
           <div class="address-text">
@@ -470,33 +506,97 @@
 
       modalBg.classList.add('active');
       sideModal.classList.add('active');
-      isModalOpen = true;
-      history.pushState({ modal: 'order_details' }, '', '');
+      modalStack.push('side');
+      history.pushState({ modal: 'side' }, '');
     }
 
-    function closeModalLogic() {
-      modalBg.classList.remove('active');
-      sideModal.classList.remove('active');
-      isModalOpen = false;
-    }
-
-    function triggerCloseModal() {
-      if (isModalOpen) {
-        history.back();
-      }
-    }
-
-    btnCloseModal.addEventListener('click', () => {
+    // 4. Track Order Bottom Sheet (Layer 2)
+    window.openTrackModal = function(orderId) {
       if (navigator.vibrate) navigator.vibrate(20);
-      triggerCloseModal();
-    });
-    
-    modalBg.addEventListener('click', triggerCloseModal);
+      const order = allOrdersData[orderId];
+      if (!order) return;
 
-    window.addEventListener('popstate', (e) => {
-      if (isModalOpen) {
-        closeModalLogic();
+      const isRejected = (order.status || '').toLowerCase() === 'rejected' || (order.status || '').toLowerCase() === 'cancelled';
+      
+      const steps = [
+        { label: 'Order Placed', time: order.createdAt },
+        { label: 'Approved & Billed', time: order.approvedAt },
+        { label: 'Agent Assigned', time: order.assignedAt },
+        { label: 'Out for Delivery', time: order.outForDeliveryAt },
+        { label: 'Delivered', time: order.deliveredAt }
+      ];
+
+      let timelineHtml = '';
+      let previousActive = true; 
+
+      if (isRejected) {
+        // Red Timeline for Rejection
+        timelineHtml += `
+          <div class="tl-item active">
+            <div class="tl-dot"></div>
+            <div class="tl-content">
+              <div class="tl-title">Order Placed</div>
+              <div class="tl-time">${formatTime(order.createdAt)}</div>
+            </div>
+          </div>
+          <div class="tl-item active rejected">
+            <div class="tl-dot"></div>
+            <div class="tl-content">
+              <div class="tl-title">Order Cancelled / Rejected</div>
+              <div class="tl-time">${formatTime(order.rejectedAt || order.cancelledAt || order.updatedAt)}</div>
+            </div>
+          </div>
+        `;
+      } else {
+        // Standard Green/Blue Timeline
+        steps.forEach((step, index) => {
+          const isActive = !!step.time;
+          const isCurrent = isActive && (index === steps.length - 1 || !steps[index + 1].time);
+          
+          let classes = 'tl-item';
+          if (isActive) classes += ' active';
+          if (isCurrent) classes += ' current';
+
+          timelineHtml += `
+            <div class="${classes}">
+              <div class="tl-dot"></div>
+              <div class="tl-content">
+                <div class="tl-title">${step.label}</div>
+                <div class="tl-time">${isActive ? formatTime(step.time) : 'Pending'}</div>
+              </div>
+            </div>
+          `;
+        });
       }
+
+      trackTimeline.innerHTML = timelineHtml;
+      trackBg.classList.add('active');
+      trackModal.classList.add('active');
+      modalStack.push('track');
+      history.pushState({ modal: 'track' }, '');
+    };
+
+    // 5. Hardware Back Button Routing
+    function closeTopLayer() {
+      const top = modalStack.pop();
+      if (top === 'track') {
+        trackBg.classList.remove('active');
+        trackModal.classList.remove('active');
+      } else if (top === 'side') {
+        modalBg.classList.remove('active');
+        sideModal.classList.remove('active');
+      }
+    }
+
+    window.addEventListener('popstate', () => {
+      if (modalStack.length > 0) closeTopLayer();
+    });
+
+    [btnCloseModal, modalBg, btnCloseTrack, trackBg].forEach(el => {
+      el.addEventListener('click', () => {
+        if (navigator.vibrate) navigator.vibrate(20);
+        if (modalStack.length > 0) history.back();
+      });
     });
 
   </script>
