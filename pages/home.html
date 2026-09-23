@@ -35,9 +35,8 @@
 
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; -webkit-tap-highlight-color: transparent; }
     
-    /* Hide scrollbar globally but keep scrolling functionality */
     ::-webkit-scrollbar { display: none; }
-    html, body, .modal-scroll { -ms-overflow-style: none; scrollbar-width: none; }
+    html, body, .modal-scroll, .horizontal-scroll { -ms-overflow-style: none; scrollbar-width: none; }
 
     body { background-color: var(--bg-color); color: var(--text-main); padding-bottom: 90px; overflow-x: hidden; }
 
@@ -47,25 +46,64 @@
     .hero-banner h2 { font-size: 28px; font-weight: 800; margin-bottom: 4px; letter-spacing: -0.5px; z-index: 1; }
     .hero-banner p { opacity: 0.9; font-size: 15px; font-weight: 500; z-index: 1; }
 
-    /* Two-Column Product Grid */
-    .section-header { display: flex; justify-content: space-between; align-items: center; padding: 0 20px; margin-bottom: 16px; }
-    .section-title { font-size: 18px; font-weight: 700; color: var(--text-main); }
-    .grid-2-col { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; padding: 0 20px; }
+    .section-header { display: flex; justify-content: space-between; align-items: center; padding: 0 20px; margin-bottom: 16px; margin-top: 24px; }
+    .section-title { font-size: 18px; font-weight: 800; color: var(--text-main); }
 
-    /* Product Cards */
+    /* Shared Card Styles */
     .product-card { background: var(--surface-color); border-radius: 16px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03); cursor: pointer; transition: transform 0.2s cubic-bezier(0.32, 0.72, 0, 1), box-shadow 0.2s; display: flex; flex-direction: column; border: 1px solid var(--border); }
     .product-card:active { transform: scale(0.96); box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
     .img-container { width: 100%; aspect-ratio: 1; background: var(--surface-color); position: relative; padding: 12px; }
     .img-container img { width: 100%; height: 100%; object-fit: contain; mix-blend-mode: multiply; }
-    
     @media (prefers-color-scheme: dark) { .img-container img { mix-blend-mode: normal; } }
-
     .card-info { padding: 12px 16px 16px; display: flex; flex-direction: column; flex: 1; background: var(--surface-color); }
     .card-title { font-size: 14px; font-weight: 600; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; margin-bottom: 8px; line-height: 1.4; color: var(--text-main); }
     .card-price { font-size: 17px; font-weight: 800; color: var(--text-main); margin-top: auto; display: flex; align-items: baseline; gap: 2px; }
     
     .card-rating { font-size: 12px; color: var(--success-text); background: var(--success-bg); display: inline-flex; align-items: center; padding: 4px 8px; border-radius: 6px; margin-top: 8px; font-weight: 700; gap: 4px; align-self: flex-start; }
     .card-rating svg { width: 12px; height: 12px; fill: currentColor; }
+
+    /* Section 1 & 5: 2-Column Grid */
+    .grid-2-col { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; padding: 0 20px; }
+
+    /* Section 2: Horizontal Scroll */
+    .horizontal-scroll { display: flex; overflow-x: auto; gap: 16px; padding: 0 20px; scroll-snap-type: x mandatory; }
+    .horizontal-scroll::after { content: ''; padding-right: 4px; } /* padding hack for smooth end scroll */
+    .h-card { flex: 0 0 160px; scroll-snap-align: start; }
+
+    /* Section 3: The Flipkart Featured 4-Grid */
+    .featured-grid-wrap { background: var(--surface-color); margin: 32px 0; position: relative; overflow: hidden; padding: 24px 20px; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+    /* Premium Geometric Blue Background elements */
+    .featured-grid-wrap::before { content: ''; position: absolute; top: -50px; right: -50px; width: 150px; height: 150px; border-radius: 50%; background: radial-gradient(circle, rgba(40, 116, 240, 0.15) 0%, rgba(40, 116, 240, 0) 70%); z-index: 0; }
+    .featured-grid-wrap::after { content: ''; position: absolute; bottom: -30px; left: -30px; width: 100px; height: 100px; border-radius: 50%; background: var(--primary); opacity: 0.05; z-index: 0; }
+    
+    .featured-title { font-size: 20px; font-weight: 800; margin-bottom: 16px; position: relative; z-index: 1; display: flex; align-items: center; gap: 8px; }
+    .featured-title::before { content: ''; display: block; width: 4px; height: 20px; background: var(--primary); border-radius: 4px; }
+    
+    .featured-grid { display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(2, auto); gap: 12px; position: relative; z-index: 1; }
+    
+    /* Slot 8: Main Big Feature (spans 2 cols, 2 rows) */
+    .f-main { grid-column: span 2; grid-row: span 2; }
+    .f-main .img-container { aspect-ratio: 4/5; padding: 20px; }
+    .f-main .card-title { font-size: 16px; -webkit-line-clamp: 3; }
+    .f-main .card-price { font-size: 20px; }
+    
+    /* Slots 9, 10: Side Stack */
+    .f-side { grid-column: span 1; }
+    .f-side .card-info { padding: 8px 12px 12px; }
+    .f-side .card-title { font-size: 12px; margin-bottom: 4px; }
+    .f-side .card-price { font-size: 14px; }
+    .f-side .card-rating { display: none; } /* Hide ratings on tiny cards */
+    
+    /* Slot 11: Bottom Full Width below the side stack */
+    .f-bottom { grid-column: span 3; display: flex; flex-direction: row; align-items: center; padding: 0; }
+    .f-bottom .img-container { width: 100px; aspect-ratio: 1; border-right: 1px solid var(--border); }
+    .f-bottom .card-info { padding: 12px 16px; justify-content: center; }
+
+    /* Section 4: Line-by-Line List */
+    .list-container { display: flex; flex-direction: column; gap: 12px; padding: 0 20px; }
+    .list-card { display: flex; flex-direction: row; align-items: center; padding: 0; height: 120px; }
+    .list-card .img-container { width: 120px; height: 100%; border-right: 1px solid var(--border); }
+    .list-card .card-info { padding: 12px 16px; justify-content: center; }
 
     /* Professional Skeleton Loading */
     .skeleton { background: linear-gradient(90deg, var(--skeleton-base) 25%, var(--skeleton-shine) 50%, var(--skeleton-base) 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 6px; }
@@ -75,34 +113,24 @@
     .sk-title.short { width: 60%; margin-bottom: 16px; }
     .sk-price-box { height: 20px; width: 45%; margin-top: auto; border-radius: 6px; }
 
-    /* Empty State */
-    .empty-state { display: none; flex-direction: column; align-items: center; justify-content: center; padding: 60px 20px; text-align: center; grid-column: span 2; }
-    .empty-state.active { display: flex; }
-    .empty-state svg { width: 80px; height: 80px; color: var(--border); margin-bottom: 16px; }
-    .empty-state h3 { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
-    .empty-state p { color: var(--text-sub); font-size: 14px; line-height: 1.5; }
-
-    /* Slide-Up Product Modal (Native Bottom Sheet) */
+    /* Slide-Up Product Modal */
     .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 999; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; backdrop-filter: blur(4px); }
     .modal-overlay.active { opacity: 1; pointer-events: auto; }
     
     .product-modal { position: fixed; bottom: 0; left: 0; width: 100%; height: 88vh; max-height: 850px; background: var(--bg-color); border-radius: 24px 24px 0 0; z-index: 1000; transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1); display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 -10px 40px rgba(0,0,0,0.2); }
     .product-modal.active { transform: translateY(0); }
     
-    /* Pull indicator for native feel */
     .modal-pull-indicator { width: 40px; height: 4px; background: var(--border); border-radius: 2px; margin: 12px auto; }
-    
     .modal-header { display: flex; justify-content: flex-end; padding: 0 16px 12px; position: absolute; width: 100%; z-index: 10; pointer-events: none; top: 12px; }
     .close-btn { background: rgba(255,255,255,0.9); border: none; width: 36px; height: 36px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.1); pointer-events: auto; backdrop-filter: blur(8px); }
-    
     @media (prefers-color-scheme: dark) { .close-btn { background: rgba(31,41,55,0.9); box-shadow: 0 4px 12px rgba(0,0,0,0.3); } }
-
     .close-btn:active { transform: scale(0.9); }
     .close-btn svg { width: 20px; height: 20px; stroke: var(--text-main); stroke-width: 2.5; }
 
     .modal-scroll { flex: 1; overflow-y: auto; padding-bottom: 100px; }
     .modal-img-wrapper { background: var(--surface-color); padding: 40px 20px 20px; display: flex; justify-content: center; align-items: center; }
     .modal-img { width: 100%; max-width: 300px; aspect-ratio: 1; object-fit: contain; }
+    @media (prefers-color-scheme: light) { .modal-img { mix-blend-mode: multiply; } }
     
     .modal-details { padding: 24px; background: var(--bg-color); }
     .m-title { font-size: 22px; font-weight: 800; margin-bottom: 12px; line-height: 1.3; color: var(--text-main); }
@@ -119,8 +147,6 @@
     /* Notification Toast */
     #toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-100px); background: #137333; color: white; padding: 14px 24px; border-radius: 50px; font-size: 15px; font-weight: 600; opacity: 0; transition: all 0.4s cubic-bezier(0.32, 0.72, 0, 1); z-index: 2000; box-shadow: 0 8px 20px rgba(0,0,0,0.25); display: flex; align-items: center; gap: 10px; width: max-content; }
     #toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
-
-    .hidden { display: none !important; }
   </style>
 </head>
 <body>
@@ -130,56 +156,19 @@
     <p>Premium quality, delivered fast.</p>
   </div>
 
-  <div class="section-header">
-    <h3 class="section-title">New Arrivals</h3>
-  </div>
-
-  <!-- 1. The Grid (Starts with Skeletons) -->
-  <div class="grid-2-col" id="product-grid">
-    <div class="product-card skeleton-card">
-      <div class="skeleton sk-img"></div>
-      <div class="card-info">
-        <div class="skeleton sk-title"></div>
-        <div class="skeleton sk-title short"></div>
-        <div class="skeleton sk-price-box"></div>
-      </div>
-    </div>
-    <div class="product-card skeleton-card">
-      <div class="skeleton sk-img"></div>
-      <div class="card-info">
-        <div class="skeleton sk-title"></div>
-        <div class="skeleton sk-title short"></div>
-        <div class="skeleton sk-price-box"></div>
-      </div>
-    </div>
-    <div class="product-card skeleton-card">
-      <div class="skeleton sk-img"></div>
-      <div class="card-info">
-        <div class="skeleton sk-title"></div>
-        <div class="skeleton sk-title short"></div>
-        <div class="skeleton sk-price-box"></div>
-      </div>
-    </div>
-    <div class="product-card skeleton-card">
-      <div class="skeleton sk-img"></div>
-      <div class="card-info">
-        <div class="skeleton sk-title"></div>
-        <div class="skeleton sk-title short"></div>
-        <div class="skeleton sk-price-box"></div>
-      </div>
-    </div>
+  <!-- Dynamic Content Container -->
+  <div id="homepage-content">
     
-    <!-- Empty State UI -->
-    <div class="empty-state" id="empty-state">
-      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
-      </svg>
-      <h3>Inventory Empty</h3>
-      <p>We are currently updating our catalog.<br>Please check back shortly.</p>
+    <!-- Initial Skeletons while fetching layout -->
+    <div class="section-header"><h3 class="section-title skeleton" style="width: 150px; height: 24px;"></h3></div>
+    <div class="grid-2-col">
+      <div class="product-card skeleton-card"><div class="skeleton sk-img"></div><div class="card-info"><div class="skeleton sk-title"></div><div class="skeleton sk-title short"></div><div class="skeleton sk-price-box"></div></div></div>
+      <div class="product-card skeleton-card"><div class="skeleton sk-img"></div><div class="card-info"><div class="skeleton sk-title"></div><div class="skeleton sk-title short"></div><div class="skeleton sk-price-box"></div></div></div>
     </div>
+
   </div>
 
-  <!-- 2. The Slide-Up Product Modal -->
+  <!-- Slide-Up Product Modal -->
   <div class="modal-overlay" id="modal-bg"></div>
   <div class="product-modal" id="product-modal">
     <div class="modal-pull-indicator"></div>
@@ -215,16 +204,15 @@
 
   <script type="module">
     import { auth, db } from '../config.js';
-    import { collection, query, limit, getDocs, doc, setDoc, increment } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { doc, getDoc, setDoc, increment } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
     import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-    const grid = document.getElementById('product-grid');
-    const emptyState = document.getElementById('empty-state');
+    const contentDiv = document.getElementById('homepage-content');
     
+    // Modal Elements
     const modalBg = document.getElementById('modal-bg');
     const modal = document.getElementById('product-modal');
     const closeModalBtn = document.getElementById('close-modal');
-    
     const mImg = document.getElementById('m-img');
     const mTitle = document.getElementById('m-title');
     const mPrice = document.getElementById('m-price');
@@ -243,61 +231,158 @@
     // SVG Placeholder using theme-compatible colors
     const placeholderImg = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='400' viewBox='0 0 400 400'><rect width='400' height='400' fill='%23f1f3f6'/><path d='M200 160c-22.1 0-40 17.9-40 40s17.9 40 40 40 40-17.9 40-40-17.9-40-40-40zm0 64c-13.2 0-24-10.8-24-24s10.8-24 24-24 24 10.8 24 24-10.8 24-24 24z' fill='%23cccccc'/><path d='M264 120H136c-13.2 0-24 10.8-24 24v112c0 13.2 10.8 24 24 24h128c13.2 0 24-10.8 24-24V144c0-13.2-10.8-24-24-24zm8 136c0 4.4-3.6 8-8 8H136c-4.4 0-8-3.6-8-8V144c0-4.4 3.6-8 8-8h128c4.4 0 8 3.6 8 8v112z' fill='%23cccccc'/></svg>";
 
-    onAuthStateChanged(auth, (user) => {
-      currentUser = user;
-    });
+    // Robust Image Extractor
+    const getProductImage = (prod) => {
+      if (!prod) return placeholderImg;
+      if (prod.images && prod.images.thumbnail) return prod.images.thumbnail;
+      if (prod.image) return prod.image;
+      if (prod.imageUrl) return prod.imageUrl;
+      return placeholderImg;
+    };
 
-    // 1. Fetch & Render Products
-    async function fetchProducts() {
+    onAuthStateChanged(auth, (user) => { currentUser = user; });
+
+    // 1. Core Data Fetching Pipeline
+    async function initCustomerHomepage() {
       try {
-        const q = query(collection(db, "products"), limit(12));
-        const querySnapshot = await getDocs(q);
-        
-        // Remove skeleton loaders
-        const skeletons = grid.querySelectorAll('.skeleton-card');
-        skeletons.forEach(sk => sk.remove());
-
-        if (querySnapshot.empty) {
-          emptyState.classList.add('active');
+        // Step 1: Fetch the layout map (1 read)
+        const layoutDoc = await getDoc(doc(db, "layout", "homepage"));
+        if (!layoutDoc.exists() || !layoutDoc.data().slots) {
+          contentDiv.innerHTML = `<p style="padding:24px; text-align:center; color: var(--text-sub);">Nothing to display right now.</p>`;
           return;
         }
 
-        querySnapshot.forEach((docSnap) => {
-          const p = docSnap.data();
-          p.id = docSnap.id;
-          
-          const imgUrl = (p.images && p.images.thumbnail) ? p.images.thumbnail : placeholderImg;
-          
-          let ratingHtml = '';
-          if (p.ratingCount && p.ratingCount > 0) {
-            const avg = (p.ratingSum / p.ratingCount).toFixed(1);
-            ratingHtml = `<div class="card-rating"><svg viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg> ${avg}</div>`;
-          }
+        const slots = layoutDoc.data().slots;
+        const requiredProductIds = [];
+        
+        // Extract IDs, ignoring nulls
+        for (let i = 1; i <= 16; i++) {
+          if (slots[i]) requiredProductIds.push(slots[i]);
+        }
 
-          const card = document.createElement('div');
-          card.className = 'product-card';
-          card.innerHTML = `
-            <div class="img-container">
-              <img src="${imgUrl}" onerror="this.src='${placeholderImg}'" alt="${p.name}">
-            </div>
-            <div class="card-info">
-              <div class="card-title">${p.name}</div>
-              ${ratingHtml}
-              <div class="card-price">₹${(p.price || 0).toLocaleString('en-IN')}</div>
-            </div>
-          `;
+        if (requiredProductIds.length === 0) {
+          contentDiv.innerHTML = `<p style="padding:24px; text-align:center; color: var(--text-sub);">Our catalog is being updated.</p>`;
+          return;
+        }
 
-          card.addEventListener('click', () => openModal(p, imgUrl));
-          grid.appendChild(card);
+        // Step 2: Batch fetch the actual products
+        const productMap = {};
+        const fetchPromises = requiredProductIds.map(id => getDoc(doc(db, "products", id)));
+        const productDocs = await Promise.all(fetchPromises);
+        
+        productDocs.forEach(d => {
+          if (d.exists()) productMap[d.id] = { id: d.id, ...d.data() };
         });
 
+        // Step 3: Render the 5 layout sections
+        renderDynamicLayout(slots, productMap);
+
       } catch (error) {
-        console.error("Error fetching products:", error);
-        grid.innerHTML = `<p style="padding:24px; text-align:center; color: var(--text-sub); width: 200%; font-weight: 600;">Failed to load products.</p>`;
+        console.error("Layout load failed:", error);
+        contentDiv.innerHTML = `<p style="padding:24px; text-align:center; color: var(--warning);">Failed to load homepage.</p>`;
       }
     }
 
-    // 2. Modal & Mobile Back Button Controls
+    // Builder Helper for a single card HTML
+    function buildCardHtml(product, customClass = '') {
+      if (!product) return ''; // Saftey fallback
+      const imgUrl = getProductImage(product);
+      
+      let ratingHtml = '';
+      if (product.ratingCount && product.ratingCount > 0) {
+        const avg = (product.ratingSum / product.ratingCount).toFixed(1);
+        ratingHtml = `<div class="card-rating"><svg viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg> ${avg}</div>`;
+      }
+
+      // Safe escape for JSON stringification in the onclick handler
+      const prodJson = JSON.stringify(product).replace(/'/g, "&#39;").replace(/"/g, "&quot;");
+
+      return `
+        <div class="product-card ${customClass}" onclick="openModalFromStr('${prodJson}')">
+          <div class="img-container">
+            <img src="${imgUrl}" onerror="this.src='${placeholderImg}'" alt="${product.name}">
+          </div>
+          <div class="card-info">
+            <div class="card-title">${product.name}</div>
+            ${ratingHtml}
+            <div class="card-price">₹${(product.price || 0).toLocaleString('en-IN')}</div>
+          </div>
+        </div>
+      `;
+    }
+
+    window.openModalFromStr = function(jsonStr) {
+      const product = JSON.parse(jsonStr.replace(/&quot;/g, '"').replace(/&#39;/g, "'"));
+      openModal(product, getProductImage(product));
+    };
+
+    // 2. The 5-Part Layout Renderer
+    function renderDynamicLayout(slots, productMap) {
+      let finalHtml = '';
+
+      // Section 1: Slots 1-4 (Top 2-Col Grid)
+      const sec1Products = [1,2,3,4].map(i => productMap[slots[i]]).filter(Boolean);
+      if (sec1Products.length > 0) {
+        finalHtml += `
+          <div class="section-header"><h3 class="section-title">Trending Now</h3></div>
+          <div class="grid-2-col">
+            ${sec1Products.map(p => buildCardHtml(p)).join('')}
+          </div>
+        `;
+      }
+
+      // Section 2: Slots 5-7 (Horizontal Scroll)
+      const sec2Products = [5,6,7].map(i => productMap[slots[i]]).filter(Boolean);
+      if (sec2Products.length > 0) {
+        finalHtml += `
+          <div class="section-header"><h3 class="section-title">Curated For You</h3></div>
+          <div class="horizontal-scroll">
+            ${sec2Products.map(p => buildCardHtml(p, 'h-card')).join('')}
+          </div>
+        `;
+      }
+
+      // Section 3: Slots 8-11 (The Flipkart Grid)
+      const p8 = productMap[slots[8]];
+      const p9 = productMap[slots[9]];
+      const p10 = productMap[slots[10]];
+      const p11 = productMap[slots[11]];
+      
+      if (p8 || p9 || p10 || p11) {
+        finalHtml += `<div class="featured-grid-wrap"><div class="featured-title">Top Picks of the Day</div><div class="featured-grid">`;
+        if (p8) finalHtml += buildCardHtml(p8, 'f-main');
+        if (p9) finalHtml += buildCardHtml(p9, 'f-side');
+        if (p10) finalHtml += buildCardHtml(p10, 'f-side');
+        if (p11) finalHtml += buildCardHtml(p11, 'list-card f-bottom'); // Uses list styling + f-bottom grid span
+        finalHtml += `</div></div>`;
+      }
+
+      // Section 4: Slots 12-14 (Line-by-Line List)
+      const sec4Products = [12,13,14].map(i => productMap[slots[i]]).filter(Boolean);
+      if (sec4Products.length > 0) {
+        finalHtml += `
+          <div class="section-header" style="margin-top:12px;"><h3 class="section-title">Most Wanted</h3></div>
+          <div class="list-container">
+            ${sec4Products.map(p => buildCardHtml(p, 'list-card')).join('')}
+          </div>
+        `;
+      }
+
+      // Section 5: Slots 15-16 (Bottom 2-Col Grid)
+      const sec5Products = [15,16].map(i => productMap[slots[i]]).filter(Boolean);
+      if (sec5Products.length > 0) {
+        finalHtml += `
+          <div class="section-header"><h3 class="section-title">Don't Miss Out</h3></div>
+          <div class="grid-2-col">
+            ${sec5Products.map(p => buildCardHtml(p)).join('')}
+          </div>
+        `;
+      }
+
+      contentDiv.innerHTML = finalHtml;
+    }
+
+    // 3. Modal & Background Lock Logic
     function openModal(product, imgUrl) {
       if (navigator.vibrate) navigator.vibrate(40);
       currentSelectedProduct = product;
@@ -318,6 +403,7 @@
 
       modalBg.classList.add('active');
       modal.classList.add('active');
+      document.body.style.overflow = 'hidden'; // FIX: Lock background scrolling
       
       isModalOpen = true;
       history.pushState({ modal: 'product' }, '', '');
@@ -326,15 +412,14 @@
     function closeModalLogic() {
       modalBg.classList.remove('active');
       modal.classList.remove('active');
+      document.body.style.overflow = ''; // FIX: Restore background scrolling
       isModalOpen = false;
       currentSelectedProduct = null;
       currentImgUrl = null;
     }
 
     function triggerCloseModal() {
-      if (isModalOpen) {
-        history.back(); // Automatically triggers popstate listener
-      }
+      if (isModalOpen) history.back(); 
     }
 
     closeModalBtn.addEventListener('click', () => {
@@ -345,17 +430,12 @@
     modalBg.addEventListener('click', triggerCloseModal);
 
     window.addEventListener('popstate', (e) => {
-      if (isModalOpen) {
-        closeModalLogic();
-      }
+      if (isModalOpen) closeModalLogic();
     });
 
-    // 3. Add to Cart (Deep merge into single map)
+    // 4. E-commerce Actions
     btnAddCart.addEventListener('click', async () => {
-      if (!currentUser) {
-        alert("Please log in to add items to cart.");
-        return;
-      }
+      if (!currentUser) return alert("Please log in to add items to cart.");
       if (!currentSelectedProduct) return;
       if (navigator.vibrate) navigator.vibrate(40);
       
@@ -383,7 +463,6 @@
         btnAddCart.style.background = 'var(--success-bg)';
         btnAddCart.style.color = 'var(--success-text)';
         btnAddCart.style.borderColor = 'var(--success-text)';
-
         toast.classList.add('show');
 
         setTimeout(() => {
@@ -400,12 +479,8 @@
       }
     });
 
-    // 4. Buy Now (Express Session Flow)
     btnBuyNow.addEventListener('click', () => {
-      if (!currentUser) {
-        alert("Please log in to purchase items.");
-        return;
-      }
+      if (!currentUser) return alert("Please log in to purchase items.");
       if (!currentSelectedProduct) return;
       if (navigator.vibrate) navigator.vibrate(40);
       
@@ -426,8 +501,8 @@
       window.parent.document.getElementById('content-frame').src = 'pages/checkout.html';
     });
 
-    // Init
-    fetchProducts();
+    // Boot
+    initCustomerHomepage();
   </script>
 </body>
 </html>
