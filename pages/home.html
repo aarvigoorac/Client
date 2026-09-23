@@ -36,7 +36,7 @@
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; -webkit-tap-highlight-color: transparent; }
     
     ::-webkit-scrollbar { display: none; }
-    html, body, .modal-scroll, .horizontal-scroll { -ms-overflow-style: none; scrollbar-width: none; }
+    html, body, .modal-scroll, .horizontal-scroll, .featured-scroll-container { -ms-overflow-style: none; scrollbar-width: none; }
 
     body { background-color: var(--bg-color); color: var(--text-main); padding-bottom: 90px; overflow-x: hidden; }
 
@@ -67,37 +67,37 @@
 
     /* Section 2: Horizontal Scroll */
     .horizontal-scroll { display: flex; overflow-x: auto; gap: 16px; padding: 0 20px; scroll-snap-type: x mandatory; }
-    .horizontal-scroll::after { content: ''; padding-right: 4px; } /* padding hack for smooth end scroll */
+    .horizontal-scroll::after { content: ''; padding-right: 4px; } 
     .h-card { flex: 0 0 160px; scroll-snap-align: start; }
 
-    /* Section 3: The Flipkart Featured 4-Grid */
-    .featured-grid-wrap { background: var(--surface-color); margin: 32px 0; position: relative; overflow: hidden; padding: 24px 20px; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+    /* Section 3: The Flipkart Featured Bento Swipe */
+    .featured-grid-wrap { background: var(--surface-color); margin: 32px 0; position: relative; overflow: hidden; padding: 24px 0 24px 20px; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
     /* Premium Geometric Blue Background elements */
     .featured-grid-wrap::before { content: ''; position: absolute; top: -50px; right: -50px; width: 150px; height: 150px; border-radius: 50%; background: radial-gradient(circle, rgba(40, 116, 240, 0.15) 0%, rgba(40, 116, 240, 0) 70%); z-index: 0; }
     .featured-grid-wrap::after { content: ''; position: absolute; bottom: -30px; left: -30px; width: 100px; height: 100px; border-radius: 50%; background: var(--primary); opacity: 0.05; z-index: 0; }
     
-    .featured-title { font-size: 20px; font-weight: 800; margin-bottom: 16px; position: relative; z-index: 1; display: flex; align-items: center; gap: 8px; }
+    .featured-title { font-size: 20px; font-weight: 800; margin-bottom: 16px; position: relative; z-index: 1; display: flex; align-items: center; gap: 8px; padding-right: 20px; }
     .featured-title::before { content: ''; display: block; width: 4px; height: 20px; background: var(--primary); border-radius: 4px; }
     
-    .featured-grid { display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(2, auto); gap: 12px; position: relative; z-index: 1; }
+    .featured-scroll-container { overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: 8px; position: relative; z-index: 1; }
+    .featured-grid { display: grid; grid-template-columns: 72vw 40vw 60vw; grid-template-rows: 1fr 1fr; gap: 12px; width: max-content; padding-right: 20px; }
     
-    /* Slot 8: Main Big Feature (spans 2 cols, 2 rows) */
-    .f-main { grid-column: span 2; grid-row: span 2; }
+    /* Slot 8: Main Big Feature */
+    .f-main { grid-column: 1 / 2; grid-row: 1 / 3; scroll-snap-align: start; }
     .f-main .img-container { aspect-ratio: 4/5; padding: 20px; }
     .f-main .card-title { font-size: 16px; -webkit-line-clamp: 3; }
     .f-main .card-price { font-size: 20px; }
     
-    /* Slots 9, 10: Side Stack */
-    .f-side { grid-column: span 1; }
+    /* Slots 9, 10: Stacked Small Cards */
+    .f-side { grid-column: 2 / 3; scroll-snap-align: start; }
     .f-side .card-info { padding: 8px 12px 12px; }
-    .f-side .card-title { font-size: 12px; margin-bottom: 4px; }
-    .f-side .card-price { font-size: 14px; }
-    .f-side .card-rating { display: none; } /* Hide ratings on tiny cards */
+    .f-side .card-title { font-size: 13px; margin-bottom: 4px; }
+    .f-side .card-price { font-size: 15px; }
+    .f-side .card-rating { display: none; }
     
-    /* Slot 11: Bottom Full Width below the side stack */
-    .f-bottom { grid-column: span 3; display: flex; flex-direction: row; align-items: center; padding: 0; }
-    .f-bottom .img-container { width: 100px; aspect-ratio: 1; border-right: 1px solid var(--border); }
-    .f-bottom .card-info { padding: 12px 16px; justify-content: center; }
+    /* Slot 11: End Banner Card */
+    .f-banner { grid-column: 3 / 4; grid-row: 1 / 3; scroll-snap-align: start; }
+    .f-banner .img-container { aspect-ratio: 1; padding: 16px; }
 
     /* Section 4: Line-by-Line List */
     .list-container { display: flex; flex-direction: column; gap: 12px; padding: 0 20px; }
@@ -113,17 +113,21 @@
     .sk-title.short { width: 60%; margin-bottom: 16px; }
     .sk-price-box { height: 20px; width: 45%; margin-top: auto; border-radius: 6px; }
 
-    /* Slide-Up Product Modal */
+    /* Slide-Up Product Modal (Native Bottom Sheet) */
     .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 999; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; backdrop-filter: blur(4px); }
     .modal-overlay.active { opacity: 1; pointer-events: auto; }
     
     .product-modal { position: fixed; bottom: 0; left: 0; width: 100%; height: 88vh; max-height: 850px; background: var(--bg-color); border-radius: 24px 24px 0 0; z-index: 1000; transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1); display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 -10px 40px rgba(0,0,0,0.2); }
     .product-modal.active { transform: translateY(0); }
     
+    /* Pull indicator for native feel */
     .modal-pull-indicator { width: 40px; height: 4px; background: var(--border); border-radius: 2px; margin: 12px auto; }
+    
     .modal-header { display: flex; justify-content: flex-end; padding: 0 16px 12px; position: absolute; width: 100%; z-index: 10; pointer-events: none; top: 12px; }
     .close-btn { background: rgba(255,255,255,0.9); border: none; width: 36px; height: 36px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.1); pointer-events: auto; backdrop-filter: blur(8px); }
+    
     @media (prefers-color-scheme: dark) { .close-btn { background: rgba(31,41,55,0.9); box-shadow: 0 4px 12px rgba(0,0,0,0.3); } }
+
     .close-btn:active { transform: scale(0.9); }
     .close-btn svg { width: 20px; height: 20px; stroke: var(--text-main); stroke-width: 2.5; }
 
@@ -159,8 +163,47 @@
   <!-- Dynamic Content Container -->
   <div id="homepage-content">
     
-    <!-- Initial Skeletons while fetching layout -->
-    <div class="section-header"><h3 class="section-title skeleton" style="width: 150px; height: 24px;"></h3></div>
+    <!-- High-Fidelity Master Skeletons -->
+    <!-- Section 1 (Grid) -->
+    <div class="section-header"><h3 class="section-title skeleton" style="width: 140px; height: 20px; border-radius: 4px;"></h3></div>
+    <div class="grid-2-col">
+      <div class="product-card skeleton-card"><div class="skeleton sk-img"></div><div class="card-info"><div class="skeleton sk-title"></div><div class="skeleton sk-title short"></div><div class="skeleton sk-price-box"></div></div></div>
+      <div class="product-card skeleton-card"><div class="skeleton sk-img"></div><div class="card-info"><div class="skeleton sk-title"></div><div class="skeleton sk-title short"></div><div class="skeleton sk-price-box"></div></div></div>
+      <div class="product-card skeleton-card"><div class="skeleton sk-img"></div><div class="card-info"><div class="skeleton sk-title"></div><div class="skeleton sk-title short"></div><div class="skeleton sk-price-box"></div></div></div>
+      <div class="product-card skeleton-card"><div class="skeleton sk-img"></div><div class="card-info"><div class="skeleton sk-title"></div><div class="skeleton sk-title short"></div><div class="skeleton sk-price-box"></div></div></div>
+    </div>
+    
+    <!-- Section 2 (Horizontal Scroll) -->
+    <div class="section-header"><h3 class="section-title skeleton" style="width: 160px; height: 20px; border-radius: 4px;"></h3></div>
+    <div class="horizontal-scroll">
+      <div class="product-card h-card skeleton-card"><div class="skeleton sk-img"></div><div class="card-info"><div class="skeleton sk-title"></div><div class="skeleton sk-title short"></div><div class="skeleton sk-price-box"></div></div></div>
+      <div class="product-card h-card skeleton-card"><div class="skeleton sk-img"></div><div class="card-info"><div class="skeleton sk-title"></div><div class="skeleton sk-title short"></div><div class="skeleton sk-price-box"></div></div></div>
+      <div class="product-card h-card skeleton-card"><div class="skeleton sk-img"></div><div class="card-info"><div class="skeleton sk-title"></div><div class="skeleton sk-title short"></div><div class="skeleton sk-price-box"></div></div></div>
+    </div>
+
+    <!-- Section 3 (Bento Swipe Grid) -->
+    <div class="featured-grid-wrap">
+      <div class="featured-title"><div class="skeleton" style="width: 180px; height: 24px; border-radius: 4px;"></div></div>
+      <div class="featured-scroll-container">
+        <div class="featured-grid">
+          <div class="product-card f-main skeleton-card"><div class="skeleton sk-img" style="aspect-ratio: 4/5;"></div><div class="card-info"><div class="skeleton sk-title"></div><div class="skeleton sk-title short"></div><div class="skeleton sk-price-box"></div></div></div>
+          <div class="product-card f-side skeleton-card"><div class="skeleton sk-img"></div><div class="card-info"><div class="skeleton sk-title"></div><div class="skeleton sk-price-box" style="height:14px; margin-top:8px;"></div></div></div>
+          <div class="product-card f-side skeleton-card"><div class="skeleton sk-img"></div><div class="card-info"><div class="skeleton sk-title"></div><div class="skeleton sk-price-box" style="height:14px; margin-top:8px;"></div></div></div>
+          <div class="product-card f-banner skeleton-card"><div class="skeleton sk-img"></div><div class="card-info"><div class="skeleton sk-title"></div><div class="skeleton sk-title short"></div><div class="skeleton sk-price-box"></div></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 4 (List) -->
+    <div class="section-header" style="margin-top:12px;"><h3 class="section-title skeleton" style="width: 130px; height: 20px; border-radius: 4px;"></h3></div>
+    <div class="list-container">
+      <div class="product-card list-card skeleton-card"><div class="skeleton sk-img" style="width: 120px; height: 100%;"></div><div class="card-info" style="justify-content:center;"><div class="skeleton sk-title"></div><div class="skeleton sk-title short"></div><div class="skeleton sk-price-box"></div></div></div>
+      <div class="product-card list-card skeleton-card"><div class="skeleton sk-img" style="width: 120px; height: 100%;"></div><div class="card-info" style="justify-content:center;"><div class="skeleton sk-title"></div><div class="skeleton sk-title short"></div><div class="skeleton sk-price-box"></div></div></div>
+      <div class="product-card list-card skeleton-card"><div class="skeleton sk-img" style="width: 120px; height: 100%;"></div><div class="card-info" style="justify-content:center;"><div class="skeleton sk-title"></div><div class="skeleton sk-title short"></div><div class="skeleton sk-price-box"></div></div></div>
+    </div>
+    
+    <!-- Section 5 (Grid) -->
+    <div class="section-header"><h3 class="section-title skeleton" style="width: 150px; height: 20px; border-radius: 4px;"></h3></div>
     <div class="grid-2-col">
       <div class="product-card skeleton-card"><div class="skeleton sk-img"></div><div class="card-info"><div class="skeleton sk-title"></div><div class="skeleton sk-title short"></div><div class="skeleton sk-price-box"></div></div></div>
       <div class="product-card skeleton-card"><div class="skeleton sk-img"></div><div class="card-info"><div class="skeleton sk-title"></div><div class="skeleton sk-title short"></div><div class="skeleton sk-price-box"></div></div></div>
@@ -285,7 +328,7 @@
 
     // Builder Helper for a single card HTML
     function buildCardHtml(product, customClass = '') {
-      if (!product) return ''; // Saftey fallback
+      if (!product) return ''; // Safety fallback
       const imgUrl = getProductImage(product);
       
       let ratingHtml = '';
@@ -342,19 +385,24 @@
         `;
       }
 
-      // Section 3: Slots 8-11 (The Flipkart Grid)
+      // Section 3: Slots 8-11 (The Flipkart Bento Swipe)
       const p8 = productMap[slots[8]];
       const p9 = productMap[slots[9]];
       const p10 = productMap[slots[10]];
       const p11 = productMap[slots[11]];
       
       if (p8 || p9 || p10 || p11) {
-        finalHtml += `<div class="featured-grid-wrap"><div class="featured-title">Top Picks of the Day</div><div class="featured-grid">`;
+        finalHtml += `<div class="featured-grid-wrap">
+                        <div class="featured-title">Top Picks of the Day</div>
+                        <div class="featured-scroll-container">
+                          <div class="featured-grid">`;
         if (p8) finalHtml += buildCardHtml(p8, 'f-main');
         if (p9) finalHtml += buildCardHtml(p9, 'f-side');
         if (p10) finalHtml += buildCardHtml(p10, 'f-side');
-        if (p11) finalHtml += buildCardHtml(p11, 'list-card f-bottom'); // Uses list styling + f-bottom grid span
-        finalHtml += `</div></div>`;
+        if (p11) finalHtml += buildCardHtml(p11, 'f-banner');
+        finalHtml += `    </div>
+                        </div>
+                      </div>`;
       }
 
       // Section 4: Slots 12-14 (Line-by-Line List)
@@ -389,6 +437,7 @@
       currentImgUrl = imgUrl;
       
       mImg.src = imgUrl;
+      mImg.onerror = function() { this.src = placeholderImg; };
       mTitle.innerText = product.name;
       mPrice.innerText = `₹${(product.price || 0).toLocaleString('en-IN')}`;
       mDesc.innerText = product.description || "Detailed description coming soon.";
@@ -403,7 +452,7 @@
 
       modalBg.classList.add('active');
       modal.classList.add('active');
-      document.body.style.overflow = 'hidden'; // FIX: Lock background scrolling
+      document.body.style.overflowY = 'hidden'; // Perfectly lock background scrolling
       
       isModalOpen = true;
       history.pushState({ modal: 'product' }, '', '');
@@ -412,7 +461,7 @@
     function closeModalLogic() {
       modalBg.classList.remove('active');
       modal.classList.remove('active');
-      document.body.style.overflow = ''; // FIX: Restore background scrolling
+      document.body.style.overflowY = ''; // Restore background scrolling
       isModalOpen = false;
       currentSelectedProduct = null;
       currentImgUrl = null;
