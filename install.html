@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#202124" media="(prefers-color-scheme: dark)">
+  <title>Aarvi Stores - Apps on Google Play</title>
+  
+  <link rel="manifest" href="./manifest.json">
+  
+  <style>
+    :root {
+      --bg-color: #ffffff;
+      --surface-color: #ffffff;
+      --text-main: #202124;
+      --text-sub: #5f6368;
+      --border: #e8eaed;
+      --play-green: #01875f;
+      --play-green-hover: #017955;
+      --play-green-light: #e6f4ea;
+      --star-color: #01875f;
+      --skeleton-base: #f1f3f6;
+      --skeleton-shine: #ffffff;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg-color: #202124;
+        --surface-color: #202124;
+        --text-main: #e8eaed;
+        --text-sub: #9aa0a6;
+        --border: #3c4043;
+        --play-green: #81c995;
+        --play-green-hover: #1e8e3e;
+        --play-green-light: #1e3a29;
+        --star-color: #81c995;
+        --skeleton-base: #333333;
+        --skeleton-shine: #444444;
+      }
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Google Sans', Roboto, Arial, sans-serif; -webkit-tap-highlight-color: transparent; }
+    ::-webkit-scrollbar { display: none; }
+    html, body { -ms-overflow-style: none; scrollbar-width: none; background-color: var(--bg-color); color: var(--text-main); width: 100vw; overflow-x: hidden; }
+
+    /* --- Navbar --- */
+    .top-nav { position: sticky; top: 0; background: var(--bg-color); height: 56px; display: flex; justify-content: space-between; align-items: center; padding: 0 16px; z-index: 50; }
+    .nav-left, .nav-right { display: flex; align-items: center; gap: 16px; }
+    .icon-btn { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: transparent; border: none; cursor: pointer; color: var(--text-main); transition: background 0.2s; }
+    .icon-btn:active { background: var(--border); }
+    .icon-btn svg { width: 24px; height: 24px; fill: currentColor; }
+    .store-logo { height: 24px; opacity: 0.9; }
+
+    .container { max-width: 800px; margin: 0 auto; padding: 0 24px 80px 24px; display: flex; flex-direction: column; }
+
+    /* --- App Header Section --- */
+    .app-header { display: flex; gap: 24px; margin-top: 16px; align-items: flex-start; }
+    .app-icon { width: 96px; height: 96px; border-radius: 20%; box-shadow: 0 1px 4px rgba(0,0,0,0.1); object-fit: contain; background: var(--surface-color); border: 1px solid var(--border); }
+    .app-info { flex: 1; display: flex; flex-direction: column; }
+    .app-title { font-size: 24px; font-weight: 500; color: var(--text-main); line-height: 1.2; margin-bottom: 4px; letter-spacing: -0.5px; }
+    .app-dev { font-size: 16px; font-weight: 500; color: var(--play-green); margin-bottom: 4px; }
+    .app-contains { font-size: 12px; color: var(--text-sub); }
+
+    /* --- Stats Row --- */
+    .stats-row { display: flex; justify-content: space-around; margin: 24px 0; padding: 0 16px; text-align: center; }
+    .stat-item { display: flex; flex-direction: column; align-items: center; gap: 4px; position: relative; flex: 1; }
+    .stat-item:not(:last-child)::after { content: ''; position: absolute; right: 0; top: 10%; height: 80%; width: 1px; background: var(--border); }
+    .stat-val { font-size: 14px; font-weight: 700; color: var(--text-main); display: flex; align-items: center; gap: 2px; }
+    .stat-val svg { width: 12px; height: 12px; fill: var(--text-main); }
+    .stat-lbl { font-size: 12px; color: var(--text-sub); font-weight: 400; }
+
+    /* --- Install Button System --- */
+    .install-container { margin: 8px 0 24px 0; position: relative; width: 100%; }
+    .btn-install { width: 100%; height: 48px; border-radius: 24px; font-size: 15px; font-weight: 600; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; letter-spacing: 0.5px; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); user-select: none; }
+    
+    .btn-install.primary { background: var(--play-green); color: white; }
+    @media (prefers-color-scheme: dark) { .btn-install.primary { color: #000000; } }
+    .btn-install.primary:active { transform: scale(0.97); filter: brightness(0.9); }
+    
+    .btn-install.installed { background: transparent; color: var(--play-green); border: 1px solid var(--border); pointer-events: none; }
+    
+    .btn-install.instagram { background: transparent; color: var(--play-green); border: 1px solid var(--play-green); }
+    .btn-install.instagram:active { background: var(--play-green-light); transform: scale(0.97); }
+
+    /* Fake Progress Bar Overlay */
+    .progress-track { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 24px; background: var(--border); overflow: hidden; display: none; pointer-events: none; }
+    .progress-track.active { display: block; }
+    .progress-fill { position: absolute; top: 0; left: 0; height: 100%; width: 0%; background: var(--play-green); animation: installProgress 3s cubic-bezier(0.1, 0.7, 0.1, 1) forwards; opacity: 0.2; }
+    @keyframes installProgress { 0% { width: 0%; } 20% { width: 15%; } 50% { width: 45%; } 80% { width: 85%; } 100% { width: 100%; } }
+    .install-text { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 600; color: var(--play-green); display: none; z-index: 2; pointer-events: none; }
+    .install-text.active { display: flex; }
+
+    /* --- Image Slider --- */
+    .screenshots-wrapper { display: flex; overflow-x: auto; gap: 12px; padding: 4px 0 16px 0; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; scroll-behavior: smooth; }
+    .screenshot { height: 280px; width: auto; border-radius: 12px; box-shadow: 0 1px 4px rgba(0,0,0,0.15); scroll-snap-align: center; cursor: pointer; transition: transform 0.1s; border: 1px solid var(--border); }
+    .screenshot:active { transform: scale(0.98); }
+
+    /* --- About Section --- */
+    .section-header { display: flex; justify-content: space-between; align-items: center; margin: 24px 0 16px 0; }
+    .section-title { font-size: 18px; font-weight: 500; color: var(--text-main); }
+    .arrow-icon { width: 24px; height: 24px; fill: var(--text-main); }
+    
+    .about-text { font-size: 14px; color: var(--text-sub); line-height: 1.5; white-space: pre-line; }
+    
+    .tags-container { display: flex; gap: 12px; margin-top: 16px; overflow-x: auto; padding-bottom: 8px; }
+    .tag { padding: 6px 16px; border: 1px solid var(--border); border-radius: 50px; font-size: 13px; font-weight: 500; color: var(--text-sub); white-space: nowrap; }
+
+    /* --- Ratings & Reviews --- */
+    .rating-hero { display: flex; align-items: center; gap: 24px; margin-top: 16px; }
+    .rating-big { font-size: 48px; font-weight: 400; color: var(--text-main); line-height: 1; display: flex; flex-direction: column; }
+    .stars { display: flex; color: var(--star-color); margin-top: 4px; }
+    .stars svg { width: 14px; height: 14px; fill: currentColor; }
+    .rating-count { font-size: 12px; color: var(--text-sub); margin-top: 2px; }
+    
+    .rating-bars { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+    .bar-row { display: flex; align-items: center; gap: 8px; font-size: 11px; color: var(--text-sub); font-weight: 500; }
+    .bar-track { flex: 1; height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; }
+    .bar-fill { height: 100%; background: var(--play-green); border-radius: 4px; }
+
+    /* --- Fullscreen Image Viewer Modal --- */
+    .viewer-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #000000; z-index: 9999; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; display: flex; flex-direction: column; }
+    .viewer-overlay.active { opacity: 1; pointer-events: auto; }
+    
+    .viewer-header { display: flex; justify-content: flex-start; padding: 16px; position: absolute; top: 0; left: 0; width: 100%; z-index: 10000; }
+    .btn-close-viewer { background: rgba(255,255,255,0.1); border: none; color: white; width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; backdrop-filter: blur(5px); }
+    .btn-close-viewer svg { width: 24px; height: 24px; fill: white; }
+    
+    .viewer-content { flex: 1; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; }
+    .viewer-img { max-width: 100%; max-height: 90vh; object-fit: contain; transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s; }
+    
+    .touch-zone { position: absolute; top: 0; height: 100%; width: 40%; z-index: 1000; }
+    .touch-left { left: 0; }
+    .touch-right { right: 0; }
+    
+    .viewer-counter { position: absolute; bottom: 32px; left: 50%; transform: translateX(-50%); color: white; font-size: 14px; font-weight: 500; background: rgba(0,0,0,0.5); padding: 6px 16px; border-radius: 50px; letter-spacing: 1px; }
+
+  </style>
+</head>
+<body>
+
+  <!-- Google Play Style Navbar -->
+  <nav class="top-nav">
+    <div class="nav-left">
+      <button class="icon-btn" onclick="history.back()"><svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg></button>
+      <svg class="store-logo" viewBox="0 0 40 40" fill="none"><path d="M19.7 0a19.7 19.7 0 100 39.4 19.7 19.7 0 000-39.4zm8.6 15.3l-13.4 7.6-5.8-3.3 11-10.7a1.6 1.6 0 012.3 0l5.9 6.4zm-14.7 9l5.3 3 1.3-2.3-6.6-3.8zm15.4-8.8l-1.3 2.3-15.5-8.9 1.4-2.3 15.4 8.9z" fill="var(--text-main)"/></svg>
+    </div>
+    <div class="nav-right">
+      <button class="icon-btn"><svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0016 9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg></button>
+      <button class="icon-btn"><svg viewBox="0 0 24 24"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg></button>
+    </div>
+  </nav>
+
+  <div class="container">
+    
+    <!-- Header -->
+    <div class="app-header">
+      <img src="images/icon.png" alt="Aarvi Stores" class="app-icon" onerror="this.src='https://via.placeholder.com/96'">
+      <div class="app-info">
+        <h1 class="app-title">Aarvi Stores</h1>
+        <div class="app-dev">Aarvi Superstore</div>
+        <div class="app-contains">Contains ads • In-app purchases</div>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-row">
+      <div class="stat-item">
+        <div class="stat-val">4.8 <svg viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg></div>
+        <div class="stat-lbl">98K reviews</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-val">10M+</div>
+        <div class="stat-lbl">Downloads</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-val"><svg viewBox="0 0 24 24" style="width:16px;height:16px"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg></div>
+        <div class="stat-lbl">Rated for 3+</div>
+      </div>
+    </div>
+
+    <!-- Action Button Area -->
+    <div class="install-container">
+      <button class="btn-install primary" id="btn-main-action">Install</button>
+      
+      <!-- Fake Progress Bar for UI -->
+      <div class="progress-track" id="progress-track"><div class="progress-fill"></div></div>
+      <div class="install-text" id="install-text">Installing...</div>
+    </div>
+
+    <!-- Image Gallery -->
+    <div class="screenshots-wrapper" id="screenshots-container">
+      <img src="images/demo/1.png" class="screenshot" alt="Screenshot 1" onclick="openViewer(1)">
+      <img src="images/demo/2.png" class="screenshot" alt="Screenshot 2" onclick="openViewer(2)">
+      <img src="images/demo/3.png" class="screenshot" alt="Screenshot 3" onclick="openViewer(3)">
+      <img src="images/demo/4.png" class="screenshot" alt="Screenshot 4" onclick="openViewer(4)">
+      <img src="images/demo/5.png" class="screenshot" alt="Screenshot 5" onclick="openViewer(5)">
+      <img src="images/demo/6.png" class="screenshot" alt="Screenshot 6" onclick="openViewer(6)">
+      <img src="images/demo/7.png" class="screenshot" alt="Screenshot 7" onclick="openViewer(7)">
+    </div>
+
+    <!-- About Section -->
+    <div class="section-header">
+      <h2 class="section-title">About this app</h2>
+      <svg class="arrow-icon" viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/></svg>
+    </div>
+    <div class="about-text">
+      Fast and seamless e-commerce experience right at your fingertips. Aarvi Stores brings the entire supermarket to your door.
+      
+      • Real-time stock synchronization
+      • Lightning-fast checkout process
+      • Live delivery tracking
+      • Exclusive daily discounts and membership perks
+      
+      Join 10 million+ happy customers and revolutionize your grocery shopping today. Built for speed, optimized for you.
+    </div>
+
+    <div class="tags-container">
+      <div class="tag">#1 Top Free in Shopping</div>
+      <div class="tag">Groceries</div>
+      <div class="tag">E-commerce</div>
+    </div>
+
+    <!-- Ratings Section -->
+    <div class="section-header" style="margin-top: 32px;">
+      <h2 class="section-title">Ratings and reviews</h2>
+      <svg class="arrow-icon" viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/></svg>
+    </div>
+    <div class="rating-hero">
+      <div class="rating-big">
+        4.8
+        <div class="stars">
+          <svg viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+          <svg viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+          <svg viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+          <svg viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+          <svg viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+        </div>
+        <span class="rating-count">98,241</span>
+      </div>
+      <div class="rating-bars">
+        <div class="bar-row"><span>5</span><div class="bar-track"><div class="bar-fill" style="width: 85%;"></div></div></div>
+        <div class="bar-row"><span>4</span><div class="bar-track"><div class="bar-fill" style="width: 10%;"></div></div></div>
+        <div class="bar-row"><span>3</span><div class="bar-track"><div class="bar-fill" style="width: 3%;"></div></div></div>
+        <div class="bar-row"><span>2</span><div class="bar-track"><div class="bar-fill" style="width: 1%;"></div></div></div>
+        <div class="bar-row"><span>1</span><div class="bar-track"><div class="bar-fill" style="width: 1%;"></div></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Fullscreen Image Viewer Modal -->
+  <div class="viewer-overlay" id="viewer-modal">
+    <div class="viewer-header">
+      <button class="btn-close-viewer" id="btn-close-viewer">
+        <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+      </button>
+    </div>
+    <div class="viewer-content">
+      <div class="touch-zone touch-left" onclick="changeViewerImg(-1)"></div>
+      <img src="" class="viewer-img" id="viewer-main-img">
+      <div class="touch-zone touch-right" onclick="changeViewerImg(1)"></div>
+    </div>
+    <div class="viewer-counter" id="viewer-counter">1 / 7</div>
+  </div>
+
+  <script>
+    // 1. Service Worker Registration
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').catch(()=>{});
+      });
+    }
+
+    // 2. Logic & State
+    const btnAction = document.getElementById('btn-main-action');
+    const progressTrack = document.getElementById('progress-track');
+    const installText = document.getElementById('install-text');
+    let deferredPrompt = null;
+    let isAppInstalled = false;
+
+    const vibrate = (ms) => { if (navigator.vibrate) navigator.vibrate(ms); };
+
+    // Detect Environment
+    const ua = navigator.userAgent || navigator.vendor || window.opera;
+    const isInstagramOrFB = (ua.indexOf('Instagram') > -1) || (ua.indexOf('FBAN') > -1) || (ua.indexOf('FBAV') > -1);
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+
+    // Initialization
+    if (isStandalone) {
+      setInstalledState();
+    } else if (isInstagramOrFB) {
+      btnAction.innerText = "Open in Chrome";
+      btnAction.className = "btn-install instagram";
+      btnAction.onclick = () => {
+        vibrate(20);
+        alert('Tap the 3 dots in the top right corner and select "Open in System Browser" or "Open in Chrome" to install the app.');
+      };
+    } else {
+      // Normal Web Browser Context
+      btnAction.onclick = triggerInstallSequence;
+      
+      window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        btnAction.innerText = "Install";
+        btnAction.disabled = false;
+      });
+
+      window.addEventListener('appinstalled', () => {
+        setInstalledState();
+      });
+    }
+
+    // 3. The 3-Second Install Illusion & Trigger
+    async function triggerInstallSequence() {
+      vibrate(20);
+      
+      // If we have a real PWA prompt, show it first
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        deferredPrompt = null;
+        if (outcome !== 'accepted') return; // User cancelled
+      }
+
+      // Start Fake "Installing..." Loader Sequence
+      btnAction.style.display = 'none';
+      progressTrack.classList.add('active');
+      installText.classList.add('active');
+
+      // Wait 3 seconds for bar to fill
+      setTimeout(() => {
+        progressTrack.classList.remove('active');
+        installText.classList.remove('active');
+        btnAction.style.display = 'flex';
+        setInstalledState();
+        vibrate([30, 50, 30]); // Success haptic
+      }, 3000);
+    }
+
+    function setInstalledState() {
+      isAppInstalled = true;
+      btnAction.innerText = "Installed";
+      btnAction.className = "btn-install installed";
+      btnAction.onclick = null;
+    }
+
+    // 4. Hardware-Back Supported Fullscreen Image Viewer
+    const viewerModal = document.getElementById('viewer-modal');
+    const viewerImg = document.getElementById('viewer-main-img');
+    const viewerCounter = document.getElementById('viewer-counter');
+    let currentImgIndex = 1;
+    const totalImgs = 7;
+    let isViewerOpen = false;
+
+    window.openViewer = function(index) {
+      vibrate(15);
+      currentImgIndex = index;
+      updateViewerUI();
+      
+      viewerModal.classList.add('active');
+      document.body.style.overflow = 'hidden'; // lock background scroll
+      isViewerOpen = true;
+      
+      // Push state for hardware back button
+      history.pushState({ modal: 'viewer' }, '');
+    };
+
+    window.changeViewerImg = function(direction) {
+      vibrate(10);
+      let newIndex = currentImgIndex + direction;
+      if (newIndex < 1) newIndex = totalImgs;
+      if (newIndex > totalImgs) newIndex = 1;
+      
+      // Slight fade animation effect
+      viewerImg.style.opacity = '0.5';
+      viewerImg.style.transform = `scale(0.98) translateX(${direction * 10}px)`;
+      
+      setTimeout(() => {
+        currentImgIndex = newIndex;
+        updateViewerUI();
+        viewerImg.style.opacity = '1';
+        viewerImg.style.transform = 'scale(1) translateX(0)';
+      }, 150);
+    };
+
+    function updateViewerUI() {
+      viewerImg.src = `images/demo/${currentImgIndex}.png`;
+      viewerCounter.innerText = `${currentImgIndex} / ${totalImgs}`;
+    }
+
+    function closeViewer() {
+      viewerModal.classList.remove('active');
+      document.body.style.overflow = ''; 
+      isViewerOpen = false;
+    }
+
+    // Bind Close Actions
+    document.getElementById('btn-close-viewer').addEventListener('click', () => {
+      vibrate(10);
+      if (isViewerOpen) history.back();
+    });
+
+    window.addEventListener('popstate', (e) => {
+      if (isViewerOpen) closeViewer();
+    });
+
+    // Fallback error handler for demo images
+    document.querySelectorAll('.screenshot').forEach(img => {
+      img.onerror = function() {
+        this.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="140" height="280" viewBox="0 0 140 280"><rect width="140" height="280" fill="%23f1f3f6"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-size="14" fill="%23999">Preview</text></svg>';
+      };
+    });
+  </script>
+</body>
+</html>
