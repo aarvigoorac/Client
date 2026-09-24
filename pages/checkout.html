@@ -107,6 +107,23 @@
     
     .spinner { animation: spin 1s linear infinite; width: 20px; height: 20px; stroke: currentColor; display: none; }
     @keyframes spin { 100% { transform: rotate(360deg); } }
+
+    /* Custom Confirmation Modal (Hardware Back Supported) */
+    .confirm-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 3000; opacity: 0; pointer-events: none; transition: opacity 0.2s; backdrop-filter: blur(4px); }
+    .confirm-overlay.active { opacity: 1; pointer-events: auto; }
+    
+    .confirm-modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.95); background: var(--surface-color); width: 90%; max-width: 320px; border-radius: 20px; padding: 24px; z-index: 3001; opacity: 0; pointer-events: none; transition: all 0.2s cubic-bezier(0.32, 0.72, 0, 1); box-shadow: 0 10px 40px rgba(0,0,0,0.2); text-align: center; }
+    .confirm-modal.active { opacity: 1; transform: translate(-50%, -50%) scale(1); pointer-events: auto; }
+    
+    .confirm-title { font-size: 18px; font-weight: 800; color: var(--text-main); margin-bottom: 8px; }
+    .confirm-desc { font-size: 14px; color: var(--text-sub); margin-bottom: 24px; line-height: 1.5; }
+    .confirm-actions { display: flex; gap: 12px; }
+    
+    .confirm-btn { flex: 1; padding: 12px; border-radius: 12px; font-size: 15px; font-weight: 700; cursor: pointer; border: none; transition: transform 0.1s; }
+    .confirm-btn:active { transform: scale(0.96); }
+    .confirm-btn.cancel { background: var(--skeleton-base); color: var(--text-main); }
+    .confirm-btn.remove { background: var(--danger); color: white; box-shadow: 0 4px 12px rgba(211, 47, 47, 0.25); }
+
   </style>
 </head>
 <body>
@@ -209,6 +226,17 @@
     </button>
   </div>
 
+  <!-- HTML Native Confirmation Modal -->
+  <div class="confirm-overlay" id="confirm-overlay"></div>
+  <div class="confirm-modal" id="confirm-modal">
+    <div class="confirm-title">Remove Item?</div>
+    <div class="confirm-desc">Are you sure you want to remove this item from your order?</div>
+    <div class="confirm-actions">
+      <button class="confirm-btn cancel" id="confirm-cancel">Cancel</button>
+      <button class="confirm-btn remove" id="confirm-remove">Remove</button>
+    </div>
+  </div>
+
   <script type="module">
     import { auth, db } from '../config.js';
     import { doc, getDoc, setDoc, deleteField, updateDoc, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
@@ -229,6 +257,12 @@
     const btnSpinner = document.getElementById('btn-spinner');
     const minOrderWarning = document.getElementById('min-order-warning');
 
+    // Confirm Modal Elements
+    const confirmOverlay = document.getElementById('confirm-overlay');
+    const confirmModal = document.getElementById('confirm-modal');
+    const confirmCancelBtn = document.getElementById('confirm-cancel');
+    const confirmRemoveBtn = document.getElementById('confirm-remove');
+
     let currentUser = null;
     let orderPayload = [];
     let orderSource = '';
@@ -240,6 +274,10 @@
     let liveProducts = {};
     let hasStockError = false;
     let liveSubscriptions = [];
+
+    // Modal State
+    let isConfirmOpen = false;
+    let itemToRemoveId = null;
 
     // 1. Isolate the View
     function toggleParentBottomNav(show) {
@@ -300,7 +338,62 @@
       });
     }
 
-    // 4. Quantity Editor Logic
+    // 4. Custom Confirmation Modal Controls
+    function openConfirmModal(id) {
+      if (navigator.vibrate) navigator.vibrate(20);
+      itemToRemoveId = id;
+      confirmOverlay.classList.add('active');
+      confirmModal.classList.add('active');
+      isConfirmOpen = true;
+      history.pushState({ modal: 'confirm_remove' }, '');
+    }
+
+    function closeConfirmModal() {
+      confirmOverlay.classList.remove('active');
+      confirmModal.classList.remove('active');
+      isConfirmOpen = false;
+      itemToRemoveId = null;
+    }
+
+    confirmCancelBtn.addEventListener('click', () => {
+      if (isConfirmOpen) history.back();
+    });
+
+    confirmOverlay.addEventListener('click', () => {
+      if (isConfirmOpen) history.back();
+    });
+
+    window.addEventListener('popstate', (e) => {
+      if (isConfirmOpen) closeConfirmModal();
+    });
+
+    confirmRemoveBtn.addEventListener('click', async () => {
+      if (!itemToRemoveId) return;
+      
+      const id = itemToRemoveId;
+      const itemIndex = orderPayload.findIndex(i => i.id === id);
+      
+      if (itemIndex > -1) {
+         orderPayload.splice(itemIndex, 1);
+         
+         if(orderSource === 'cart' && currentUser) {
+            const cartRef = doc(db, 'carts', currentUser.uid);
+            updateDoc(cartRef, { [`items.${id}`]: deleteField() });
+         }
+         
+         sessionStorage.setItem('checkout_payload', JSON.stringify(orderPayload));
+         
+         if (orderPayload.length === 0) {
+            if (isConfirmOpen) history.back(); // close modal
+            btnBack.click(); // exit checkout entirely
+         } else {
+            renderOrderSummary();
+            if (isConfirmOpen) history.back(); // close modal
+         }
+      }
+    });
+
+    // 5. Quantity Editor Logic
     window.changeQty = function(id, delta) {
       if (navigator.vibrate) navigator.vibrate(10);
       const itemIndex = orderPayload.findIndex(i => i.id === id);
@@ -309,34 +402,20 @@
         let newQty = orderPayload[itemIndex].qty + delta;
         
         if (newQty < 1) {
-          if (confirm("Remove this item from your order?")) {
-             orderPayload.splice(itemIndex, 1);
-             if(orderSource === 'cart' && currentUser) {
-                const cartRef = doc(db, 'carts', currentUser.uid);
-                updateDoc(cartRef, { [`items.${id}`]: deleteField() });
-             }
-          } else {
-             return;
-          }
+          openConfirmModal(id);
         } else {
           orderPayload[itemIndex].qty = newQty;
           if(orderSource === 'cart' && currentUser) {
              const cartRef = doc(db, 'carts', currentUser.uid);
              updateDoc(cartRef, { [`items.${id}.qty`]: newQty });
           }
-        }
-        
-        sessionStorage.setItem('checkout_payload', JSON.stringify(orderPayload));
-        
-        if (orderPayload.length === 0) {
-           btnBack.click();
-        } else {
-           renderOrderSummary();
+          sessionStorage.setItem('checkout_payload', JSON.stringify(orderPayload));
+          renderOrderSummary();
         }
       }
     };
 
-    // 5. Fetch User Address
+    // 6. Fetch User Address
     async function fetchUserAddress() {
       try {
         const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
@@ -380,7 +459,7 @@
       }
     }
 
-    // 6. Render Items & Math
+    // 7. Render Items & Math
     function renderOrderSummary() {
       let subTotal = 0;
       hasStockError = false; 
@@ -461,7 +540,7 @@
       }
     });
 
-    // 7. Place Order Execution (Injecting Live Prices)
+    // 8. Place Order Execution (Injecting Live Prices)
     btnPlaceOrder.addEventListener('click', async () => {
       if (!savedAddress || orderPayload.length === 0 || btnPlaceOrder.disabled || hasStockError) return;
       if (navigator.vibrate) navigator.vibrate(40);
@@ -495,6 +574,7 @@
           createdAt: new Date().toISOString()
         });
 
+        // 9. Correctly clear the user's cart
         if (orderSource === 'cart') {
           const cartRef = doc(db, 'carts', currentUser.uid);
           await updateDoc(cartRef, { items: deleteField() });
