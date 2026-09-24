@@ -17,6 +17,8 @@
       --skeleton-shine: #f5f5f5;
       --success-bg: #e6f4ea;
       --success-text: #137333;
+      --warning: #b3261e;
+      --warning-bg: #f9dedc;
     }
     
     @media (prefers-color-scheme: dark) {
@@ -30,6 +32,8 @@
         --skeleton-shine: #444444;
         --success-bg: #1e3a29;
         --success-text: #81c995;
+        --warning: #f2b8b5;
+        --warning-bg: #410e0b;
       }
     }
 
@@ -138,12 +142,14 @@
     .m-price { font-size: 28px; font-weight: 800; color: var(--primary); margin-bottom: 20px; display: flex; align-items: baseline; gap: 8px; }
     .m-desc { font-size: 15px; color: var(--text-sub); line-height: 1.6; }
 
-    /* Sticky Bottom Action Bar */
+    /* Sticky Bottom Action Bar & Out of Stock */
     .action-bar { position: absolute; bottom: 0; left: 0; width: 100%; padding: 16px 20px; background: var(--surface-color); border-top: 1px solid var(--border); display: flex; gap: 12px; z-index: 20; padding-bottom: calc(16px + env(safe-area-inset-bottom)); box-shadow: 0 -4px 12px rgba(0,0,0,0.03); }
     .btn { flex: 1; padding: 16px; border-radius: 14px; font-size: 16px; font-weight: 700; text-align: center; cursor: pointer; border: none; transition: transform 0.2s cubic-bezier(0.32, 0.72, 0, 1); display: flex; justify-content: center; align-items: center; gap: 8px; }
     .btn:active { transform: scale(0.96); }
     .btn-add { background: var(--bg-color); color: var(--text-main); border: 1.5px solid var(--border); }
     .btn-buy { background: var(--primary); color: #fff; box-shadow: 0 4px 12px rgba(40, 116, 240, 0.25); }
+    
+    .out-of-stock-msg { flex: 1; padding: 16px; border-radius: 14px; font-size: 16px; font-weight: 800; text-align: center; background: var(--warning-bg); color: var(--warning); border: 1.5px solid var(--warning); display: flex; justify-content: center; align-items: center; gap: 8px; }
 
     /* Notification Toast */
     #toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-100px); background: #137333; color: white; padding: 14px 24px; border-radius: 50px; font-size: 15px; font-weight: 600; opacity: 0; transition: all 0.4s cubic-bezier(0.32, 0.72, 0, 1); z-index: 2000; box-shadow: 0 8px 20px rgba(0,0,0,0.25); display: flex; align-items: center; gap: 10px; width: max-content; }
@@ -232,6 +238,10 @@
     <div class="action-bar">
       <button class="btn btn-add" id="btn-add-cart">Add to Cart</button>
       <button class="btn btn-buy" id="btn-buy-now">Buy Now</button>
+      <div id="out-of-stock-msg" class="out-of-stock-msg" style="display: none;">
+        <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+        Out of Stock - Coming Soon
+      </div>
     </div>
   </div>
 
@@ -260,6 +270,7 @@
     
     const btnAddCart = document.getElementById('btn-add-cart');
     const btnBuyNow = document.getElementById('btn-buy-now');
+    const outOfStockMsg = document.getElementById('out-of-stock-msg');
     const toast = document.getElementById('toast');
 
     let currentUser = null;
@@ -442,6 +453,18 @@
         mRating.style.display = 'inline-flex';
       } else {
         mRating.style.display = 'none';
+      }
+
+      // Dynamic Out of Stock Handling
+      const stock = Number(product.stock) || 0;
+      if (stock <= 0) {
+        btnAddCart.style.display = 'none';
+        btnBuyNow.style.display = 'none';
+        outOfStockMsg.style.display = 'flex';
+      } else {
+        btnAddCart.style.display = 'flex';
+        btnBuyNow.style.display = 'flex';
+        outOfStockMsg.style.display = 'none';
       }
 
       modalBg.classList.add('active');
