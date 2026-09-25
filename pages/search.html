@@ -71,8 +71,13 @@
     .list-info { padding: 16px; display: flex; flex-direction: column; flex: 1; height: 100%; justify-content: center; min-width: 0; }
     .list-title { font-size: 15px; font-weight: 600; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; margin-bottom: 6px; line-height: 1.4; color: var(--text-main); }
     
-    .list-rating { font-size: 12px; display: inline-flex; align-items: center; padding: 4px 8px; border-radius: 6px; font-weight: 700; gap: 4px; align-self: flex-start; margin-bottom: 8px; }
-    .list-rating svg { width: 12px; height: 12px; fill: currentColor; stroke: none; }
+    /* Card Vote Badges */
+    .card-vote-wrap { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+    .card-vote-pill { font-size: 12px; display: inline-flex; align-items: center; padding: 4px 8px; border-radius: 6px; font-weight: 700; gap: 4px; }
+    .card-vote-pill.like { background: var(--success-bg); color: var(--success-text); }
+    .card-vote-pill.dislike { background: var(--warning-bg); color: var(--warning); }
+    .card-vote-pill.neutral { background: var(--skeleton-base); color: var(--text-sub); opacity: 0.85; }
+    .card-vote-pill svg { width: 12px; height: 12px; fill: currentColor; stroke: none; flex-shrink: 0; }
 
     .list-price { font-size: 18px; font-weight: 800; color: var(--text-main); margin-top: auto; }
 
@@ -147,51 +152,60 @@
     .rec-header { padding: 0 24px; font-size: 18px; font-weight: 800; margin-bottom: 12px; color: var(--text-main); }
     .rec-carousel { display: flex; overflow-x: auto; gap: 16px; padding: 0 24px 16px 24px; scroll-snap-type: x mandatory; }
     .rec-carousel::after { content: ''; padding-right: 8px; }
-    .rec-card { flex: 0 0 140px; scroll-snap-align: start; background: var(--surface-color); border-radius: 12px; overflow: hidden; border: 1px solid var(--border); box-shadow: 0 4px 10px rgba(0,0,0,0.03); cursor: pointer; transition: transform 0.2s; display: flex; flex-direction: column; }
+    .rec-card { flex: 0 0 148px; scroll-snap-align: start; background: var(--surface-color); border-radius: 14px; overflow: hidden; border: 1px solid var(--border); box-shadow: 0 4px 10px rgba(0,0,0,0.03); cursor: pointer; transition: transform 0.2s; display: flex; flex-direction: column; }
     .rec-card:active { transform: scale(0.96); }
     .rec-img-wrap { width: 100%; aspect-ratio: 1; background: var(--surface-color); display: flex; align-items: center; justify-content: center; padding: 12px; border-bottom: 1px solid var(--border); }
     .rec-img-wrap img { width: 100%; height: 100%; object-fit: contain; mix-blend-mode: multiply; }
     @media (prefers-color-scheme: dark) { .rec-img-wrap img { mix-blend-mode: normal; } }
-    .rec-info { padding: 12px; display: flex; flex-direction: column; flex: 1; }
+    .rec-info { padding: 12px; display: flex; flex-direction: column; flex: 1; min-width: 0; }
     .rec-title { font-size: 13px; font-weight: 600; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; margin-bottom: 8px; line-height: 1.4; color: var(--text-main); }
-    .rec-rating { font-size: 11px; display: inline-flex; align-items: center; gap: 4px; padding: 4px 6px; border-radius: 6px; font-weight: 700; margin-top: auto; align-self: flex-start; }
-    .rec-rating svg { width: 10px; height: 10px; fill: currentColor; stroke: none; }
+    
+    .rec-vote-wrap { display: flex; align-items: center; gap: 6px; margin-top: auto; }
+    .rec-vote-pill { font-size: 11px; display: inline-flex; align-items: center; gap: 4px; padding: 3px 6px; border-radius: 6px; font-weight: 700; }
+    .rec-vote-pill.like { background: var(--success-bg); color: var(--success-text); }
+    .rec-vote-pill.dislike { background: var(--warning-bg); color: var(--warning); }
+    .rec-vote-pill.neutral { background: var(--skeleton-base); color: var(--text-sub); opacity: 0.85; }
+    .rec-vote-pill svg { width: 10px; height: 10px; fill: currentColor; stroke: none; flex-shrink: 0; }
 
     /* Reviews Section Subsystem */
     .reviews-section { padding: 24px; background: var(--bg-color); }
     
-    /* Long Name Fixes */
-    .mc-header > div, .review-header > div { flex: 1; min-width: 0; }
-    .mc-name, .review-name { font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .mc-name { font-size: 15px; }
-    .review-name { font-size: 14px; color: var(--text-main); }
+    /* Perfect Long Name Truncation Fixes */
+    .mc-header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; width: 100%; min-width: 0; }
+    .mc-header-info { flex: 1 1 auto; min-width: 0; overflow: hidden; }
+    .mc-name { font-weight: 800; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; width: 100%; }
 
-    /* My Comment - Display Mode */
-    .my-comment-display { background: var(--primary); padding: 16px; border-radius: 16px; margin-bottom: 24px; color: white; box-shadow: 0 8px 20px rgba(40, 116, 240, 0.2); }
-    .mc-header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
-    .mc-avatar { width: 40px; height: 40px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.3); object-fit: cover; flex-shrink: 0; }
-    .mc-label { font-size: 12px; font-weight: 600; opacity: 0.8; }
-    .mc-edit-btn { margin-left: auto; background: rgba(255,255,255,0.2); border: none; color: white; padding: 6px 14px; border-radius: 50px; font-weight: 700; font-size: 13px; cursor: pointer; backdrop-filter: blur(4px); transition: transform 0.2s; flex-shrink: 0; }
-    .mc-edit-btn:active { transform: scale(0.95); }
-    .mc-text { font-size: 15px; line-height: 1.5; opacity: 0.95; }
+    .review-header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; width: 100%; min-width: 0; }
+    .review-header-info { flex: 1 1 auto; min-width: 0; overflow: hidden; }
+    .review-name { font-weight: 800; font-size: 14px; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; width: 100%; }
 
-    /* My Comment - Edit/Compose Mode */
-    .my-comment-edit { background: var(--surface-color); padding: 16px; border-radius: 16px; margin-bottom: 24px; border: 1px solid var(--border); box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
-    .my-comment-edit textarea { width: 100%; padding: 16px; border: 1.5px solid var(--border); border-radius: 12px; resize: none; min-height: 100px; font-family: inherit; font-size: 15px; margin-bottom: 12px; background: var(--bg-color); outline: none; color: var(--text-main); transition: border-color 0.2s; }
-    .my-comment-edit textarea:focus { border-color: var(--primary); }
-    .edit-actions { display: flex; gap: 12px; justify-content: flex-end; }
-    .btn-cancel { padding: 12px 20px; background: transparent; border: none; font-weight: 700; color: var(--text-sub); cursor: pointer; border-radius: 10px; }
-    .btn-post { padding: 12px 24px; background: var(--primary); color: white; border: none; border-radius: 10px; font-weight: 800; cursor: pointer; box-shadow: 0 4px 12px rgba(40, 116, 240, 0.2); transition: opacity 0.2s; }
+    /* My Comment - Display Mode (Sleek Glassmorphic Brand Card) */
+    .my-comment-display { background: linear-gradient(135deg, var(--primary), var(--primary-hover)); padding: 18px 20px; border-radius: 18px; margin-bottom: 24px; color: white; box-shadow: 0 8px 24px rgba(40, 116, 240, 0.25); position: relative; overflow: hidden; }
+    .my-comment-display::after { content: ''; position: absolute; top: -30%; right: -15%; width: 140px; height: 140px; background: rgba(255,255,255,0.08); border-radius: 50%; pointer-events: none; }
+    .mc-avatar { width: 44px; height: 44px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.4); object-fit: cover; flex-shrink: 0; background: rgba(255,255,255,0.2); }
+    .mc-label { font-size: 12px; font-weight: 700; opacity: 0.85; text-transform: uppercase; letter-spacing: 0.4px; }
+    .mc-edit-btn { margin-left: auto; background: rgba(255,255,255,0.22); border: 1px solid rgba(255,255,255,0.3); color: white; padding: 7px 16px; border-radius: 50px; font-weight: 800; font-size: 13px; cursor: pointer; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); transition: transform 0.15s, background 0.15s; flex-shrink: 0; }
+    .mc-edit-btn:active { transform: scale(0.94); background: rgba(255,255,255,0.35); }
+    .mc-text { font-size: 15px; line-height: 1.55; opacity: 0.98; font-weight: 500; word-break: break-word; overflow-wrap: break-word; }
+
+    /* My Comment - Edit/Compose Mode (Sleek Professional Form) */
+    .my-comment-edit { background: var(--surface-color); padding: 20px; border-radius: 18px; margin-bottom: 24px; border: 1.5px solid var(--border); box-shadow: 0 6px 16px rgba(0,0,0,0.03); }
+    .my-comment-edit textarea { width: 100%; padding: 14px 16px; border: 1.5px solid var(--border); border-radius: 14px; resize: none; min-height: 105px; font-family: inherit; font-size: 15px; margin-bottom: 8px; background: var(--bg-color); outline: none; color: var(--text-main); transition: border-color 0.2s, box-shadow 0.2s; line-height: 1.5; }
+    .my-comment-edit textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(40, 116, 240, 0.12); }
+    .char-hint { font-size: 12px; color: var(--text-sub); margin-bottom: 12px; display: flex; justify-content: space-between; font-weight: 600; padding: 0 4px; }
+    .edit-actions { display: flex; gap: 12px; justify-content: flex-end; align-items: center; }
+    .btn-cancel { padding: 10px 18px; background: transparent; border: none; font-weight: 700; color: var(--text-sub); cursor: pointer; border-radius: 10px; font-size: 14px; transition: color 0.15s; }
+    .btn-cancel:hover { color: var(--text-main); }
+    .btn-post { padding: 12px 24px; background: var(--primary); color: white; border: none; border-radius: 12px; font-weight: 800; font-size: 14px; cursor: pointer; box-shadow: 0 4px 12px rgba(40, 116, 240, 0.25); transition: opacity 0.2s, transform 0.15s; }
     .btn-post:active { transform: scale(0.95); }
 
     .login-prompt { padding: 20px; text-align: center; background: var(--surface-color); border-radius: 16px; border: 1.5px dashed var(--border); margin-bottom: 24px; color: var(--text-sub); font-size: 14px; font-weight: 600; display: flex; flex-direction: column; align-items: center; gap: 12px; }
 
     /* Other Comments List */
-    .review-card { background: var(--surface-color); padding: 20px; border-radius: 16px; margin-bottom: 12px; border: 1px solid var(--border); }
-    .review-header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
-    .review-avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--skeleton-base); object-fit: cover; flex-shrink: 0; }
-    .review-date { font-size: 12px; color: var(--text-sub); font-weight: 600; }
-    .review-text { font-size: 15px; line-height: 1.6; color: var(--text-main); }
+    .review-card { background: var(--surface-color); padding: 18px 20px; border-radius: 16px; margin-bottom: 12px; border: 1px solid var(--border); box-shadow: 0 2px 6px rgba(0,0,0,0.02); }
+    .review-avatar { width: 42px; height: 42px; border-radius: 50%; background: var(--skeleton-base); object-fit: cover; flex-shrink: 0; }
+    .review-date { font-size: 12px; color: var(--text-sub); font-weight: 600; margin-top: 2px; }
+    .review-text { font-size: 15px; line-height: 1.6; color: var(--text-main); word-break: break-word; overflow-wrap: break-word; }
 
     /* Notification Toast */
     #toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-100px); background: #137333; color: white; padding: 14px 24px; border-radius: 50px; font-size: 15px; font-weight: 600; opacity: 0; transition: all 0.4s cubic-bezier(0.32, 0.72, 0, 1); z-index: 2000; box-shadow: 0 8px 20px rgba(0,0,0,0.25); display: flex; align-items: center; gap: 10px; width: max-content; }
@@ -368,6 +382,65 @@
     const svgThumbUp = `<svg viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.56l2.5-8.76A2 2 0 0 0 20.83 9H14z"/><path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>`;
     const svgThumbDown = `<svg viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.56l-2.5 8.76A2 2 0 0 0 3.17 15H10z"/><path d="M17 2h3a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-3"/></svg>`;
 
+    // --- REUSABLE BADGE BUILDERS ---
+    function getVoteBadgesHtml(likes = 0, dislikes = 0) {
+      const lCount = Number(likes) || 0;
+      const dCount = Number(dislikes) || 0;
+      const likeClass = lCount > 0 ? 'like' : 'neutral';
+      const dislikeClass = dCount > 0 ? 'dislike' : 'neutral';
+      return `
+        <div class="card-vote-wrap">
+          <div class="card-vote-pill ${likeClass}">${svgThumbUp} <span>${lCount.toLocaleString()}</span></div>
+          <div class="card-vote-pill ${dislikeClass}">${svgThumbDown} <span>${dCount.toLocaleString()}</span></div>
+        </div>
+      `;
+    }
+
+    function getRecVoteBadgesHtml(likes = 0, dislikes = 0) {
+      const lCount = Number(likes) || 0;
+      const dCount = Number(dislikes) || 0;
+      const likeClass = lCount > 0 ? 'like' : 'neutral';
+      const dislikeClass = dCount > 0 ? 'dislike' : 'neutral';
+      return `
+        <div class="rec-vote-wrap">
+          <div class="rec-vote-pill ${likeClass}">${svgThumbUp} <span>${lCount}</span></div>
+          <div class="rec-vote-pill ${dislikeClass}">${svgThumbDown} <span>${dCount}</span></div>
+        </div>
+      `;
+    }
+
+    // Real-Time DOM & Cache Synchronizer across cards and modals
+    function syncAllProductVoteDOM(productId, likes, dislikes) {
+      const l = Number(likes) || 0;
+      const d = Number(dislikes) || 0;
+
+      // 1. Sync Search List Card if rendered
+      const searchRatingEl = document.getElementById(`search-rating-${productId}`);
+      if (searchRatingEl) {
+        searchRatingEl.innerHTML = getVoteBadgesHtml(l, d);
+      }
+
+      // 2. Sync Recommendation Carousel Card if rendered
+      const recRatingEl = document.getElementById(`rec-rating-${productId}`);
+      if (recRatingEl) {
+        recRatingEl.innerHTML = getRecVoteBadgesHtml(l, d);
+      }
+
+      // 3. Sync Modal View if it's the currently viewed product
+      if (currentSelectedProduct && currentSelectedProduct.id === productId) {
+        currentSelectedProduct.totalLikes = l;
+        currentSelectedProduct.totalDislikes = d;
+        mLikesCount.innerText = l.toLocaleString();
+        mDislikesCount.innerText = d.toLocaleString();
+      }
+
+      // 4. Update In-Memory Cache
+      if (productCache[productId]) {
+        productCache[productId].totalLikes = l;
+        productCache[productId].totalDislikes = d;
+      }
+    }
+
     // --- ZERO-READ PRE-FETCH RECOMMENDATIONS ARCHITECTURE ---
     async function prefetchLayoutForRecommendations() {
       try {
@@ -500,25 +573,19 @@
           
           const likes = p.totalLikes || 0;
           const dislikes = p.totalDislikes || 0;
-          
-          let ratingHtml = '';
-          if (likes > 0 || dislikes > 0) {
-            ratingHtml = `
-              <div style="display:flex; gap:8px; margin-bottom:8px;">
-                ${likes > 0 ? `<div class="list-rating" style="color:var(--success-text); background:var(--success-bg);">${svgThumbUp}${likes.toLocaleString()}</div>` : ''}
-                ${dislikes > 0 ? `<div class="list-rating" style="color:var(--warning); background:var(--warning-bg);">${svgThumbDown}${dislikes.toLocaleString()}</div>` : ''}
-              </div>`;
-          }
 
           const card = document.createElement('div');
           card.className = 'list-card';
+          card.id = `search-card-${p.id}`;
           card.innerHTML = `
             <div class="list-img-wrap">
               <img src="${imgUrl}" onerror="this.src='${placeholderImg}'" alt="${p.name}">
             </div>
             <div class="list-info">
               <div class="list-title">${p.name}</div>
-              ${ratingHtml}
+              <div id="search-rating-${p.id}">
+                ${getVoteBadgesHtml(likes, dislikes)}
+              </div>
               <div class="list-price">₹${(p.price || 0).toLocaleString('en-IN')}</div>
             </div>
           `;
@@ -548,7 +615,6 @@
       }
     }, { rootMargin: "100px" });
     observer.observe(sentinel);
-
 
     // =========================================================================
     // MODAL DEEP HISTORY STACK & RENDERING ENGINE
@@ -589,16 +655,13 @@
       renderRecommendations(product.id);
       initReviewSection(product.id);
 
-      // Attach Real-Time Snapshot Listener for YouTube-Style live updates
+      // Attach Real-Time Snapshot Listener for live updates across multiple users
       if (productSnapshotUnsubscribe) productSnapshotUnsubscribe();
       
       productSnapshotUnsubscribe = onSnapshot(doc(db, "products", product.id), (docSnap) => {
         if (docSnap.exists() && currentSelectedProduct && currentSelectedProduct.id === docSnap.id) {
           const data = docSnap.data();
-          currentSelectedProduct.totalLikes = data.totalLikes || 0;
-          currentSelectedProduct.totalDislikes = data.totalDislikes || 0;
-          mLikesCount.innerText = currentSelectedProduct.totalLikes.toLocaleString();
-          mDislikesCount.innerText = currentSelectedProduct.totalDislikes.toLocaleString();
+          syncAllProductVoteDOM(docSnap.id, data.totalLikes || 0, data.totalDislikes || 0);
         }
       });
     }
@@ -643,7 +706,7 @@
     }
 
     // =========================================================================
-    // RECOMMENDATIONS ENGINE (Zero-Read Shuffle)
+    // RECOMMENDATIONS ENGINE (Zero-Read Shuffle & Wrap-Around Integrity)
     // =========================================================================
     function shuffleArray(array) {
       let cur = array.length, rand;
@@ -708,23 +771,17 @@
         
         const likes = p.totalLikes || 0;
         const dislikes = p.totalDislikes || 0;
-        
-        let ratingHtml = `<div class="rec-rating" style="background:var(--skeleton-base); color:var(--text-sub);">${svgThumbUp} 0</div>`;
-        if (likes > 0 || dislikes > 0) {
-          if (likes >= dislikes) {
-            ratingHtml = `<div class="rec-rating" style="color:var(--success-text); background:var(--success-bg);">${svgThumbUp} ${likes.toLocaleString()}</div>`;
-          } else {
-            ratingHtml = `<div class="rec-rating" style="color:var(--warning); background:var(--warning-bg);">${svgThumbDown} ${dislikes.toLocaleString()}</div>`;
-          }
-        }
 
         const card = document.createElement('div');
         card.className = 'rec-card';
+        card.id = `rec-card-${p.id}`;
         card.innerHTML = `
           <div class="rec-img-wrap"><img src="${imgUrl}" onerror="this.src='${placeholderImg}'"></div>
           <div class="rec-info">
             <div class="rec-title">${p.name}</div>
-            ${ratingHtml}
+            <div id="rec-rating-${p.id}">
+              ${getRecVoteBadgesHtml(likes, dislikes)}
+            </div>
           </div>
         `;
         
@@ -737,7 +794,7 @@
     }
 
     // =========================================================================
-    // E-COMMERCE ACTION BAR
+    // E-COMMERCE ACTION BAR (Perpetually Active - Zero-Stock Restrictions)
     // =========================================================================
     btnAddCart.addEventListener('click', async () => {
       if (!currentUser) return alert("Please log in to add items.");
@@ -815,11 +872,11 @@
     let currentUserReviewData = null; 
     let isEditingMyComment = false;
 
-    // A. INSTANT OPTIMISTIC VOTING ENGINE
+    // A. INSTANT OPTIMISTIC VOTING ENGINE (With Real-Time Card Sync)
     window.handleVote = async function(type) {
       if (!currentUser) return alert("Please sign in to vote.");
       if (!currentSelectedProduct) return;
-      if(navigator.vibrate) navigator.vibrate(15);
+      if (navigator.vibrate) navigator.vibrate(15);
       
       const pid = currentSelectedProduct.id;
       const oldVote = currentUserReviewData ? currentUserReviewData.vote : null;
@@ -835,13 +892,13 @@
       if (newVote === 'like') likeDiff = 1;
       if (newVote === 'dislike') dislikeDiff = 1;
 
-      // 2. Optimistic Local State Update
-      currentSelectedProduct.totalLikes = (currentSelectedProduct.totalLikes || 0) + likeDiff;
-      currentSelectedProduct.totalDislikes = (currentSelectedProduct.totalDislikes || 0) + dislikeDiff;
+      // 2. Optimistic Local State Calculation
+      const updatedLikes = Math.max(0, (currentSelectedProduct.totalLikes || 0) + likeDiff);
+      const updatedDislikes = Math.max(0, (currentSelectedProduct.totalDislikes || 0) + dislikeDiff);
 
-      // 3. Render Instant Changes
-      mLikesCount.innerText = currentSelectedProduct.totalLikes.toLocaleString();
-      mDislikesCount.innerText = currentSelectedProduct.totalDislikes.toLocaleString();
+      // 3. Render Instant Changes Everywhere (Modal & Parent Cards)
+      syncAllProductVoteDOM(pid, updatedLikes, updatedDislikes);
+
       btnVoteLike.classList.toggle('active', newVote === 'like');
       btnVoteDislike.classList.toggle('active', newVote === 'dislike');
 
@@ -868,7 +925,7 @@
         if (Object.keys(prodUpdates).length > 0) {
           await setDoc(prodRef, prodUpdates, { merge: true });
         }
-      } catch (e) { console.error("Vote failed", e); }
+      } catch (e) { console.error("Vote write failed", e); }
     };
 
     // B. COMMENT SUBSYSTEM INITIALIZATION
@@ -893,7 +950,7 @@
         // Exact 1 Read per user to fetch their isolated review doc
         try {
           const userRevSnap = await getDoc(doc(db, 'products', productId, 'reviews', currentUser.uid));
-          if(userRevSnap.exists()) {
+          if (userRevSnap.exists()) {
             currentUserReviewData = userRevSnap.data();
             if (currentUserReviewData.vote === 'like') btnVoteLike.classList.add('active');
             if (currentUserReviewData.vote === 'dislike') btnVoteDislike.classList.add('active');
@@ -907,18 +964,22 @@
       fetchPaginatedReviews();
     }
 
-    // C. STATE-MACHINE WIDGET (Compose vs Display)
+    // C. STATE-MACHINE WIDGET (Dynamic 4-Character Real-Time Input Validation)
     window.validateCommentInput = function() {
       const input = document.getElementById('review-comment-input');
       const btn = document.getElementById('btn-submit-review');
+      const hint = document.getElementById('char-count-text');
       if (input && btn) {
-        if (input.value.trim().length >= 4) {
+        const len = input.value.trim().length;
+        if (hint) hint.innerText = `${len}/4 min characters`;
+
+        if (len >= 4) {
           btn.disabled = false;
           btn.style.opacity = '1';
           btn.style.pointerEvents = 'auto';
         } else {
           btn.disabled = true;
-          btn.style.opacity = '0.5';
+          btn.style.opacity = '0.45';
           btn.style.pointerEvents = 'none';
         }
       }
@@ -936,9 +997,9 @@
           <div class="my-comment-display">
             <div class="mc-header">
               <img src="${currentUser.photoURL || avatarPlaceholder}" class="mc-avatar" onerror="this.src='${avatarPlaceholder}'">
-              <div>
-                <div class="mc-name">${currentUser.displayName || 'You'}</div>
-                <div class="mc-label">Your Comment</div>
+              <div class="mc-header-info">
+                <div class="mc-name" title="${currentUser.displayName || 'You'}">${currentUser.displayName || 'You'}</div>
+                <div class="mc-label">Your Verified Comment</div>
               </div>
               <button class="mc-edit-btn" onclick="toggleEditMyComment()">Edit</button>
             </div>
@@ -953,9 +1014,12 @@
         container.innerHTML = `
           <div class="my-comment-edit">
              <textarea id="review-comment-input" oninput="validateCommentInput()" placeholder="Share details of your experience...">${currentText}</textarea>
+             <div class="char-hint">
+                <span id="char-count-text">${currentText.trim().length}/4 min characters</span>
+             </div>
              <div class="edit-actions">
                 ${hasComment ? `<button class="btn-cancel" onclick="toggleEditMyComment()">Cancel</button>` : ''}
-                <button class="btn-post" id="btn-submit-review" onclick="submitTextReview()" ${isValid ? '' : 'disabled style="opacity:0.5; pointer-events:none;"'}>Post</button>
+                <button class="btn-post" id="btn-submit-review" onclick="submitTextReview()" ${isValid ? '' : 'disabled style="opacity:0.45; pointer-events:none;"'}>Post</button>
              </div>
           </div>
         `;
@@ -963,7 +1027,7 @@
     };
 
     window.toggleEditMyComment = function() {
-      if(navigator.vibrate) navigator.vibrate(10);
+      if (navigator.vibrate) navigator.vibrate(10);
       isEditingMyComment = !isEditingMyComment;
       renderMyCommentWidget();
     };
@@ -973,8 +1037,8 @@
       const commentInput = document.getElementById('review-comment-input').value.trim();
       const submitBtn = document.getElementById('btn-submit-review');
       
-      if (commentInput.length < 4) return alert("Please enter a slightly longer comment.");
-      if(navigator.vibrate) navigator.vibrate(20);
+      if (commentInput.length < 4) return alert("Please enter at least 4 characters.");
+      if (navigator.vibrate) navigator.vibrate(20);
       
       submitBtn.style.pointerEvents = 'none';
       submitBtn.innerText = 'Saving...';
@@ -1042,7 +1106,7 @@
           snap.forEach(docSnap => {
             const rev = docSnap.data();
             
-            // Skip rendering if they don't have text, or if it is the current user (which is already pinned at the top)
+            // Skip rendering if they don't have text, or if it is the current user (which is pinned at the top)
             if (!rev.comment || rev.comment.trim() === '') return;
             if (currentUser && docSnap.id === currentUser.uid) return; 
 
@@ -1053,8 +1117,8 @@
             el.innerHTML = `
               <div class="review-header">
                 <img src="${rev.userPhoto || avatarPlaceholder}" class="review-avatar" onerror="this.src='${avatarPlaceholder}'">
-                <div>
-                  <div class="review-name">${rev.userName || 'Customer'}</div>
+                <div class="review-header-info">
+                  <div class="review-name" title="${rev.userName || 'Customer'}">${rev.userName || 'Customer'}</div>
                   <div class="review-date">${dateStr}</div>
                 </div>
               </div>
