@@ -504,7 +504,7 @@
     let productCache = {}; // Global cache
     let globalCategories = []; 
     let globalBanners = []; 
-    let globalRecommendationPool = []; 
+    let globalRecommendationPool = []; // Newly integrated Recommendation Pool for Deep Pagination
     let carouselInterval;
     let heroInterval;
     let productSnapshotUnsubscribe = null;
@@ -573,6 +573,31 @@
       }
     });
 
+    // --- DEEP LINK INTERCEPTION BOOT SEQUENCE ---
+    window.addEventListener('DOMContentLoaded', async () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const productId = urlParams.get('product');
+      if (productId) {
+        try {
+          const docRef = doc(db, "products", productId);
+          const docSnap = await getDoc(docRef);
+          if (docSnap.exists()) {
+            const p = docSnap.data();
+            p.id = docSnap.id;
+            productCache[p.id] = p;
+            
+            // Clean up the parent URL to preserve the back-button history stack
+            window.parent.history.replaceState({}, document.title, window.parent.location.pathname);
+            
+            // Open the product modal using the correct homepage function
+            openProductModalFromStr(JSON.stringify(p)); 
+          }
+        } catch (e) {
+          console.error("Deep link fetch error:", e);
+        }
+      }
+    });
+
     // 1. Core Data Fetching Pipeline
     async function initCustomerHomepage() {
       try {
@@ -587,6 +612,7 @@
         globalCategories = data.categories || [];
         globalBanners = data.banners || [];
         
+        // Build robust global recommendation pool for infinite pagination from layout
         const ids = new Set();
         if (data.slots) Object.values(data.slots).forEach(id => ids.add(id));
         if (data.categories) {
@@ -1080,25 +1106,11 @@
       if (!currentSelectedProduct) return;
       if (navigator.vibrate) navigator.vibrate(10);
       
-      const shareUrl = `${window.location.origin}/search.html?product=${currentSelectedProduct.id}`;
-      const shareData = {
-        title: currentSelectedProduct.name,
-        text: `Check out ${currentSelectedProduct.name} at Aarvi Stores!`,
-        url: shareUrl
-      };
-
-      try {
-        if (navigator.share) {
-          await navigator.share(shareData);
-        } else {
-          await navigator.clipboard.writeText(shareUrl);
-          toast.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"></path></svg> Link copied to clipboard`;
-          toast.classList.add('show');
-          setTimeout(() => toast.classList.remove('show'), 2000);
-        }
-      } catch (err) {
-        console.error('Error sharing:', err);
-      }
+      // Send the product data up to the index.html app shell
+      window.parent.postMessage({
+        type: 'SHARE_PRODUCT',
+        product: currentSelectedProduct
+      }, '*');
     };
 
     // =========================================================================
@@ -1129,6 +1141,7 @@
       recCarousel.scrollLeft = 0;
       recCarousel.style.scrollBehavior = '';
       
+      // Now perfectly fetches un-cached items natively using globalRecommendationPool
       const pool = globalRecommendationPool.filter(id => id !== currentId);
       if (pool.length === 0) {
         recSection.style.display = 'none';
@@ -1240,14 +1253,17 @@
       const l = Number(likes) || 0;
       const d = Number(dislikes) || 0;
 
+      // Update recommendation carousel if rendered
       const recRatingEl = document.getElementById(`rec-rating-${productId}`);
       if (recRatingEl) recRatingEl.innerHTML = getRecVoteBadgesHtml(l, d);
 
+      // Update all matching cards strictly on the homepage grid (Trending, Categories, Top Picks)
       const homeRatingEls = document.querySelectorAll(`[id="home-rating-${productId}"]`);
       homeRatingEls.forEach(el => {
         el.innerHTML = getVoteBadgesHtml(l, d);
       });
 
+      // Update modal view if currently viewing
       if (currentSelectedProduct && currentSelectedProduct.id === productId) {
         currentSelectedProduct.totalLikes = l;
         currentSelectedProduct.totalDislikes = d;
@@ -1255,6 +1271,7 @@
         mDislikesCount.innerText = d > 0 ? d.toLocaleString() : '';
       }
 
+      // Sync memory cache
       if (productCache[productId]) {
         productCache[productId].totalLikes = l;
         productCache[productId].totalDislikes = d;
@@ -1270,25 +1287,31 @@
       const oldVote = currentUserReviewData ? currentUserReviewData.vote : null;
       let newVote = type;
 
+      // Double-Tap Toggle Logic
       if (oldVote === type) newVote = null; 
 
+      // 1. Calculate Aggregate Deltas
       let likeDiff = 0; let dislikeDiff = 0;
       if (oldVote === 'like') likeDiff = -1;
       if (oldVote === 'dislike') dislikeDiff = -1;
       if (newVote === 'like') likeDiff = 1;
       if (newVote === 'dislike') dislikeDiff = 1;
 
+      // 2. Optimistic Local State Calculation
       const updatedLikes = Math.max(0, (currentSelectedProduct.totalLikes || 0) + likeDiff);
       const updatedDislikes = Math.max(0, (currentSelectedProduct.totalDislikes || 0) + dislikeDiff);
 
+      // 3. Render Instant Changes Everywhere (Modal & Parent Cards)
       syncAllProductVoteDOM(pid, updatedLikes, updatedDislikes);
 
       btnVoteLike.classList.toggle('active', newVote === 'like');
       btnVoteDislike.classList.toggle('active', newVote === 'dislike');
 
+      // Update in-memory user document
       if (!currentUserReviewData) currentUserReviewData = {};
       currentUserReviewData.vote = newVote;
 
+      // 4. Background Firebase Transactions (Zero Wait)
       const revRef = doc(db, 'products', pid, 'reviews', currentUser.uid);
       const prodRef = doc(db, 'products', pid);
 
@@ -1311,6 +1334,7 @@
     };
 
     async function initReviewSection(productId) {
+      // Completely wipe state on deep-nav transitions to reset paginator
       reviewsLastVisible = null;
       hasMoreReviews = true;
       isFetchingReviews = false;
@@ -1328,6 +1352,7 @@
       } else {
         composerContainer.innerHTML = `<div style="text-align:center; padding:20px;"><svg width="24" height="24" stroke="var(--primary)" viewBox="0 0 24 24" fill="none" style="animation: spin 1s linear infinite;"><circle cx="12" cy="12" r="10" stroke-width="2" stroke-opacity="0.25"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 2v4"/></svg></div>`;
         
+        // Exact 1 Read per user to fetch their isolated review doc
         try {
           const userRevSnap = await getDoc(doc(db, 'products', productId, 'reviews', currentUser.uid));
           if (userRevSnap.exists()) {
@@ -1339,9 +1364,12 @@
         
         renderMyCommentWidget();
       }
+
+      // Boot List Pagination (Strictly fetches 5)
       fetchPaginatedReviews();
     }
 
+    // C. STATE-MACHINE WIDGET (Dynamic 4-Character Real-Time Input Validation)
     window.validateCommentInput = function() {
       const input = document.getElementById('review-comment-input');
       const btn = document.getElementById('btn-submit-review');
@@ -1349,6 +1377,7 @@
       if (input && btn) {
         const len = input.value.trim().length;
         if (hint) hint.innerText = `${len}/4 min characters`;
+
         if (len >= 4) {
           btn.disabled = false;
           btn.style.opacity = '1';
@@ -1368,6 +1397,7 @@
       const hasComment = currentUserReviewData && currentUserReviewData.comment && currentUserReviewData.comment.trim().length > 0;
 
       if (hasComment && !isEditingMyComment) {
+        // STATE: Display Mode
         container.innerHTML = `
           <div class="my-comment-display">
             <div class="mc-header">
@@ -1382,6 +1412,7 @@
           </div>
         `;
       } else {
+        // STATE: Edit / Compose Mode
         const currentText = hasComment ? currentUserReviewData.comment : '';
         const isValid = currentText.trim().length >= 4;
         
@@ -1428,8 +1459,10 @@
           timestamp: new Date().toISOString()
         };
 
+        // If no document existed at all, we create it
         await setDoc(reviewRef, payload, { merge: true });
 
+        // Update Local Memory and trigger Display Mode
         if (!currentUserReviewData) currentUserReviewData = {};
         currentUserReviewData.comment = commentInput;
         isEditingMyComment = false;
@@ -1443,13 +1476,14 @@
       }
     };
 
+    // D. SCROLL PAGINATION SUBSYSTEM (Strict batches of 5)
     async function fetchPaginatedReviews() {
       if (isFetchingReviews || !hasMoreReviews || !currentSelectedProduct) return;
       isFetchingReviews = true;
       const loadingEl = document.getElementById('reviews-loading');
       loadingEl.classList.add('active');
 
-      const fetchLimit = 5; 
+      const fetchLimit = 5; // Enforced hard limit per scroll batch
 
       try {
         let q = query(
@@ -1479,6 +1513,7 @@
           snap.forEach(docSnap => {
             const rev = docSnap.data();
             
+            // Skip rendering if they don't have text, or if it is the current user (which is pinned at the top)
             if (!rev.comment || rev.comment.trim() === '') return;
             if (currentUser && docSnap.id === currentUser.uid) return; 
 
@@ -1508,82 +1543,13 @@
     }
 
     const reviewsObserver = new IntersectionObserver((entries) => {
-      if (entries[0].isIntersecting && !isFetchingReviews && hasMoreReviews && modalStack.includes('product')) {
+      if (entries[0].isIntersecting && !isFetchingReviews && hasMoreReviews && isModalOpen) {
         fetchPaginatedReviews();
       }
     }, { rootMargin: "200px" });
     
     reviewsObserver.observe(document.getElementById('reviews-sentinel'));
 
-    // 4. E-commerce Actions
-    btnAddCart.addEventListener('click', async () => {
-      if (!currentUser) return alert("Please log in to add items to cart.");
-      if (!currentSelectedProduct) return;
-      if (navigator.vibrate) navigator.vibrate(40);
-      
-      btnAddCart.style.pointerEvents = 'none';
-      btnAddCart.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="animation: spin 1s linear infinite;"><circle cx="12" cy="12" r="10"></circle><path d="M12 2v4"></path></svg>`;
-
-      try {
-        const cartRef = doc(db, 'carts', currentUser.uid);
-        const cartUpdate = {
-          items: {
-            [currentSelectedProduct.id]: {
-              name: currentSelectedProduct.name,
-              price: currentSelectedProduct.price,
-              image: currentImgUrl,
-              qty: increment(1),
-              addedAt: new Date().toISOString()
-            }
-          }
-        };
-
-        await setDoc(cartRef, cartUpdate, { merge: true });
-
-        btnAddCart.innerText = 'Added!';
-        btnAddCart.style.background = 'var(--success-bg)';
-        btnAddCart.style.color = 'var(--success-text)';
-        btnAddCart.style.borderColor = 'var(--success-text)';
-        toast.classList.add('show');
-
-        setTimeout(() => {
-          btnAddCart.innerText = 'Add to Cart';
-          btnAddCart.style = '';
-          toast.classList.remove('show');
-          history.back();
-        }, 1500);
-
-      } catch (error) {
-        console.error("Cart error:", error);
-        btnAddCart.innerText = 'Error';
-        btnAddCart.style.pointerEvents = 'auto';
-      }
-    });
-
-    btnBuyNow.addEventListener('click', () => {
-      if (!currentUser) return alert("Please log in to purchase items.");
-      if (!currentSelectedProduct) return;
-      if (navigator.vibrate) navigator.vibrate(40);
-      
-      btnBuyNow.style.pointerEvents = 'none';
-      btnBuyNow.innerText = 'Processing...';
-
-      const instantPurchase = [{
-        id: currentSelectedProduct.id,
-        name: currentSelectedProduct.name,
-        price: currentSelectedProduct.price,
-        image: currentImgUrl,
-        qty: 1
-      }];
-
-      sessionStorage.setItem('checkout_payload', JSON.stringify(instantPurchase));
-      sessionStorage.setItem('checkout_source', 'buy_now');
-      
-      window.parent.document.getElementById('content-frame').src = 'pages/checkout.html';
-    });
-
-    // Boot
-    initCustomerHomepage();
   </script>
 </body>
 </html>
