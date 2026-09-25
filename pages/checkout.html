@@ -53,6 +53,9 @@
     /* Address Section */
     .address-details { font-size: 14px; line-height: 1.5; color: var(--text-sub); }
     .address-name { font-weight: 700; color: var(--text-main); font-size: 15px; margin-bottom: 4px; }
+    .address-header-flex { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 4px; }
+    .btn-change-address { background: rgba(40, 116, 240, 0.1); color: var(--primary); border: none; padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; transition: background 0.2s; }
+    .btn-change-address:active { background: rgba(40, 116, 240, 0.2); }
     
     /* Order Summary Items */
     .summary-item { display: flex; gap: 12px; margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid var(--border); }
@@ -70,10 +73,6 @@
     .qty-btn { width: 28px; height: 28px; border-radius: 6px; border: 1.5px solid var(--border); background: var(--bg-color); color: var(--text-main); font-weight: 800; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.1s, transform 0.1s; }
     .qty-btn:active { background: var(--border); transform: scale(0.9); }
     .qty-val { font-size: 14px; font-weight: 800; min-width: 20px; text-align: center; }
-    
-    /* Live Stock Warnings */
-    .stock-warning { color: var(--danger); font-size: 12px; font-weight: 700; margin-top: 6px; display: flex; align-items: center; gap: 4px; }
-    .stock-warning svg { width: 14px; height: 14px; stroke: currentColor; }
 
     /* Price Breakdown */
     .price-row { display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 12px; color: var(--text-sub); }
@@ -272,7 +271,6 @@
     
     // Live Data Systems
     let liveProducts = {};
-    let hasStockError = false;
     let liveSubscriptions = [];
 
     // Modal State
@@ -330,7 +328,7 @@
           if(docSnap.exists()) {
             liveProducts[item.id] = docSnap.data();
           } else {
-            liveProducts[item.id] = { stock: 0, price: item.price, name: item.name }; // Item deleted from ERP
+            liveProducts[item.id] = { price: item.price, name: item.name }; // Item deleted from ERP
           }
           renderOrderSummary(); // Auto-rerender on any DB change
         });
@@ -415,40 +413,52 @@
       }
     };
 
-    // 6. Fetch User Address
+    // 6. Fetch User Address (Strict Validation & UI Update)
     async function fetchUserAddress() {
       try {
         const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
+        let hasValidAddress = false;
         
-        if (userDoc.exists() && userDoc.data().name && userDoc.data().address_details) {
+        if (userDoc.exists()) {
           const data = userDoc.data();
+          const addr = data.address_details || {};
           
-          savedAddress = {
-            name: data.name || '',
-            phone: data.phone || '',
-            house: data.address_details.house || '',
-            area: data.address_details.area || '',
-            city: data.address_details.city || '',
-            state: data.address_details.state || '',
-            pincode: data.address_details.pincode || ''
-          };
-
+          // Strict validation: Verify all sub-fields exist, not just the parent object
+          if (data.name && data.phone && addr.house && addr.area && addr.city && addr.state && addr.pincode) {
+            hasValidAddress = true;
+            savedAddress = {
+              name: data.name,
+              phone: data.phone,
+              house: addr.house,
+              area: addr.area,
+              city: addr.city,
+              state: addr.state,
+              pincode: addr.pincode
+            };
+          }
+        }
+        
+        if (hasValidAddress) {
           addressContainer.innerHTML = `
             <div class="address-details">
-              <div class="address-name">${savedAddress.name}</div>
+              <div class="address-header-flex">
+                <div class="address-name">${savedAddress.name}</div>
+                <button class="btn-change-address" onclick="window.parent.document.getElementById('content-frame').src='pages/account.html'; window.parent.document.getElementById('bottom-nav').style.display='flex'; window.parent.document.querySelector('.layout-wrapper').style.paddingBottom='';">Change Address</button>
+              </div>
               <div>${savedAddress.house}, ${savedAddress.area}</div>
               <div>${savedAddress.city}, ${savedAddress.state} - ${savedAddress.pincode}</div>
               <div style="margin-top: 6px; font-weight: 500;">Phone: ${savedAddress.phone}</div>
             </div>
           `;
         } else {
+          savedAddress = null;
           addressContainer.innerHTML = `
             <div style="color:var(--danger); font-weight: 600; padding-top: 4px;">
-              Address missing. Please update your profile.
+              Address incomplete or missing. Please add a complete delivery address.
             </div>
-            <button onclick="window.parent.document.getElementById('content-frame').src='pages/setup.html'; window.parent.document.getElementById('bottom-nav').style.display='flex'; window.parent.document.querySelector('.layout-wrapper').style.paddingBottom='';" 
-                    style="margin-top: 12px; background: var(--primary); color: white; border: none; padding: 10px 16px; border-radius: 8px; font-weight: bold; cursor: pointer;">
-              Complete Profile Setup
+            <button onclick="window.parent.document.getElementById('content-frame').src='pages/account.html'; window.parent.document.getElementById('bottom-nav').style.display='flex'; window.parent.document.querySelector('.layout-wrapper').style.paddingBottom='';" 
+                    style="margin-top: 12px; background: var(--primary); color: white; border: none; padding: 10px 16px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%;">
+              Add Address
             </button>
           `;
         }
@@ -459,24 +469,18 @@
       }
     }
 
-    // 7. Render Items & Math
+    // 7. Render Items & Math (Removed Stock Checks)
     function renderOrderSummary() {
       let subTotal = 0;
-      hasStockError = false; 
       itemsContainer.innerHTML = '';
 
       orderPayload.forEach(item => {
         // Pull live data if loaded, otherwise fallback to session data
-        const liveData = liveProducts[item.id] || { stock: 9999, price: item.price, name: item.name };
-        const liveStock = liveProducts[item.id] ? (Number(liveData.stock) || 0) : 9999; 
+        const liveData = liveProducts[item.id] || { price: item.price, name: item.name };
         const livePrice = Number(liveData.price) || 0;
         
         const itemTotal = livePrice * item.qty;
         subTotal += itemTotal;
-
-        // Validation Math
-        const isOutOfStock = item.qty > liveStock;
-        if (isOutOfStock) hasStockError = true;
 
         const itemDiv = document.createElement('div');
         itemDiv.className = 'summary-item';
@@ -490,12 +494,6 @@
               <span class="qty-val">${item.qty}</span>
               <button class="qty-btn" onclick="changeQty('${item.id}', 1)">+</button>
             </div>
-            ${isOutOfStock ? `
-              <div class="stock-warning">
-                <svg fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-                Only ${liveStock} available
-              </div>
-            ` : ''}
           </div>
           <div class="item-price">₹${itemTotal.toLocaleString('en-IN')}</div>
         `;
@@ -510,12 +508,8 @@
       uiTotal.innerText = `₹${finalTotal.toLocaleString('en-IN')}`;
       barTotal.innerText = `₹${finalTotal.toLocaleString('en-IN')}`;
 
-      // Enforce Minimum Order & Live Stock Logic
-      if (hasStockError) {
-        minOrderWarning.style.display = 'none';
-        btnPlaceOrder.disabled = true;
-        btnPlaceOrder.querySelector('span').innerText = 'Resolve Stock Issues';
-      } else if (subTotal < MINIMUM_ORDER_VALUE) {
+      // Enforce Minimum Order Logic
+      if (subTotal < MINIMUM_ORDER_VALUE) {
         minOrderWarning.style.display = 'flex';
         btnPlaceOrder.disabled = true;
         btnPlaceOrder.querySelector('span').innerText = `Add ₹${(MINIMUM_ORDER_VALUE - subTotal)} more`;
@@ -542,7 +536,7 @@
 
     // 8. Place Order Execution (Injecting Live Prices)
     btnPlaceOrder.addEventListener('click', async () => {
-      if (!savedAddress || orderPayload.length === 0 || btnPlaceOrder.disabled || hasStockError) return;
+      if (!savedAddress || orderPayload.length === 0 || btnPlaceOrder.disabled) return;
       if (navigator.vibrate) navigator.vibrate(40);
       
       btnPlaceOrder.style.pointerEvents = 'none';
