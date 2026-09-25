@@ -445,6 +445,9 @@
 
     <!-- Fixed Bottom Control Bar -->
     <div class="bottom-nav-bar">
+      <!-- Skip button added here on the bottom left over the hidden prev-btn -->
+      <button id="skip-setup-btn" style="position: absolute; left: 24px; z-index: 20; background: transparent; border: none; color: var(--text-sub); font-weight: 600; font-size: 15px; cursor: pointer; padding: 10px; text-decoration: underline;">Skip</button>
+
       <button class="nav-arrow-btn" id="prev-btn" title="Previous">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg>
       </button>
@@ -473,6 +476,7 @@
     const prevBtn = document.getElementById('prev-btn');
     const nextActionBtn = document.getElementById('next-action-btn');
     const nextActionText = document.getElementById('next-action-text');
+    const skipSetupBtn = document.getElementById('skip-setup-btn');
 
     // Setup Form UI
     const setupName = document.getElementById('setup-name');
@@ -550,6 +554,11 @@
       } else {
         nextActionBtn.style.display = 'inline-flex';
         nextActionText.innerText = currentSlide === 1 ? 'Start Setup' : 'Next';
+      }
+
+      // Toggle Skip button visibility (Only display on the first slide)
+      if (skipSetupBtn) {
+        skipSetupBtn.style.display = currentSlide === 0 ? 'block' : 'none';
       }
     }
 
@@ -647,6 +656,52 @@
       gpsResult.classList.add('hidden');
       gpsBtn.classList.remove('hidden');
     });
+
+    // ----------------------------------------------------
+    // Skip Setup Handler 
+    // ----------------------------------------------------
+    if (skipSetupBtn) {
+      skipSetupBtn.addEventListener('click', async () => {
+        if (navigator.vibrate) navigator.vibrate(40);
+        if (!currentUser) return;
+
+        skipSetupBtn.innerText = "Skipping...";
+        skipSetupBtn.style.pointerEvents = 'none';
+
+        try {
+          await setDoc(doc(db, 'users', currentUser.uid), {
+            name: currentUser.displayName || 'User',
+            email: currentUser.email || '',
+            photoURL: currentUser.photoURL || '',
+            phone: '',
+            address: '',
+            address_details: {
+              house: '',
+              area: '',
+              city: '',
+              state: '',
+              pincode: ''
+            },
+            coordinates: null,
+            createdAt: new Date().toISOString()
+          });
+
+          try {
+            localStorage.setItem('aarvi_setup_complete', 'true');
+          } catch (e) {
+            console.warn("Could not save setup flag to localStorage:", e);
+          }
+
+          window.location.replace("home.html");
+
+        } catch (error) {
+          console.error("Firestore skip setup write error:", error);
+          alert("Failed to skip setup. Please try again.");
+          skipSetupBtn.innerText = "Skip";
+          skipSetupBtn.style.pointerEvents = 'auto';
+        }
+      });
+    }
 
     // ----------------------------------------------------
     // Final Submission & Firestore Setup Document Write
