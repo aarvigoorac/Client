@@ -500,10 +500,11 @@
     
     // Architecture Upgrades
     let modalStack = [];
+    let modalProductStack = []; // Fix: Dedicated internal product stack array
     let productCache = {}; // Global cache
     let globalCategories = []; 
     let globalBanners = []; 
-    let globalRecommendationPool = []; // Newly integrated Recommendation Pool for Deep Pagination
+    let globalRecommendationPool = []; 
     let carouselInterval;
     let heroInterval;
     let productSnapshotUnsubscribe = null;
@@ -586,7 +587,6 @@
         globalCategories = data.categories || [];
         globalBanners = data.banners || [];
         
-        // Build robust global recommendation pool for infinite pagination from layout
         const ids = new Set();
         if (data.slots) Object.values(data.slots).forEach(id => ids.add(id));
         if (data.categories) {
@@ -745,20 +745,36 @@
       `;
     }
 
-    // Modal Stacking Engine
+    // Modal Stacking Engine Re-Engineered For Deep Linking Back Navigation
     window.openProductModalFromStr = function(jsonStr) {
       const product = JSON.parse(jsonStr.replace(/&quot;/g, '"').replace(/&#39;/g, "'"));
       
       if (navigator.vibrate) navigator.vibrate(40);
+      const imgUrl = getProductImage(product);
+      
+      modalStack.push('product');
+      modalProductStack.push({ product, imgUrl });
+      history.pushState({ modal: 'product' }, '');
+
+      if (!productModal.classList.contains('active')) {
+        modalBg.classList.add('active');
+        productModal.classList.add('active');
+        document.body.style.overflowY = 'hidden'; 
+      }
+      
+      renderProductModalState(product, imgUrl);
+    };
+
+    function renderProductModalState(product, imgUrl) {
       currentSelectedProduct = product;
-      currentImgUrl = getProductImage(product);
+      currentImgUrl = imgUrl;
       
       const scrollArea = document.getElementById('modal-scroll-area');
       scrollArea.style.scrollBehavior = 'auto';
       scrollArea.scrollTop = 0;
       scrollArea.style.scrollBehavior = '';
       
-      mImg.src = currentImgUrl;
+      mImg.src = imgUrl;
       mImg.onerror = function() { this.src = placeholderImg; };
       mTitle.innerText = product.name;
       mPrice.innerText = `₹${(product.price || 0).toLocaleString('en-IN')}`;
@@ -794,14 +810,7 @@
           syncAllProductVoteDOM(docSnap.id, data.totalLikes || 0, data.totalDislikes || 0);
         }
       });
-
-      modalBg.classList.add('active');
-      productModal.classList.add('active');
-      document.body.style.overflowY = 'hidden'; 
-      
-      modalStack.push('product');
-      history.pushState({ modal: 'product' }, '');
-    };
+    }
 
     window.openCategoryModalFromId = async function(catId) {
       if (navigator.vibrate) navigator.vibrate(15);
@@ -809,9 +818,12 @@
       if(!cat) return;
 
       document.getElementById('cat-modal-title').innerText = cat.name;
-      catModalBg.classList.add('active');
-      catModal.classList.add('active');
-      document.body.style.overflowY = 'hidden';
+      
+      if (!catModal.classList.contains('active')) {
+        catModalBg.classList.add('active');
+        catModal.classList.add('active');
+        document.body.style.overflowY = 'hidden';
+      }
       
       modalStack.push('category');
       history.pushState({ modal: 'category' }, '');
@@ -890,9 +902,20 @@
       catObserver.observe(catSentinel);
     }
 
+    // Fix: Unified Modal Closing Logic for Hardware Back Button and Arrow Clicks
     function closeTopModal() {
       const top = modalStack.pop();
       if (top === 'product') {
+        modalProductStack.pop(); // Remove the current viewed product from internal memory stack
+        
+        // If we are deep within recommended products, DO NOT close modal. Just re-render the previous one!
+        if (modalProductStack.length > 0) {
+          const prev = modalProductStack[modalProductStack.length - 1];
+          renderProductModalState(prev.product, prev.imgUrl);
+          return; 
+        }
+        
+        // Otherwise, completely close the product modal
         if (productSnapshotUnsubscribe) {
           productSnapshotUnsubscribe();
           productSnapshotUnsubscribe = null;
@@ -900,10 +923,13 @@
         modalBg.classList.remove('active');
         productModal.classList.remove('active');
         currentSelectedProduct = null;
+        currentImgUrl = null;
+        
       } else if (top === 'category') {
         catModalBg.classList.remove('active');
         catModal.classList.remove('active');
       }
+      
       if (modalStack.length === 0) document.body.style.overflowY = ''; 
     }
 
@@ -918,6 +944,7 @@
       });
     };
 
+    // Clicking the on-screen arrow or physical back button now correctly steps through product history
     bindClose('close-modal');
     bindClose('close-cat-modal');
     modalBg.addEventListener('click', () => { if (modalStack.length > 0) history.back(); });
@@ -1102,7 +1129,6 @@
       recCarousel.scrollLeft = 0;
       recCarousel.style.scrollBehavior = '';
       
-      // Now perfectly fetches un-cached items natively using globalRecommendationPool
       const pool = globalRecommendationPool.filter(id => id !== currentId);
       if (pool.length === 0) {
         recSection.style.display = 'none';
@@ -1214,17 +1240,14 @@
       const l = Number(likes) || 0;
       const d = Number(dislikes) || 0;
 
-      // Update recommendation carousel if rendered
       const recRatingEl = document.getElementById(`rec-rating-${productId}`);
       if (recRatingEl) recRatingEl.innerHTML = getRecVoteBadgesHtml(l, d);
 
-      // Update all matching cards strictly on the homepage grid (Trending, Categories, Top Picks)
       const homeRatingEls = document.querySelectorAll(`[id="home-rating-${productId}"]`);
       homeRatingEls.forEach(el => {
         el.innerHTML = getVoteBadgesHtml(l, d);
       });
 
-      // Update modal view if currently viewing
       if (currentSelectedProduct && currentSelectedProduct.id === productId) {
         currentSelectedProduct.totalLikes = l;
         currentSelectedProduct.totalDislikes = d;
@@ -1232,7 +1255,6 @@
         mDislikesCount.innerText = d > 0 ? d.toLocaleString() : '';
       }
 
-      // Sync memory cache
       if (productCache[productId]) {
         productCache[productId].totalLikes = l;
         productCache[productId].totalDislikes = d;
