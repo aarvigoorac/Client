@@ -665,7 +665,7 @@
       const startIdx = catCurrentPage * CAT_ITEMS_PER_PAGE + 1;
       const endIdx = startIdx + CAT_ITEMS_PER_PAGE - 1;
 
-      for(let i=startIdx; i<=endIdx && i<=30; i++) {
+      for(let i=startIdx; i<=endIdx && i<=60; i++) {
         if(slots[i] && !productCache[slots[i]]) requiredIds.push(slots[i]);
       }
 
@@ -679,7 +679,7 @@
 
       let newHtml = '';
       let hasProductsInChunk = false;
-      for(let i=startIdx; i<=endIdx && i<=30; i++) {
+      for(let i=startIdx; i<=endIdx && i<=60; i++) {
         const pid = slots[i];
         if(pid && productCache[pid]) {
           newHtml += buildCardHtml(productCache[pid]);
@@ -701,7 +701,7 @@
 
       if (loadingIndicator) loadingIndicator.classList.remove('active');
 
-      if (endIdx >= 30) {
+      if (endIdx >= 60) {
         catHasMore = false;
       }
 
