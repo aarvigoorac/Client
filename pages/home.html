@@ -50,6 +50,12 @@
     .hero-animate { animation: none; transition: none; }
     #dynamic-hero-container { min-height: 140px; }
 
+    /* Top Promo Banner */
+    .hero-banner { width: 100%; height: 116px; background: linear-gradient(135deg, var(--primary), var(--primary-hover)); color: white; display: flex; flex-direction: column; justify-content: center; padding: 20px; margin-bottom: 24px; border-radius: 0 0 24px 24px; box-shadow: 0 10px 25px -5px rgba(40, 116, 240, 0.3); position: relative; overflow: hidden; }
+    .hero-banner::after { content: ''; position: absolute; top: -50%; right: -10%; width: 180px; height: 180px; background: rgba(255,255,255,0.1); border-radius: 50%; }
+    .hero-banner h2 { font-size: 24px; font-weight: 800; margin-bottom: 4px; letter-spacing: -0.5px; z-index: 1; }
+    .hero-banner p { opacity: 0.9; font-size: 14px; font-weight: 500; z-index: 1; }
+
     /* Auto-Sliding Dynamic Hero Banners */
     .hero-carousel-wrap { width: 100%; height: 116px; margin-bottom: 24px; border-radius: 0 0 24px 24px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.2); position: relative; overflow: hidden; transform: translateZ(0); }
     .hero-carousel { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; width: 100%; height: 100%; scroll-behavior: smooth; }
@@ -58,7 +64,6 @@
     .hero-slide h2 { font-size: 24px; font-weight: 800; margin-bottom: 4px; letter-spacing: -0.5px; z-index: 1; text-shadow: 0 2px 8px rgba(0,0,0,0.15); }
     .hero-slide p { opacity: 0.95; font-size: 14px; font-weight: 600; z-index: 1; text-shadow: 0 1px 4px rgba(0,0,0,0.15); }
     
-    /* 6 Premium Layout Gradients */
     .grad-0 { background: linear-gradient(135deg, #2874f0, #1e5bb8); }
     .grad-1 { background: linear-gradient(135deg, #FF8008, #FFC837); }
     .grad-2 { background: linear-gradient(135deg, #11998e, #38ef7d); }
@@ -70,7 +75,7 @@
     .dot { width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,0.4); transition: all 0.3s ease; }
     .dot.active { background: #ffffff; width: 18px; border-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
 
-    /* Blinkit-Style Category Carousel */
+    /* Category Carousel */
     .cat-carousel-wrap { margin-top: 8px; margin-bottom: 24px; padding: 0 20px; overflow: hidden; }
     .cat-carousel { display: grid; grid-template-rows: repeat(2, 1fr); grid-auto-flow: column; gap: 16px 12px; overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: 4px; }
     .cat-carousel::after { content: ''; padding-right: 8px; grid-row: span 2; }
@@ -90,20 +95,21 @@
     .section-header { display: flex; justify-content: space-between; align-items: center; padding: 0 20px; margin-bottom: 16px; margin-top: 24px; }
     .section-title { font-size: 18px; font-weight: 800; color: var(--text-main); }
 
-    /* Shared Card Styles */
+    /* Professional Grid Fix applied here */
     .product-card { background: var(--surface-color); border-radius: 16px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03); cursor: pointer; transition: transform 0.2s cubic-bezier(0.32, 0.72, 0, 1), box-shadow 0.2s; display: flex; flex-direction: column; border: 1px solid var(--border); }
     .product-card:active { transform: scale(0.96); box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
     .img-container { width: 100%; aspect-ratio: 1; background: var(--surface-color); position: relative; padding: 12px; }
     .img-container img { width: 100%; height: 100%; object-fit: contain; mix-blend-mode: multiply; }
     @media (prefers-color-scheme: dark) { .img-container img { mix-blend-mode: normal; } }
-
-    /* Card Vote Badges (Replaces Stars) */
-    .card-vote-wrap { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
-    .card-vote-pill { font-size: 12px; display: inline-flex; align-items: center; padding: 4px 8px; border-radius: 6px; font-weight: 700; gap: 4px; }
-    .card-vote-pill.like { background: var(--success-bg); color: var(--success-text); }
-    .card-vote-pill.dislike { background: var(--warning-bg); color: var(--warning); }
-    .card-vote-pill.neutral { background: var(--skeleton-base); color: var(--text-sub); opacity: 0.85; }
-    .card-vote-pill svg { width: 12px; height: 12px; fill: currentColor; stroke: none; flex-shrink: 0; }
+    
+    /* Updated Flex and Line heights for grid lock */
+    .card-info { padding: 12px 16px 16px; display: flex; flex-direction: column; flex: 1; background: var(--surface-color); justify-content: flex-start; }
+    .card-title { font-size: 13px; font-weight: 600; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; margin-bottom: 8px; line-height: 1.4; color: var(--text-main); min-height: 37px; }
+    
+    .card-price { font-size: 17px; font-weight: 800; color: var(--text-main); margin-top: auto; display: flex; align-items: baseline; gap: 2px; }
+    
+    .card-rating { font-size: 12px; color: var(--success-text); background: var(--success-bg); display: inline-flex; align-items: center; padding: 4px 8px; border-radius: 6px; margin-top: 8px; font-weight: 700; gap: 4px; align-self: flex-start; }
+    .card-rating svg { width: 12px; height: 12px; fill: currentColor; }
 
     /* Section 1 & 5: 2-Column Grid */
     .grid-2-col { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; padding: 0 20px; }
@@ -126,10 +132,14 @@
     .f-main { grid-column: span 2; }
     .f-main .img-container { aspect-ratio: 16/9; padding: 0; }
     .f-main .img-container img { object-fit: cover; border-radius: 16px 16px 0 0; mix-blend-mode: normal; width: 100%; height: 100%; }
+    .f-main .card-title { font-size: 16px; -webkit-line-clamp: 2; margin-top: 4px; }
+    .f-main .card-price { font-size: 20px; }
     
     .f-side { grid-column: span 1; }
     .f-side .card-info { padding: 12px; }
-    .f-side .card-vote-wrap { display: none; } 
+    .f-side .card-title { font-size: 13px; margin-bottom: 4px; }
+    .f-side .card-price { font-size: 15px; }
+    .f-side .card-rating { display: none; } 
     
     .f-banner { grid-column: span 2; display: flex; flex-direction: row; align-items: center; height: 110px; padding: 0; }
     .f-banner .img-container { width: 110px; height: 100%; border-right: 1px solid var(--border); border-radius: 16px 0 0 16px; padding: 8px; }
@@ -153,16 +163,19 @@
     .loading-more { display: none; text-align: center; padding: 20px 10px; color: var(--text-sub); font-size: 14px; font-weight: 600; width: 100%; align-items: center; justify-content: center; gap: 8px; grid-column: span 2; }
     .loading-more.active { display: flex; }
     .loading-more svg { animation: spin 1s linear infinite; width: 20px; height: 20px; stroke: currentColor; }
+    @keyframes spin { 100% { transform: rotate(360deg); } }
     .sentinel { height: 20px; width: 100%; grid-column: span 2; }
 
     /* Multi-Layer Modals Base Setup */
     .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); opacity: 0; pointer-events: none; transition: opacity 0.3s ease; backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); }
     .modal-overlay.active { opacity: 1; pointer-events: auto; }
     
-    /* Category Level Modal (Layer 1) */
     .base-modal { position: fixed; bottom: 0; left: 0; width: 100%; background: var(--bg-color); border-radius: 24px 24px 0 0; transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1); display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 -10px 40px rgba(0,0,0,0.2); }
     .base-modal.active { transform: translateY(0); }
-    
+    .modal-pull-indicator { display: none; } /* Hidden for full screen modal */
+    .modal-scroll { flex: 1; overflow-y: auto; padding-bottom: 120px; }
+
+    /* Category Level Modal (Layer 1) */
     #cat-modal-bg { z-index: 899; }
     #cat-modal { z-index: 900; height: 100%; height: 100dvh; max-height: 100%; max-height: 100dvh; border-radius: 0; }
     .cat-modal-header { display: flex; align-items: center; padding: calc(12px + env(safe-area-inset-top)) 16px 16px; position: sticky; top: 0; background: rgba(var(--surface-rgb), 0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); z-index: 10; gap: 16px; }
@@ -171,15 +184,12 @@
     .cat-back-btn svg { width: 24px; height: 24px; stroke: currentColor; stroke-width: 2.5; }
     .cat-modal-title { font-size: 18px; font-weight: 800; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1; }
 
-    /* =========================================================================
-       ENTERPRISE FULL-SCREEN PRODUCT MODAL (Layer 2)
-       ========================================================================= */
+    /* =========================================================
+       ENTERPRISE FULL SCREEN PRODUCT MODAL (Layer 2)
+       ========================================================= */
     #modal-bg { z-index: 1999; }
-    .product-modal { position: fixed; bottom: 0; left: 0; width: 100vw; height: 100dvh; max-height: 100dvh; border-radius: 0; background: var(--bg-color); z-index: 2000; transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1); display: flex; flex-direction: column; overflow: hidden; }
-    .product-modal.active { transform: translateY(0); }
-    .modal-scroll { flex: 1; overflow-y: auto; padding-bottom: 120px; position: relative; }
+    #product-modal { z-index: 2000; height: 100dvh !important; max-height: 100dvh !important; border-radius: 0 !important; width: 100vw; }
     
-    /* Parallax Image Engine */
     .modal-img-wrapper { position: sticky; top: 0; z-index: 1; width: 100%; height: 45vh; min-height: 350px; background: var(--surface-color); display: flex; align-items: center; justify-content: center; padding: 0; margin: 0; border: none; }
     .modal-img { width: 100%; height: 100%; object-fit: contain; margin: 0; mix-blend-mode: multiply; }
     @media (prefers-color-scheme: dark) { .modal-img { mix-blend-mode: normal; } }
@@ -188,12 +198,11 @@
     .close-btn-overlay:active { transform: scale(0.9); }
     .close-btn-overlay svg { width: 24px; height: 24px; stroke: currentColor; stroke-width: 2.5; }
     
-    /* Content Layer (Scrolls OVER the image) */
     .modal-details { position: relative; z-index: 10; background: var(--bg-color); border-radius: 24px 24px 0 0; margin-top: -24px; padding: 24px; box-shadow: 0 -8px 24px rgba(0,0,0,0.08); }
     .m-title { font-size: 22px; font-weight: 800; margin-bottom: 12px; line-height: 1.3; color: var(--text-main); }
     .m-price { font-size: 28px; font-weight: 800; color: var(--primary); margin-bottom: 16px; display: flex; align-items: baseline; gap: 8px; }
     
-    /* Professional Action Bar (Like / Dislike / Share) */
+    /* Vote / Action Bar */
     .product-vote-bar { display: flex; gap: 12px; margin-bottom: 24px; align-items: center; }
     .vote-action-btn { display: flex; align-items: center; gap: 8px; padding: 10px 18px; border-radius: 50px; background: var(--surface-color); border: 1.5px solid var(--border); font-weight: 700; font-size: 15px; color: var(--text-sub); cursor: pointer; transition: all 0.2s cubic-bezier(0.32, 0.72, 0, 1); }
     .vote-action-btn:active { transform: scale(0.95); }
@@ -207,12 +216,13 @@
 
     .m-desc { font-size: 15px; color: var(--text-sub); line-height: 1.6; padding-bottom: 24px; border-bottom: 1px solid var(--border); }
 
-    /* Sticky Bottom Action Bar (Always Active) */
-    .action-bar { position: absolute; bottom: 0; left: 0; width: 100%; padding: 16px 20px; background: var(--surface-color); border-top: 1px solid var(--border); display: flex; gap: 12px; z-index: 20; padding-bottom: max(16px, env(safe-area-inset-bottom)); box-shadow: 0 -4px 20px rgba(0,0,0,0.05); }
+    /* Sticky Bottom Action Bar & Out of Stock */
+    .action-bar { position: absolute; bottom: 0; left: 0; width: 100%; padding: 16px 20px; background: var(--surface-color); border-top: 1px solid var(--border); display: flex; gap: 12px; z-index: 20; padding-bottom: calc(16px + env(safe-area-inset-bottom)); box-shadow: 0 -4px 12px rgba(0,0,0,0.03); }
     .btn { flex: 1; padding: 16px; border-radius: 14px; font-size: 16px; font-weight: 700; text-align: center; cursor: pointer; border: none; transition: transform 0.2s cubic-bezier(0.32, 0.72, 0, 1); display: flex; justify-content: center; align-items: center; gap: 8px; }
     .btn:active { transform: scale(0.96); }
     .btn-add { background: var(--bg-color); color: var(--text-main); border: 1.5px solid var(--border); }
     .btn-buy { background: var(--primary); color: #fff; box-shadow: 0 4px 12px rgba(40, 116, 240, 0.25); }
+    .out-of-stock-msg { flex: 1; padding: 16px; border-radius: 14px; font-size: 16px; font-weight: 800; text-align: center; background: var(--warning-bg); color: var(--warning); border: 1.5px solid var(--warning); display: flex; justify-content: center; align-items: center; gap: 8px; }
 
     /* Recommendations Carousel */
     .rec-section { position: relative; z-index: 10; padding: 24px 0 0 0; background: var(--bg-color); }
@@ -225,6 +235,7 @@
     .rec-img-wrap img { width: 100%; height: 100%; object-fit: contain; mix-blend-mode: multiply; }
     @media (prefers-color-scheme: dark) { .rec-img-wrap img { mix-blend-mode: normal; } }
     .rec-info { padding: 12px; display: flex; flex-direction: column; flex: 1; min-width: 0; }
+    .rec-title { font-size: 12px; font-weight: 600; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; margin-bottom: 8px; line-height: 1.4; color: var(--text-main); min-height: 34px; }
     .rec-price { font-size: 15px; font-weight: 800; color: var(--text-main); margin-bottom: 8px; }
     
     .rec-vote-wrap { display: flex; align-items: center; gap: 6px; margin-top: auto; }
@@ -233,23 +244,17 @@
     .rec-vote-pill.dislike { background: var(--warning-bg); color: var(--warning); }
     .rec-vote-pill.neutral { background: var(--skeleton-base); color: var(--text-sub); opacity: 0.85; }
     .rec-vote-pill svg { width: 10px; height: 10px; fill: currentColor; stroke: none; flex-shrink: 0; }
-    
-    /* Horizontal Sentinel for Rec Pagination */
     .rec-sentinel { flex: 0 0 10px; width: 10px; pointer-events: none; }
 
-    /* Reviews Section Subsystem */
+    /* Reviews Section */
     .reviews-section { position: relative; z-index: 10; padding: 24px; background: var(--bg-color); }
-    
-    /* Perfect Long Name Truncation Fixes */
     .mc-header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; width: 100%; min-width: 0; }
     .mc-header-info { flex: 1 1 auto; min-width: 0; overflow: hidden; }
     .mc-name { font-weight: 800; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; width: 100%; }
-
     .review-header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; width: 100%; min-width: 0; }
     .review-header-info { flex: 1 1 auto; min-width: 0; overflow: hidden; }
     .review-name { font-weight: 800; font-size: 14px; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; width: 100%; }
 
-    /* My Comment - Display Mode (Sleek Glassmorphic Brand Card) */
     .my-comment-display { background: linear-gradient(135deg, var(--primary), var(--primary-hover)); padding: 18px 20px; border-radius: 18px; margin-bottom: 24px; color: white; box-shadow: 0 8px 24px rgba(40, 116, 240, 0.25); position: relative; overflow: hidden; }
     .my-comment-display::after { content: ''; position: absolute; top: -30%; right: -15%; width: 140px; height: 140px; background: rgba(255,255,255,0.08); border-radius: 50%; pointer-events: none; }
     .mc-avatar { width: 44px; height: 44px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.4); object-fit: cover; flex-shrink: 0; background: rgba(255,255,255,0.2); }
@@ -258,7 +263,6 @@
     .mc-edit-btn:active { transform: scale(0.94); background: rgba(255,255,255,0.35); }
     .mc-text { font-size: 15px; line-height: 1.55; opacity: 0.98; font-weight: 500; word-break: break-word; overflow-wrap: break-word; }
 
-    /* My Comment - Edit/Compose Mode (Sleek Professional Form) */
     .my-comment-edit { background: var(--surface-color); padding: 20px; border-radius: 18px; margin-bottom: 24px; border: 1.5px solid var(--border); box-shadow: 0 6px 16px rgba(0,0,0,0.03); }
     .my-comment-edit textarea { width: 100%; padding: 14px 16px; border: 1.5px solid var(--border); border-radius: 14px; resize: none; min-height: 105px; font-family: inherit; font-size: 15px; margin-bottom: 8px; background: var(--bg-color); outline: none; color: var(--text-main); transition: border-color 0.2s, box-shadow 0.2s; line-height: 1.5; }
     .my-comment-edit textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(40, 116, 240, 0.12); }
@@ -271,7 +275,6 @@
 
     .login-prompt { padding: 20px; text-align: center; background: var(--surface-color); border-radius: 16px; border: 1.5px dashed var(--border); margin-bottom: 24px; color: var(--text-sub); font-size: 14px; font-weight: 600; display: flex; flex-direction: column; align-items: center; gap: 12px; }
 
-    /* Other Comments List */
     .review-card { background: var(--surface-color); padding: 18px 20px; border-radius: 16px; margin-bottom: 12px; border: 1px solid var(--border); box-shadow: 0 2px 6px rgba(0,0,0,0.02); }
     .review-avatar { width: 42px; height: 42px; border-radius: 50%; background: var(--skeleton-base); object-fit: cover; flex-shrink: 0; }
     .review-date { font-size: 12px; color: var(--text-sub); font-weight: 600; margin-top: 2px; }
@@ -280,18 +283,6 @@
     /* Notification Toast */
     #toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-100px); background: #137333; color: white; padding: 14px 24px; border-radius: 50px; font-size: 15px; font-weight: 600; opacity: 0; transition: all 0.4s cubic-bezier(0.32, 0.72, 0, 1); z-index: 3000; box-shadow: 0 8px 20px rgba(0,0,0,0.25); display: flex; align-items: center; gap: 10px; width: max-content; }
     #toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
-
-    /* HOMEPAGE SPECIFIC STRUCTURAL FIXES */
-    .card-info { padding: 12px 16px 16px; display: flex; flex-direction: column; flex: 1; background: var(--surface-color); min-width: 0; }
-    .card-title { font-size: 14px; font-weight: 600; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; margin-bottom: 8px; line-height: 1.4; color: var(--text-main); height: 39.2px; }
-    .card-price { font-size: 17px; font-weight: 800; color: var(--text-main); display: flex; align-items: baseline; gap: 2px; }
-
-    .list-info { padding: 16px; display: flex; flex-direction: column; flex: 1; height: 100%; justify-content: center; min-width: 0; }
-    .list-title { font-size: 15px; font-weight: 600; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; margin-bottom: 6px; line-height: 1.4; color: var(--text-main); height: 42px; }
-
-    .f-main .card-title { font-size: 16px; -webkit-line-clamp: 2; margin-top: 4px; height: 44.8px; }
-    .f-side .card-title { font-size: 13px; margin-bottom: 4px; height: 36.4px; }
-    .rec-title { font-size: 13px; font-weight: 600; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; margin-bottom: 8px; line-height: 1.4; color: var(--text-main); height: 36.4px; }
   </style>
 </head>
 <body>
@@ -333,6 +324,37 @@
       <div class="product-card skeleton-card"><div class="skeleton sk-img"></div><div class="card-info"><div class="skeleton sk-title"></div><div class="skeleton sk-title short"></div><div class="skeleton sk-price-box"></div></div></div>
       <div class="product-card skeleton-card"><div class="skeleton sk-img"></div><div class="card-info"><div class="skeleton sk-title"></div><div class="skeleton sk-title short"></div><div class="skeleton sk-price-box"></div></div></div>
     </div>
+    
+    <div class="section-header"><h3 class="section-title skeleton" style="width: 160px; height: 20px; border-radius: 4px;"></h3></div>
+    <div class="horizontal-scroll">
+      <div class="product-card h-card skeleton-card"><div class="skeleton sk-img"></div><div class="card-info"><div class="skeleton sk-title"></div><div class="skeleton sk-title short"></div><div class="skeleton sk-price-box"></div></div></div>
+      <div class="product-card h-card skeleton-card"><div class="skeleton sk-img"></div><div class="card-info"><div class="skeleton sk-title"></div><div class="skeleton sk-title short"></div><div class="skeleton sk-price-box"></div></div></div>
+      <div class="product-card h-card skeleton-card"><div class="skeleton sk-img"></div><div class="card-info"><div class="skeleton sk-title"></div><div class="skeleton sk-title short"></div><div class="skeleton sk-price-box"></div></div></div>
+    </div>
+
+    <div class="featured-grid-wrap">
+      <div class="featured-title"><div class="skeleton" style="width: 180px; height: 24px; border-radius: 4px;"></div></div>
+      <div class="featured-grid">
+        <div class="product-card f-main skeleton-card"><div class="skeleton sk-img" style="aspect-ratio: 16/9;"></div><div class="card-info"><div class="skeleton sk-title"></div><div class="skeleton sk-price-box"></div></div></div>
+        <div class="product-card f-side skeleton-card"><div class="skeleton sk-img"></div><div class="card-info"><div class="skeleton sk-title"></div><div class="skeleton sk-price-box" style="height:14px; margin-top:8px;"></div></div></div>
+        <div class="product-card f-side skeleton-card"><div class="skeleton sk-img"></div><div class="card-info"><div class="skeleton sk-title"></div><div class="skeleton sk-price-box" style="height:14px; margin-top:8px;"></div></div></div>
+        <div class="product-card f-banner skeleton-card"><div class="skeleton sk-img" style="width: 110px; height: 100%;"></div><div class="card-info" style="justify-content:center;"><div class="skeleton sk-title"></div><div class="skeleton sk-price-box"></div></div></div>
+      </div>
+    </div>
+
+    <div class="section-header" style="margin-top:12px;"><h3 class="section-title skeleton" style="width: 130px; height: 20px; border-radius: 4px;"></h3></div>
+    <div class="list-container">
+      <div class="product-card list-card skeleton-card"><div class="skeleton sk-img" style="width: 120px; height: 100%;"></div><div class="card-info" style="justify-content:center;"><div class="skeleton sk-title"></div><div class="skeleton sk-title short"></div><div class="skeleton sk-price-box"></div></div></div>
+      <div class="product-card list-card skeleton-card"><div class="skeleton sk-img" style="width: 120px; height: 100%;"></div><div class="card-info" style="justify-content:center;"><div class="skeleton sk-title"></div><div class="skeleton sk-title short"></div><div class="skeleton sk-price-box"></div></div></div>
+      <div class="product-card list-card skeleton-card"><div class="skeleton sk-img" style="width: 120px; height: 100%;"></div><div class="card-info" style="justify-content:center;"><div class="skeleton sk-title"></div><div class="skeleton sk-title short"></div><div class="skeleton sk-price-box"></div></div></div>
+    </div>
+    
+    <div class="section-header"><h3 class="section-title skeleton" style="width: 150px; height: 20px; border-radius: 4px;"></h3></div>
+    <div class="grid-2-col">
+      <div class="product-card skeleton-card"><div class="skeleton sk-img"></div><div class="card-info"><div class="skeleton sk-title"></div><div class="skeleton sk-title short"></div><div class="skeleton sk-price-box"></div></div></div>
+      <div class="product-card skeleton-card"><div class="skeleton sk-img"></div><div class="card-info"><div class="skeleton sk-title"></div><div class="skeleton sk-title short"></div><div class="skeleton sk-price-box"></div></div></div>
+    </div>
+
   </div>
 
   <!-- Layer 1: Category Modal -->
@@ -357,25 +379,25 @@
     </div>
   </div>
 
-  <!-- Layer 2: Product Detail Modal (Edge-to-Edge Parallax) -->
+  <!-- Layer 2: Product Detail Modal (Enterprise Full Screen Replacement) -->
   <div class="modal-overlay" id="modal-bg"></div>
-  <div class="product-modal" id="product-modal">
+  <div class="base-modal" id="product-modal">
     
     <div class="modal-scroll" id="modal-scroll-area">
       <!-- Edge to Edge Full Media Canvas (Parallax Sticky) -->
       <div class="modal-img-wrapper">
-        <button class="close-btn-overlay" id="close-modal-btn">
+        <button class="close-btn-overlay" id="close-modal">
           <svg fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" /></svg>
         </button>
         <img id="m-img" class="modal-img" src="" alt="Product">
       </div>
       
-      <!-- Content Layer (Scrolls OVER the image) -->
+      <!-- Content Layer -->
       <div class="modal-details">
         <h2 id="m-title" class="m-title">Loading...</h2>
         <div id="m-price" class="m-price">₹0</div>
         
-        <!-- Professional Independent Vote Bar (Hides Zeros) + Native Share -->
+        <!-- Professional Independent Vote Bar + Native Share -->
         <div class="product-vote-bar">
           <button class="vote-action-btn like" id="btn-vote-like" onclick="handleVote('like')">
             <svg viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.56l2.5-8.76A2 2 0 0 0 20.83 9H14z"/><path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg> 
@@ -393,7 +415,7 @@
         <p id="m-desc" class="m-desc"></p>
       </div>
       
-      <!-- Zero-Read Dynamic Recommendations with Horizontal Pagination -->
+      <!-- Dynamic Recommendations -->
       <div class="rec-section" id="rec-section" style="display:none;">
         <div class="rec-header">You Might Also Like</div>
         <div class="rec-carousel" id="rec-carousel">
@@ -425,6 +447,10 @@
     <div class="action-bar">
       <button class="btn btn-add" id="btn-add-cart">Add to Cart</button>
       <button class="btn btn-buy" id="btn-buy-now">Buy Now</button>
+      <div id="out-of-stock-msg" class="out-of-stock-msg" style="display: none;">
+        <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+        Out of Stock
+      </div>
     </div>
   </div>
 
@@ -436,60 +462,64 @@
 
   <script type="module">
     import { auth, db } from '../config.js';
-    import { collection, query, limit, where, getDocs, getDoc, startAfter, doc, setDoc, increment, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { doc, getDoc, getDocs, collection, query, limit, where, setDoc, startAfter, increment, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
     import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
     const contentDiv = document.getElementById('homepage-content');
     
-    // Modal Elements
+    // Modals
     const modalBg = document.getElementById('modal-bg');
     const productModal = document.getElementById('product-modal');
     const catModalBg = document.getElementById('cat-modal-bg');
     const catModal = document.getElementById('cat-modal');
-    const closeModalBtn = document.getElementById('close-modal-btn');
+    
+    // Product UI
     const mImg = document.getElementById('m-img');
     const mTitle = document.getElementById('m-title');
     const mPrice = document.getElementById('m-price');
     const mDesc = document.getElementById('m-desc');
+    const btnAddCart = document.getElementById('btn-add-cart');
+    const btnBuyNow = document.getElementById('btn-buy-now');
+    const outOfStockMsg = document.getElementById('out-of-stock-msg');
+    const toast = document.getElementById('toast');
+    
+    // New Voting & Review UI Elements
     const mLikesCount = document.getElementById('m-likes-count');
     const mDislikesCount = document.getElementById('m-dislikes-count');
     const btnVoteLike = document.getElementById('btn-vote-like');
     const btnVoteDislike = document.getElementById('btn-vote-dislike');
-    
-    const btnAddCart = document.getElementById('btn-add-cart');
-    const btnBuyNow = document.getElementById('btn-buy-now');
-    const toast = document.getElementById('toast');
 
-    // State Variables
     let currentUser = null;
     let currentSelectedProduct = null;
     let currentImgUrl = null;
-    let isModalOpen = false;
-
-    // Advanced Enterprise Caching & Stack Arrays
-    let productCache = {};
-    let globalRecommendationPool = [];
-    let modalProductStack = [];
-    let productSnapshotUnsubscribe = null;
     
+    // Architecture Upgrades
+    let modalStack = [];
+    let productCache = {}; // Global cache
+    let globalCategories = []; 
+    let globalBanners = []; 
+    let carouselInterval;
+    let heroInterval;
+    let productSnapshotUnsubscribe = null;
+
+    // Review & Recommendation States
+    let currentRecPool = [];
+    let recCurrentIndex = 0;
+    let isFetchingRecs = false;
+    let reviewsLastVisible = null;
+    let isFetchingReviews = false;
+    let hasMoreReviews = true;
+    let currentUserReviewData = null; 
+    let isEditingMyComment = false;
+
     // Category Pagination State
     let activeCategoryObj = null;
     let catCurrentPage = 0;
     let isFetchingCategory = false;
     let catHasMore = true;
     const CAT_ITEMS_PER_PAGE = 10;
-    let globalCategories = [];
-    let globalBanners = [];
-    let carouselInterval;
-    let heroInterval;
 
-    // Recommendation Pagination State
-    let currentRecPool = [];
-    let recCurrentIndex = 0;
-    let isFetchingRecs = false;
-
-    // Professional Placeholders & SVGs
-    const placeholderImg = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='400' viewBox='0 0 400 400'><rect width='400' height='400' fill='%23f1f3f6'/><path d='M200 160c-22.1 0-40 17.9-40 40s17.9 40 40 40 40-17.9 40-40-17.9-40-40-40zm0 64c-13.2 0-24-10.8-24-24s10.8-24 24-24 24 10.8 24 24-10.8 24-24 24z' fill='%23cccccc'/><path d='M264 120H136c-13.2 0-24 10.8-24 24v112c0 13.2 10.8 24 24 24h128c13.2 0 24-10.8 24-24V144c0-13.2-10.8-24-24-24zm8 136c0 4.4-3.6 8-8 8H136c-4.4 0-8-3.6-8-8V144c0-4.4 3.6-8 8-8h128c4.4 0 8 3.6 8 8v112z' fill='%23cccccc'/></svg>";
+    const placeholderImg = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==";
     const catPlaceholderSvg = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==";
     const avatarPlaceholder = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23999'><path d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/></svg>";
     const svgThumbUp = `<svg viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.56l2.5-8.76A2 2 0 0 0 20.83 9H14z"/><path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>`;
@@ -503,102 +533,14 @@
       return placeholderImg;
     };
 
-    // --- REUSABLE ZERO-HIDING BADGE BUILDERS ---
-    function getVoteBadgesHtml(likes = 0, dislikes = 0) {
-      const lCount = Number(likes) || 0;
-      const dCount = Number(dislikes) || 0;
-      const likeClass = lCount > 0 ? 'like' : 'neutral';
-      const dislikeClass = dCount > 0 ? 'dislike' : 'neutral';
-      return `
-        <div class="card-vote-wrap" style="margin-top: auto;">
-          <div class="card-vote-pill ${likeClass}">${svgThumbUp} ${lCount > 0 ? `<span>${lCount.toLocaleString()}</span>` : ''}</div>
-          <div class="card-vote-pill ${dislikeClass}">${svgThumbDown} ${dCount > 0 ? `<span>${dCount.toLocaleString()}</span>` : ''}</div>
-        </div>
-      `;
-    }
-
-    function getRecVoteBadgesHtml(likes = 0, dislikes = 0) {
-      const lCount = Number(likes) || 0;
-      const dCount = Number(dislikes) || 0;
-      const likeClass = lCount > 0 ? 'like' : 'neutral';
-      const dislikeClass = dCount > 0 ? 'dislike' : 'neutral';
-      return `
-        <div class="rec-vote-wrap">
-          <div class="rec-vote-pill ${likeClass}">${svgThumbUp} ${lCount > 0 ? `<span>${lCount.toLocaleString()}</span>` : ''}</div>
-          <div class="rec-vote-pill ${dislikeClass}">${svgThumbDown} ${dCount > 0 ? `<span>${dCount.toLocaleString()}</span>` : ''}</div>
-        </div>
-      `;
-    }
-
-    // Real-Time DOM & Cache Synchronizer across cards and modals (Fixing Duplicate IDs)
-    function syncAllProductVoteDOM(productId, likes, dislikes) {
-      const l = Number(likes) || 0;
-      const d = Number(dislikes) || 0;
-
-      const htmlHomeSearch = getVoteBadgesHtml(l, d);
-      const htmlRec = getRecVoteBadgesHtml(l, d);
-
-      // Update Search & Homepage Layout Cards universally
-      document.querySelectorAll(`[id="search-rating-${productId}"]`).forEach(el => {
-        el.innerHTML = htmlHomeSearch;
-      });
-
-      // Update Recommendation Carousel Cards universally
-      document.querySelectorAll(`[id="rec-rating-${productId}"]`).forEach(el => {
-        el.innerHTML = htmlRec;
-      });
-
-      // Update Modal View if it's the currently viewed product
-      if (currentSelectedProduct && currentSelectedProduct.id === productId) {
-        currentSelectedProduct.totalLikes = l;
-        currentSelectedProduct.totalDislikes = d;
-        mLikesCount.innerText = l > 0 ? l.toLocaleString() : '';
-        mDislikesCount.innerText = d > 0 ? d.toLocaleString() : '';
-      }
-
-      // Update In-Memory Cache
-      if (productCache[productId]) {
-        productCache[productId].totalLikes = l;
-        productCache[productId].totalDislikes = d;
-      }
-    }
-
     onAuthStateChanged(auth, (user) => { 
       currentUser = user; 
-      if (isModalOpen && currentSelectedProduct) {
+      if (modalStack.includes('product') && currentSelectedProduct) {
         initReviewSection(currentSelectedProduct.id);
       }
     });
 
-    // --- DEEP LINK INTERCEPTION & HOMEPAGE BOOT SEQUENCE ---
-    window.addEventListener('DOMContentLoaded', async () => {
-      // Deep Link Check
-      const urlParams = new URLSearchParams(window.location.search);
-      const productId = urlParams.get('product');
-      if (productId) {
-        try {
-          const docRef = doc(db, "products", productId);
-          const docSnap = await getDoc(docRef);
-          if (docSnap.exists()) {
-            const p = docSnap.data();
-            p.id = docSnap.id;
-            productCache[p.id] = p;
-            const imgUrl = (p.images && p.images.thumbnail) ? p.images.thumbnail : placeholderImg;
-            
-            // Clean up the URL to preserve history stack integrity
-            window.history.replaceState({}, document.title, window.location.pathname);
-            
-            // Push directly to modal
-            pushToModalStack(p, imgUrl);
-          }
-        } catch (e) {
-          console.error("Deep link fetch error:", e);
-        }
-      }
-      
-      initCustomerHomepage();
-    });
-
+    // 1. Core Data Fetching Pipeline
     async function initCustomerHomepage() {
       try {
         const layoutDoc = await getDoc(doc(db, "layout", "homepage"));
@@ -612,17 +554,10 @@
         globalCategories = data.categories || [];
         globalBanners = data.banners || [];
         
-        // Zero-Read Recommendation Pool Builder (RAM only)
-        const ids = new Set();
-        Object.values(slots).forEach(id => ids.add(id));
-        globalCategories.forEach(cat => {
-            if (cat.slots) Object.values(cat.slots).forEach(id => ids.add(id));
-        });
-        globalRecommendationPool = Array.from(ids);
-        
         renderHeroBanners();
         
         const requiredProductIds = [];
+        
         for (let i = 1; i <= 16; i++) {
           if (slots[i]) requiredProductIds.push(slots[i]);
         }
@@ -749,27 +684,200 @@
     function buildCardHtml(product, customClass = '') {
       if (!product) return ''; 
       const imgUrl = getProductImage(product);
-      const likes = product.totalLikes || 0;
-      const dislikes = product.totalDislikes || 0;
-
       const prodJson = JSON.stringify(product).replace(/'/g, "&#39;").replace(/"/g, "&quot;");
 
       return `
-        <div class="product-card ${customClass}" onclick="openProductModalFromStr('${prodJson}')" id="search-card-${product.id}">
+        <div class="product-card ${customClass}" id="card-${product.id}" onclick="openProductModalFromStr('${prodJson}')">
           <div class="img-container">
             <img src="${imgUrl}" onerror="this.src='${placeholderImg}'" alt="${product.name}">
           </div>
           <div class="card-info">
             <div class="card-title">${product.name}</div>
-            <div id="search-rating-${product.id}" style="margin-top: auto;">
-              ${getVoteBadgesHtml(likes, dislikes)}
-            </div>
             <div class="card-price">₹${(product.price || 0).toLocaleString('en-IN')}</div>
           </div>
         </div>
       `;
     }
 
+    // Modal Stacking Engine
+    window.openProductModalFromStr = function(jsonStr) {
+      const product = JSON.parse(jsonStr.replace(/&quot;/g, '"').replace(/&#39;/g, "'"));
+      
+      if (navigator.vibrate) navigator.vibrate(40);
+      currentSelectedProduct = product;
+      currentImgUrl = getProductImage(product);
+      
+      const scrollArea = document.getElementById('modal-scroll-area');
+      scrollArea.style.scrollBehavior = 'auto';
+      scrollArea.scrollTop = 0;
+      scrollArea.style.scrollBehavior = '';
+      
+      mImg.src = currentImgUrl;
+      mImg.onerror = function() { this.src = placeholderImg; };
+      mTitle.innerText = product.name;
+      mPrice.innerText = `₹${(product.price || 0).toLocaleString('en-IN')}`;
+      mDesc.innerText = product.description || "Detailed description coming soon.";
+      
+      const likes = product.totalLikes || 0;
+      const dislikes = product.totalDislikes || 0;
+      mLikesCount.innerText = likes > 0 ? likes.toLocaleString() : '';
+      mDislikesCount.innerText = dislikes > 0 ? dislikes.toLocaleString() : '';
+      
+      btnVoteLike.classList.remove('active');
+      btnVoteDislike.classList.remove('active');
+
+      const stock = Number(product.stock) || 0;
+      if (stock <= 0) {
+        btnAddCart.style.display = 'none';
+        btnBuyNow.style.display = 'none';
+        outOfStockMsg.style.display = 'flex';
+      } else {
+        btnAddCart.style.display = 'flex';
+        btnBuyNow.style.display = 'flex';
+        outOfStockMsg.style.display = 'none';
+      }
+
+      initRecommendations(product.id);
+      initReviewSection(product.id);
+
+      if (productSnapshotUnsubscribe) productSnapshotUnsubscribe();
+      
+      productSnapshotUnsubscribe = onSnapshot(doc(db, "products", product.id), (docSnap) => {
+        if (docSnap.exists() && currentSelectedProduct && currentSelectedProduct.id === docSnap.id) {
+          const data = docSnap.data();
+          syncAllProductVoteDOM(docSnap.id, data.totalLikes || 0, data.totalDislikes || 0);
+        }
+      });
+
+      modalBg.classList.add('active');
+      productModal.classList.add('active');
+      document.body.style.overflowY = 'hidden'; 
+      
+      modalStack.push('product');
+      history.pushState({ modal: 'product' }, '');
+    };
+
+    window.openCategoryModalFromId = async function(catId) {
+      if (navigator.vibrate) navigator.vibrate(15);
+      const cat = globalCategories.find(c => c.id === catId);
+      if(!cat) return;
+
+      document.getElementById('cat-modal-title').innerText = cat.name;
+      catModalBg.classList.add('active');
+      catModal.classList.add('active');
+      document.body.style.overflowY = 'hidden';
+      
+      modalStack.push('category');
+      history.pushState({ modal: 'category' }, '');
+
+      const grid = document.getElementById('cat-modal-grid');
+      grid.innerHTML = Array(4).fill(`<div class="product-card skeleton-card"><div class="skeleton sk-img"></div><div class="card-info"><div class="skeleton sk-title"></div><div class="skeleton sk-title short"></div><div class="skeleton sk-price-box"></div></div></div>`).join('');
+
+      activeCategoryObj = cat;
+      catCurrentPage = 0;
+      catHasMore = true;
+      isFetchingCategory = false;
+      
+      await loadNextCategoryPage();
+    };
+
+    async function loadNextCategoryPage() {
+      if (isFetchingCategory || !catHasMore || !activeCategoryObj) return;
+      isFetchingCategory = true;
+      
+      const grid = document.getElementById('cat-modal-grid');
+      const loadingIndicator = document.getElementById('cat-loading-more');
+      
+      if (catCurrentPage > 0 && loadingIndicator) loadingIndicator.classList.add('active');
+
+      const slots = activeCategoryObj.slots || {};
+      const requiredIds = [];
+      const startIdx = catCurrentPage * CAT_ITEMS_PER_PAGE + 1;
+      const endIdx = startIdx + CAT_ITEMS_PER_PAGE - 1;
+
+      for(let i=startIdx; i<=endIdx && i<=60; i++) {
+        if(slots[i] && !productCache[slots[i]]) requiredIds.push(slots[i]);
+      }
+
+      if(requiredIds.length > 0) {
+        try {
+           const promises = requiredIds.map(id => getDoc(doc(db, "products", id)));
+           const docs = await Promise.all(promises);
+           docs.forEach(d => { if(d.exists()) productCache[d.id] = { id: d.id, ...d.data() }; });
+        } catch(e) { console.error("Cat fetch error", e); }
+      }
+
+      let newHtml = '';
+      let hasProductsInChunk = false;
+      for(let i=startIdx; i<=endIdx && i<=60; i++) {
+        const pid = slots[i];
+        if(pid && productCache[pid]) {
+          newHtml += buildCardHtml(productCache[pid]);
+          hasProductsInChunk = true;
+        }
+      }
+
+      if (catCurrentPage === 0) {
+        if(!hasProductsInChunk && startIdx === 1) {
+           grid.innerHTML = `<div style="grid-column: span 2; padding: 40px 20px; text-align: center; color: var(--text-sub); font-weight: 600;">More products coming soon.</div>`;
+        } else {
+           grid.innerHTML = newHtml;
+        }
+      } else {
+        if (newHtml) grid.insertAdjacentHTML('beforeend', newHtml);
+      }
+
+      if (loadingIndicator) loadingIndicator.classList.remove('active');
+
+      if (endIdx >= 60) catHasMore = false;
+      catCurrentPage++;
+      isFetchingCategory = false;
+    }
+
+    const catSentinel = document.getElementById('cat-sentinel');
+    if(catSentinel) {
+      const catObserver = new IntersectionObserver((entries) => {
+        if (entries[0].isIntersecting && !isFetchingCategory && catHasMore) {
+          loadNextCategoryPage();
+        }
+      }, { rootMargin: '100px' });
+      catObserver.observe(catSentinel);
+    }
+
+    function closeTopModal() {
+      const top = modalStack.pop();
+      if (top === 'product') {
+        if (productSnapshotUnsubscribe) {
+          productSnapshotUnsubscribe();
+          productSnapshotUnsubscribe = null;
+        }
+        modalBg.classList.remove('active');
+        productModal.classList.remove('active');
+        currentSelectedProduct = null;
+      } else if (top === 'category') {
+        catModalBg.classList.remove('active');
+        catModal.classList.remove('active');
+      }
+      if (modalStack.length === 0) document.body.style.overflowY = ''; 
+    }
+
+    window.addEventListener('popstate', () => {
+      if (modalStack.length > 0) closeTopModal();
+    });
+
+    const bindClose = (btnId) => {
+      document.getElementById(btnId).addEventListener('click', () => {
+        if (navigator.vibrate) navigator.vibrate(10);
+        if (modalStack.length > 0) history.back();
+      });
+    };
+
+    bindClose('close-modal');
+    bindClose('close-cat-modal');
+    modalBg.addEventListener('click', () => { if (modalStack.length > 0) history.back(); });
+    catModalBg.addEventListener('click', () => { if (modalStack.length > 0) history.back(); });
+
+    // 2. Main Render Pipeline
     function renderDynamicLayout(slots, pMap) {
       let finalHtml = '';
 
@@ -867,21 +975,14 @@
       function smoothScrollCustom(element, distance, duration) {
         const start = element.scrollLeft;
         const startTime = performance.now();
-
-        function easeOutQuart(t) {
-          return 1 - Math.pow(1 - t, 4);
-        }
+        function easeOutQuart(t) { return 1 - Math.pow(1 - t, 4); }
 
         function step(currentTime) {
           const timeElapsed = currentTime - startTime;
           const progress = Math.min(timeElapsed / duration, 1);
           const ease = easeOutQuart(progress);
-
           element.scrollLeft = start + (distance * ease);
-
-          if (timeElapsed < duration) {
-            requestAnimationFrame(step);
-          }
+          if (timeElapsed < duration) requestAnimationFrame(step);
         }
         requestAnimationFrame(step);
       }
@@ -890,229 +991,14 @@
       carouselInterval = setInterval(() => {
         if (!modalStack.length && !isInteracting) { 
           const maxScroll = carousel.scrollWidth - carousel.clientWidth;
-          
           if(carousel.scrollLeft >= maxScroll - 10) {
             smoothScrollCustom(carousel, -carousel.scrollLeft, 1000);
           } else {
             smoothScrollCustom(carousel, 176, 800);
           }
         }
-      }, 3500);
+      }, 3500); 
     }
-
-    // =========================================================================
-    // MODAL DEEP HISTORY STACK & RENDERING ENGINE
-    // =========================================================================
-    
-    window.openProductModalFromStr = function(jsonStr) {
-      const product = JSON.parse(jsonStr.replace(/&quot;/g, '"').replace(/&#39;/g, "'"));
-      if (navigator.vibrate) navigator.vibrate(40);
-      pushToModalStack(product, getProductImage(product));
-    };
-
-    function pushToModalStack(product, imgUrl) {
-      modalProductStack.push({ product, imgUrl });
-      history.pushState({ modal: 'product', id: product.id }, '', '');
-      
-      if (!isModalOpen) {
-        modalBg.classList.add('active');
-        modal.classList.add('active');
-        document.body.style.overflow = 'hidden'; 
-        isModalOpen = true;
-      }
-      renderModalState(product, imgUrl);
-    }
-
-    function renderModalState(product, imgUrl) {
-      currentSelectedProduct = product;
-      currentImgUrl = imgUrl;
-      
-      // CRITICAL BUG FIX: Force synchronous scroll reset before rendering new observers
-      const scrollArea = document.getElementById('modal-scroll-area');
-      scrollArea.style.scrollBehavior = 'auto';
-      scrollArea.scrollTop = 0;
-      scrollArea.style.scrollBehavior = '';
-      
-      mImg.src = imgUrl;
-      mImg.onerror = function() { this.src = placeholderImg; };
-      mTitle.innerText = product.name;
-      mPrice.innerText = `₹${(product.price || 0).toLocaleString('en-IN')}`;
-      mDesc.innerText = product.description || "Detailed description coming soon.";
-      
-      const likes = product.totalLikes || 0;
-      const dislikes = product.totalDislikes || 0;
-      mLikesCount.innerText = likes > 0 ? likes.toLocaleString() : '';
-      mDislikesCount.innerText = dislikes > 0 ? dislikes.toLocaleString() : '';
-      
-      btnVoteLike.classList.remove('active');
-      btnVoteDislike.classList.remove('active');
-
-      // Boot Independent Subsystems
-      initRecommendations(product.id);
-      initReviewSection(product.id);
-
-      // Attach Real-Time Snapshot Listener for live updates across multiple users
-      if (productSnapshotUnsubscribe) productSnapshotUnsubscribe();
-      
-      productSnapshotUnsubscribe = onSnapshot(doc(db, "products", product.id), (docSnap) => {
-        if (docSnap.exists() && currentSelectedProduct && currentSelectedProduct.id === docSnap.id) {
-          const data = docSnap.data();
-          syncAllProductVoteDOM(docSnap.id, data.totalLikes || 0, data.totalDislikes || 0);
-        }
-      });
-    }
-
-    // Modal Nav Controls
-    window.addEventListener('popstate', (e) => {
-      if (isModalOpen) {
-        if(modalProductStack.length > 0) modalProductStack.pop();
-        
-        if (modalProductStack.length > 0) {
-          const prev = modalProductStack[modalProductStack.length - 1];
-          renderModalState(prev.product, prev.imgUrl);
-        } else {
-          closeModalLogic();
-        }
-      } else {
-         // Handle Category Modal Popstate
-         if(document.getElementById('cat-modal').classList.contains('active')) {
-             closeTopModal();
-         }
-      }
-    });
-
-    closeModalBtn.addEventListener('click', () => {
-      if (navigator.vibrate) navigator.vibrate(40);
-      if (isModalOpen) {
-        history.go(-modalProductStack.length);
-        setTimeout(closeModalLogic, 50); // Fallback sweep
-      }
-    });
-
-    modalBg.addEventListener('click', () => {
-      if (isModalOpen) history.go(-modalProductStack.length);
-    });
-
-    function closeModalLogic() {
-      if (productSnapshotUnsubscribe) {
-        productSnapshotUnsubscribe();
-        productSnapshotUnsubscribe = null;
-      }
-      modalProductStack = [];
-      modalBg.classList.remove('active');
-      modal.classList.remove('active');
-      document.body.style.overflow = '';
-      isModalOpen = false;
-      currentSelectedProduct = null;
-      currentImgUrl = null;
-    }
-    
-    // Category Modal System (Layer 1)
-    window.openCategoryModalFromId = async function(catId) {
-      if (navigator.vibrate) navigator.vibrate(15);
-      const cat = globalCategories.find(c => c.id === catId);
-      if(!cat) return;
-
-      document.getElementById('cat-modal-title').innerText = cat.name;
-      catModalBg.classList.add('active');
-      catModal.classList.add('active');
-      document.body.style.overflowY = 'hidden';
-      
-      history.pushState({ modal: 'category' }, '');
-
-      const grid = document.getElementById('cat-modal-grid');
-      grid.innerHTML = Array(4).fill(`<div class="product-card skeleton-card"><div class="skeleton sk-img"></div><div class="card-info"><div class="skeleton sk-title"></div><div class="skeleton sk-title short"></div><div class="skeleton sk-price-box"></div></div></div>`).join('');
-
-      activeCategoryObj = cat;
-      catCurrentPage = 0;
-      catHasMore = true;
-      isFetchingCategory = false;
-      
-      await loadNextCategoryPage();
-    };
-
-    async function loadNextCategoryPage() {
-      if (isFetchingCategory || !catHasMore || !activeCategoryObj) return;
-      isFetchingCategory = true;
-      
-      const grid = document.getElementById('cat-modal-grid');
-      const loadingIndicator = document.getElementById('cat-loading-more');
-      
-      if (catCurrentPage > 0 && loadingIndicator) {
-        loadingIndicator.classList.add('active');
-      }
-
-      const slots = activeCategoryObj.slots || {};
-      const requiredIds = [];
-      const startIdx = catCurrentPage * CAT_ITEMS_PER_PAGE + 1;
-      const endIdx = startIdx + CAT_ITEMS_PER_PAGE - 1;
-
-      for(let i=startIdx; i<=endIdx && i<=60; i++) {
-        if(slots[i] && !productCache[slots[i]]) requiredIds.push(slots[i]);
-      }
-
-      if(requiredIds.length > 0) {
-        try {
-           const promises = requiredIds.map(id => getDoc(doc(db, "products", id)));
-           const docs = await Promise.all(promises);
-           docs.forEach(d => { if(d.exists()) productCache[d.id] = { id: d.id, ...d.data() }; });
-        } catch(e) { console.error("Cat fetch error", e); }
-      }
-
-      let newHtml = '';
-      let hasProductsInChunk = false;
-      for(let i=startIdx; i<=endIdx && i<=60; i++) {
-        const pid = slots[i];
-        if(pid && productCache[pid]) {
-          newHtml += buildCardHtml(productCache[pid]);
-          hasProductsInChunk = true;
-        }
-      }
-
-      if (catCurrentPage === 0) {
-        if(!hasProductsInChunk && startIdx === 1) {
-           grid.innerHTML = `<div style="grid-column: span 2; padding: 40px 20px; text-align: center; color: var(--text-sub); font-weight: 600;">More products coming soon.</div>`;
-        } else {
-           grid.innerHTML = newHtml;
-        }
-      } else {
-        if (newHtml) {
-          grid.insertAdjacentHTML('beforeend', newHtml);
-        }
-      }
-
-      if (loadingIndicator) loadingIndicator.classList.remove('active');
-
-      if (endIdx >= 60) {
-        catHasMore = false;
-      }
-
-      catCurrentPage++;
-      isFetchingCategory = false;
-    }
-
-    const catSentinel = document.getElementById('cat-sentinel');
-    if(catSentinel) {
-      const catObserver = new IntersectionObserver((entries) => {
-        if (entries[0].isIntersecting && !isFetchingCategory && catHasMore) {
-          loadNextCategoryPage();
-        }
-      }, { rootMargin: '100px' });
-      catObserver.observe(catSentinel);
-    }
-    
-    function closeTopModal() {
-      catModalBg.classList.remove('active');
-      catModal.classList.remove('active');
-      if (!isModalOpen) document.body.style.overflowY = ''; 
-    }
-
-    document.getElementById('close-cat-modal').addEventListener('click', () => {
-      if (navigator.vibrate) navigator.vibrate(10);
-      history.back();
-    });
-    catModalBg.addEventListener('click', () => { history.back(); });
-
 
     // =========================================================================
     // NATIVE SHARE PROTOCOL
@@ -1121,7 +1007,7 @@
       if (!currentSelectedProduct) return;
       if (navigator.vibrate) navigator.vibrate(10);
       
-      const shareUrl = `${window.location.origin}${window.location.pathname}?product=${currentSelectedProduct.id}`;
+      const shareUrl = `${window.location.origin}/search.html?product=${currentSelectedProduct.id}`;
       const shareData = {
         title: currentSelectedProduct.name,
         text: `Check out ${currentSelectedProduct.name} at Aarvi Stores!`,
@@ -1143,11 +1029,10 @@
     };
 
     // =========================================================================
-    // RECOMMENDATIONS ENGINE (Zero-Read Shuffle & Horizontal Scroll Batching)
+    // RECOMMENDATIONS ENGINE
     // =========================================================================
-    
     const recObserver = new IntersectionObserver((entries) => {
-      if (entries[0].isIntersecting && !isFetchingRecs && isModalOpen) {
+      if (entries[0].isIntersecting && !isFetchingRecs && modalStack.includes('product')) {
         loadMoreRecommendations(5);
       }
     }, { root: document.getElementById('rec-carousel'), rootMargin: "50px" });
@@ -1162,29 +1047,39 @@
       return array;
     }
 
+    function getRecVoteBadgesHtml(likes = 0, dislikes = 0) {
+      const lCount = Number(likes) || 0;
+      const dCount = Number(dislikes) || 0;
+      const likeClass = lCount > 0 ? 'like' : 'neutral';
+      const dislikeClass = dCount > 0 ? 'dislike' : 'neutral';
+      return `
+        <div class="rec-vote-wrap">
+          <div class="rec-vote-pill ${likeClass}">${svgThumbUp} ${lCount > 0 ? `<span>${lCount.toLocaleString()}</span>` : ''}</div>
+          <div class="rec-vote-pill ${dislikeClass}">${svgThumbDown} ${dCount > 0 ? `<span>${dCount.toLocaleString()}</span>` : ''}</div>
+        </div>
+      `;
+    }
+
     async function initRecommendations(currentId) {
       const recSection = document.getElementById('rec-section');
       const recCarousel = document.getElementById('rec-carousel');
       
       recObserver.disconnect();
-      
-      // CRITICAL BUG FIX: Reset horizontal scroll to prevent phantom intersection triggers
       recCarousel.style.scrollBehavior = 'auto';
       recCarousel.scrollLeft = 0;
       recCarousel.style.scrollBehavior = '';
       
-      if (globalRecommendationPool.length === 0) {
+      const pool = Object.keys(productCache).filter(id => id !== currentId);
+      if (pool.length === 0) {
         recSection.style.display = 'none';
         return;
       }
 
       recSection.style.display = 'block';
-      const pool = globalRecommendationPool.filter(id => id !== currentId);
       currentRecPool = shuffleArray(pool);
       recCurrentIndex = 0;
       
       recCarousel.innerHTML = '<div class="rec-sentinel" id="rec-sentinel"></div>';
-      
       const sentinelEl = document.getElementById('rec-sentinel');
       if (sentinelEl) recObserver.observe(sentinelEl);
       
@@ -1192,14 +1087,11 @@
     }
 
     async function loadMoreRecommendations(count = 5) {
-      // Hard limit logic: Never exceed 10 total items, even on scroll.
       if (isFetchingRecs || recCurrentIndex >= 10 || recCurrentIndex >= currentRecPool.length) return;
       isFetchingRecs = true;
       
       let fetchCount = count;
-      if (recCurrentIndex + fetchCount > 10) {
-        fetchCount = 10 - recCurrentIndex; // Cap the final batch
-      }
+      if (recCurrentIndex + fetchCount > 10) fetchCount = 10 - recCurrentIndex; 
 
       const selectedIds = currentRecPool.slice(recCurrentIndex, recCurrentIndex + fetchCount);
       if (selectedIds.length === 0) {
@@ -1208,7 +1100,6 @@
       }
 
       const sentinelEl = document.getElementById('rec-sentinel');
-
       const skeletonsHtml = selectedIds.map(id => `
         <div class="rec-card skeleton-card" id="sk-rec-${id}">
           <div class="skeleton" style="width:100%; aspect-ratio:1;"></div>
@@ -1222,32 +1113,15 @@
       
       if (sentinelEl) sentinelEl.insertAdjacentHTML('beforebegin', skeletonsHtml);
 
-      const fetchPromises = [];
-      selectedIds.forEach(id => {
-        if (!productCache[id]) fetchPromises.push(getDoc(doc(db, "products", id)));
-      });
-
-      if (fetchPromises.length > 0) {
-        try {
-          const docs = await Promise.all(fetchPromises);
-          docs.forEach(d => {
-            if (d.exists()) productCache[d.id] = { id: d.id, ...d.data() };
-          });
-        } catch (e) { console.error("Rec Fetch Error", e); }
-      }
-
       selectedIds.forEach(id => {
         const skEl = document.getElementById(`sk-rec-${id}`);
         const p = productCache[id];
-        
-        if (!p) {
-           if (skEl) skEl.remove();
-           return;
-        }
+        if (!p) { if (skEl) skEl.remove(); return; }
 
         const imgUrl = (p.images && p.images.thumbnail) ? p.images.thumbnail : placeholderImg;
         const likes = p.totalLikes || 0;
         const dislikes = p.totalDislikes || 0;
+        const prodJson = JSON.stringify(p).replace(/'/g, "&#39;").replace(/"/g, "&quot;");
 
         const card = document.createElement('div');
         card.className = 'rec-card';
@@ -1256,8 +1130,8 @@
           <div class="rec-img-wrap"><img src="${imgUrl}" onerror="this.src='${placeholderImg}'"></div>
           <div class="rec-info">
             <div class="rec-title">${p.name}</div>
-            <div class="rec-price">₹${(p.price || 0).toLocaleString('en-IN')}</div>
-            <div id="rec-rating-${p.id}">
+            <div class="rec-price" style="font-size: 15px; font-weight: 800; color: var(--text-main); margin-bottom: 8px;">₹${(p.price || 0).toLocaleString('en-IN')}</div>
+            <div id="rec-rating-${p.id}" style="margin-top: auto;">
               ${getRecVoteBadgesHtml(likes, dislikes)}
             </div>
           </div>
@@ -1265,7 +1139,7 @@
         
         card.addEventListener('click', () => {
           if (navigator.vibrate) navigator.vibrate(15);
-          pushToModalStack(p, imgUrl);
+          openProductModalFromStr(prodJson);
         });
         
         if (skEl) {
@@ -1283,90 +1157,30 @@
          sentinelEl.remove();
       }
     }
+
+    // =========================================================================
+    // ENTERPRISE REVIEWS & VOTING ARCHITECTURE
+    // =========================================================================
     
-    setInterval(() => {
-       const el = document.getElementById('rec-sentinel');
-       if (el && isModalOpen) recObserver.observe(el);
-    }, 1000);
+    function syncAllProductVoteDOM(productId, likes, dislikes) {
+      const l = Number(likes) || 0;
+      const d = Number(dislikes) || 0;
 
-    // =========================================================================
-    // E-COMMERCE ACTION BAR (Perpetually Active - Zero-Stock Restrictions)
-    // =========================================================================
-    btnAddCart.addEventListener('click', async () => {
-      if (!currentUser) return alert("Please log in to add items.");
-      if (!currentSelectedProduct) return alert("Product not loaded.");
-      if (navigator.vibrate) navigator.vibrate(40);
-      
-      btnAddCart.style.pointerEvents = 'none';
-      btnAddCart.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="animation: spin 1s linear infinite;"><circle cx="12" cy="12" r="10"></circle><path d="M12 2v4"></path></svg>`;
+      const recRatingEl = document.getElementById(`rec-rating-${productId}`);
+      if (recRatingEl) recRatingEl.innerHTML = getRecVoteBadgesHtml(l, d);
 
-      try {
-        const cartRef = doc(db, 'carts', currentUser.uid);
-        const cartUpdate = {
-          items: {
-            [currentSelectedProduct.id]: {
-              name: currentSelectedProduct.name,
-              price: currentSelectedProduct.price,
-              image: currentImgUrl,
-              qty: increment(1),
-              addedAt: new Date().toISOString()
-            }
-          }
-        };
-
-        await setDoc(cartRef, cartUpdate, { merge: true });
-
-        btnAddCart.innerText = 'Added!';
-        btnAddCart.style.background = 'var(--success-bg)';
-        btnAddCart.style.color = 'var(--success-text)';
-        btnAddCart.style.borderColor = 'var(--success-text)';
-        toast.classList.add('show');
-
-        setTimeout(() => {
-          btnAddCart.innerText = 'Add to Cart';
-          btnAddCart.style = '';
-          toast.classList.remove('show');
-          triggerCloseModal();
-        }, 1500);
-
-      } catch (error) {
-        console.error("Cart error:", error);
-        btnAddCart.innerText = 'Error';
-        btnAddCart.style.pointerEvents = 'auto';
+      if (currentSelectedProduct && currentSelectedProduct.id === productId) {
+        currentSelectedProduct.totalLikes = l;
+        currentSelectedProduct.totalDislikes = d;
+        mLikesCount.innerText = l > 0 ? l.toLocaleString() : '';
+        mDislikesCount.innerText = d > 0 ? d.toLocaleString() : '';
       }
-    });
 
-    btnBuyNow.addEventListener('click', () => {
-      if (!currentUser) return alert("Please log in to purchase.");
-      if (!currentSelectedProduct) return alert("Product not loaded.");
-      if (navigator.vibrate) navigator.vibrate(40);
-      
-      btnBuyNow.style.pointerEvents = 'none';
-      btnBuyNow.innerText = 'Processing...';
-
-      const instantPurchase = [{
-        id: currentSelectedProduct.id,
-        name: currentSelectedProduct.name,
-        price: currentSelectedProduct.price,
-        image: currentImgUrl,
-        qty: 1
-      }];
-
-      sessionStorage.setItem('checkout_payload', JSON.stringify(instantPurchase));
-      sessionStorage.setItem('checkout_source', 'buy_now');
-      
-      window.parent.document.getElementById('content-frame').src = 'pages/checkout.html';
-    });
-
-    // =========================================================================
-    // ENTERPRISE REVIEWS & VOTING ARCHITECTURE (Batch: 5)
-    // =========================================================================
-    
-    let reviewsLastVisible = null;
-    let isFetchingReviews = false;
-    let hasMoreReviews = true;
-    let currentUserReviewData = null; 
-    let isEditingMyComment = false;
+      if (productCache[productId]) {
+        productCache[productId].totalLikes = l;
+        productCache[productId].totalDislikes = d;
+      }
+    }
 
     window.handleVote = async function(type) {
       if (!currentUser) return alert("Please sign in to vote.");
@@ -1418,7 +1232,6 @@
     };
 
     async function initReviewSection(productId) {
-      // Completely wipe state on deep-nav transitions to reset paginator
       reviewsLastVisible = null;
       hasMoreReviews = true;
       isFetchingReviews = false;
@@ -1447,7 +1260,6 @@
         
         renderMyCommentWidget();
       }
-
       fetchPaginatedReviews();
     }
 
@@ -1458,7 +1270,6 @@
       if (input && btn) {
         const len = input.value.trim().length;
         if (hint) hint.innerText = `${len}/4 min characters`;
-
         if (len >= 4) {
           btn.disabled = false;
           btn.style.opacity = '1';
@@ -1618,13 +1429,82 @@
     }
 
     const reviewsObserver = new IntersectionObserver((entries) => {
-      if (entries[0].isIntersecting && !isFetchingReviews && hasMoreReviews && isModalOpen) {
+      if (entries[0].isIntersecting && !isFetchingReviews && hasMoreReviews && modalStack.includes('product')) {
         fetchPaginatedReviews();
       }
     }, { rootMargin: "200px" });
     
     reviewsObserver.observe(document.getElementById('reviews-sentinel'));
 
+    // 4. E-commerce Actions
+    btnAddCart.addEventListener('click', async () => {
+      if (!currentUser) return alert("Please log in to add items to cart.");
+      if (!currentSelectedProduct) return;
+      if (navigator.vibrate) navigator.vibrate(40);
+      
+      btnAddCart.style.pointerEvents = 'none';
+      btnAddCart.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="animation: spin 1s linear infinite;"><circle cx="12" cy="12" r="10"></circle><path d="M12 2v4"></path></svg>`;
+
+      try {
+        const cartRef = doc(db, 'carts', currentUser.uid);
+        const cartUpdate = {
+          items: {
+            [currentSelectedProduct.id]: {
+              name: currentSelectedProduct.name,
+              price: currentSelectedProduct.price,
+              image: currentImgUrl,
+              qty: increment(1),
+              addedAt: new Date().toISOString()
+            }
+          }
+        };
+
+        await setDoc(cartRef, cartUpdate, { merge: true });
+
+        btnAddCart.innerText = 'Added!';
+        btnAddCart.style.background = 'var(--success-bg)';
+        btnAddCart.style.color = 'var(--success-text)';
+        btnAddCart.style.borderColor = 'var(--success-text)';
+        toast.classList.add('show');
+
+        setTimeout(() => {
+          btnAddCart.innerText = 'Add to Cart';
+          btnAddCart.style = '';
+          toast.classList.remove('show');
+          history.back();
+        }, 1500);
+
+      } catch (error) {
+        console.error("Cart error:", error);
+        btnAddCart.innerText = 'Error';
+        btnAddCart.style.pointerEvents = 'auto';
+      }
+    });
+
+    btnBuyNow.addEventListener('click', () => {
+      if (!currentUser) return alert("Please log in to purchase items.");
+      if (!currentSelectedProduct) return;
+      if (navigator.vibrate) navigator.vibrate(40);
+      
+      btnBuyNow.style.pointerEvents = 'none';
+      btnBuyNow.innerText = 'Processing...';
+
+      const instantPurchase = [{
+        id: currentSelectedProduct.id,
+        name: currentSelectedProduct.name,
+        price: currentSelectedProduct.price,
+        image: currentImgUrl,
+        qty: 1
+      }];
+
+      sessionStorage.setItem('checkout_payload', JSON.stringify(instantPurchase));
+      sessionStorage.setItem('checkout_source', 'buy_now');
+      
+      window.parent.document.getElementById('content-frame').src = 'pages/checkout.html';
+    });
+
+    // Boot
+    initCustomerHomepage();
   </script>
 </body>
 </html>
