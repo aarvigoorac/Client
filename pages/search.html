@@ -106,25 +106,25 @@
     .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 999; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; backdrop-filter: blur(4px); }
     .modal-overlay.active { opacity: 1; pointer-events: auto; }
     
-    .product-modal { position: fixed; bottom: 0; left: 0; width: 100%; height: 88vh; max-height: 850px; background: var(--bg-color); border-radius: 24px 24px 0 0; z-index: 1000; transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1); display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 -10px 40px rgba(0,0,0,0.2); }
+    .product-modal { position: fixed; bottom: 0; left: 0; width: 100%; height: 100dvh; max-height: 100dvh; border-radius: 0; background: var(--bg-color); z-index: 1000; transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1); display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 -10px 40px rgba(0,0,0,0.2); }
     .product-modal.active { transform: translateY(0); }
     
-    .modal-pull-indicator { width: 40px; height: 4px; background: var(--border); border-radius: 2px; margin: 12px auto; display: none; }
+    .modal-pull-indicator { display: none; }
     .modal-header { display: none; }
     
-    /* ENTERPRISE OVERRIDES: Full Screen Edge-to-Edge Media Canvas */
-    .product-modal { height: 100dvh !important; max-height: 100dvh !important; border-radius: 0 !important; width: 100vw; }
-    .modal-scroll { flex: 1; overflow-y: auto; padding-bottom: 120px; }
+    .modal-scroll { flex: 1; overflow-y: auto; padding-bottom: 120px; position: relative; }
     
-    .modal-img-wrapper { position: relative; width: 100%; height: 45vh; min-height: 350px; background: var(--surface-color); display: flex; align-items: center; justify-content: center; padding: 0; border-bottom: 1px solid var(--border); }
-    .modal-img { width: 100%; height: 100%; object-fit: contain; mix-blend-mode: multiply; }
+    /* ENTERPRISE PARALLAX IMAGE ENGINE */
+    .modal-img-wrapper { position: sticky; top: 0; z-index: 1; width: 100%; height: 45vh; min-height: 350px; background: var(--surface-color); display: flex; align-items: center; justify-content: center; padding: 0; margin: 0; border: none; }
+    .modal-img { width: 100%; height: 100%; object-fit: contain; margin: 0; mix-blend-mode: multiply; }
     @media (prefers-color-scheme: dark) { .modal-img { mix-blend-mode: normal; } }
     
     .close-btn-overlay { position: absolute; top: max(16px, env(safe-area-inset-top)); left: 16px; width: 40px; height: 40px; border-radius: 50%; background: rgba(var(--surface-rgb), 0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 100; color: var(--text-main); box-shadow: 0 4px 12px rgba(0,0,0,0.1); transition: transform 0.2s; }
     .close-btn-overlay:active { transform: scale(0.9); }
     .close-btn-overlay svg { width: 24px; height: 24px; stroke: currentColor; stroke-width: 2.5; }
     
-    .modal-details { padding: 24px; background: var(--bg-color); }
+    /* PARALLAX CONTENT LAYER (Scrolls OVER the image) */
+    .modal-details { position: relative; z-index: 10; background: var(--bg-color); border-radius: 24px 24px 0 0; margin-top: -24px; padding: 24px; box-shadow: 0 -8px 24px rgba(0,0,0,0.08); }
     .m-title { font-size: 22px; font-weight: 800; margin-bottom: 12px; line-height: 1.3; color: var(--text-main); }
     .m-price { font-size: 28px; font-weight: 800; color: var(--primary); margin-bottom: 16px; display: flex; align-items: baseline; gap: 8px; }
     
@@ -150,7 +150,7 @@
     .btn-buy { background: var(--primary); color: #fff; box-shadow: 0 4px 12px rgba(40, 116, 240, 0.25); }
 
     /* Recommendations Carousel */
-    .rec-section { padding: 24px 0 0 0; background: var(--bg-color); }
+    .rec-section { position: relative; z-index: 10; padding: 24px 0 0 0; background: var(--bg-color); }
     .rec-header { padding: 0 24px; font-size: 18px; font-weight: 800; margin-bottom: 12px; color: var(--text-main); }
     .rec-carousel { display: flex; overflow-x: auto; gap: 16px; padding: 0 24px 16px 24px; scroll-snap-type: x mandatory; align-items: stretch; }
     .rec-carousel::after { content: ''; padding-right: 8px; }
@@ -173,7 +173,7 @@
     .rec-sentinel { flex: 0 0 10px; width: 10px; pointer-events: none; }
 
     /* Reviews Section Subsystem */
-    .reviews-section { padding: 24px; background: var(--bg-color); }
+    .reviews-section { position: relative; z-index: 10; padding: 24px; background: var(--bg-color); }
     
     /* Perfect Long Name Truncation Fixes */
     .mc-header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; width: 100%; min-width: 0; }
@@ -268,7 +268,7 @@
   <div class="product-modal" id="product-modal">
     
     <div class="modal-scroll" id="modal-scroll-area">
-      <!-- Edge to Edge Full Media Canvas -->
+      <!-- Edge to Edge Full Media Canvas (Parallax Sticky) -->
       <div class="modal-img-wrapper">
         <button class="close-btn-overlay" id="close-modal-btn">
           <svg fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" /></svg>
@@ -276,11 +276,12 @@
         <img id="m-img" class="modal-img" src="" alt="Product">
       </div>
       
+      <!-- Content Layer (Scrolls OVER the image) -->
       <div class="modal-details">
         <h2 id="m-title" class="m-title">Loading...</h2>
         <div id="m-price" class="m-price">₹0</div>
         
-        <!-- Professional Independent Vote Bar (Hides Zeros) + Share -->
+        <!-- Professional Independent Vote Bar (Hides Zeros) + Native Share -->
         <div class="product-vote-bar">
           <button class="vote-action-btn like" id="btn-vote-like" onclick="handleVote('like')">
             <svg viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.56l2.5-8.76A2 2 0 0 0 20.83 9H14z"/><path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg> 
@@ -783,6 +784,14 @@
     // =========================================================================
     // RECOMMENDATIONS ENGINE (Zero-Read Shuffle & Horizontal Scroll Batching)
     // =========================================================================
+    
+    // The recommendation horizontal observer instance
+    const recObserver = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting && !isFetchingRecs && isModalOpen) {
+        loadMoreRecommendations(5);
+      }
+    }, { root: document.getElementById('rec-carousel'), rootMargin: "50px" });
+    
     function shuffleArray(array) {
       let cur = array.length, rand;
       while (cur != 0) {
@@ -796,6 +805,9 @@
     async function initRecommendations(currentId) {
       const recSection = document.getElementById('rec-section');
       const recCarousel = document.getElementById('rec-carousel');
+      
+      // Clean up previous observers
+      recObserver.disconnect();
       
       // CRITICAL BUG FIX: Reset horizontal scroll to prevent phantom intersection triggers
       recCarousel.style.scrollBehavior = 'auto';
@@ -814,6 +826,10 @@
       
       // Reset Carousel Content & Inject Horizontal Sentinel
       recCarousel.innerHTML = '<div class="rec-sentinel" id="rec-sentinel"></div>';
+      
+      // Dynamically attach observer
+      const sentinelEl = document.getElementById('rec-sentinel');
+      if (sentinelEl) recObserver.observe(sentinelEl);
       
       // Initial Load of 5
       await loadMoreRecommendations(5);
@@ -907,24 +923,12 @@
       recCurrentIndex += fetchCount;
       isFetchingRecs = false;
 
-      // Remove sentinel if limit reached to stop observing
+      // Remove sentinel if limit reached to stop observing natively
       if (recCurrentIndex >= 10 && sentinelEl) {
+         recObserver.disconnect();
          sentinelEl.remove();
       }
     }
-
-    // Recommendation Horizontal Scrolling Intersection Observer
-    const recObserver = new IntersectionObserver((entries) => {
-      if (entries[0].isIntersecting && !isFetchingRecs && isModalOpen) {
-        loadMoreRecommendations(5);
-      }
-    }, { root: document.getElementById('rec-carousel'), rootMargin: "50px" });
-    
-    // Attach observer dynamically if sentinel exists
-    setInterval(() => {
-       const el = document.getElementById('rec-sentinel');
-       if (el && isModalOpen) recObserver.observe(el);
-    }, 1000);
 
     // =========================================================================
     // E-COMMERCE ACTION BAR (Perpetually Active - Zero-Stock Restrictions)
