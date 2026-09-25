@@ -68,7 +68,7 @@
     .list-img-wrap img { width: 100%; height: 100%; object-fit: contain; mix-blend-mode: multiply; }
     @media (prefers-color-scheme: dark) { .list-img-wrap img { mix-blend-mode: normal; } }
 
-    .list-info { padding: 16px; display: flex; flex-direction: column; flex: 1; height: 100%; justify-content: center; }
+    .list-info { padding: 16px; display: flex; flex-direction: column; flex: 1; height: 100%; justify-content: center; min-width: 0; }
     .list-title { font-size: 15px; font-weight: 600; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; margin-bottom: 6px; line-height: 1.4; color: var(--text-main); }
     
     .list-rating { font-size: 12px; display: inline-flex; align-items: center; padding: 4px 8px; border-radius: 6px; font-weight: 700; gap: 4px; align-self: flex-start; margin-bottom: 8px; }
@@ -142,16 +142,36 @@
     .btn-add { background: var(--bg-color); color: var(--text-main); border: 1.5px solid var(--border); }
     .btn-buy { background: var(--primary); color: #fff; box-shadow: 0 4px 12px rgba(40, 116, 240, 0.25); }
 
+    /* Recommendations Carousel */
+    .rec-section { padding: 24px 0 0 0; background: var(--bg-color); }
+    .rec-header { padding: 0 24px; font-size: 18px; font-weight: 800; margin-bottom: 12px; color: var(--text-main); }
+    .rec-carousel { display: flex; overflow-x: auto; gap: 16px; padding: 0 24px 16px 24px; scroll-snap-type: x mandatory; }
+    .rec-carousel::after { content: ''; padding-right: 8px; }
+    .rec-card { flex: 0 0 140px; scroll-snap-align: start; background: var(--surface-color); border-radius: 12px; overflow: hidden; border: 1px solid var(--border); box-shadow: 0 4px 10px rgba(0,0,0,0.03); cursor: pointer; transition: transform 0.2s; display: flex; flex-direction: column; }
+    .rec-card:active { transform: scale(0.96); }
+    .rec-img-wrap { width: 100%; aspect-ratio: 1; background: var(--surface-color); display: flex; align-items: center; justify-content: center; padding: 12px; border-bottom: 1px solid var(--border); }
+    .rec-img-wrap img { width: 100%; height: 100%; object-fit: contain; mix-blend-mode: multiply; }
+    @media (prefers-color-scheme: dark) { .rec-img-wrap img { mix-blend-mode: normal; } }
+    .rec-info { padding: 12px; display: flex; flex-direction: column; flex: 1; }
+    .rec-title { font-size: 13px; font-weight: 600; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; margin-bottom: 8px; line-height: 1.4; color: var(--text-main); }
+    .rec-rating { font-size: 11px; display: inline-flex; align-items: center; gap: 4px; padding: 4px 6px; border-radius: 6px; font-weight: 700; margin-top: auto; align-self: flex-start; }
+    .rec-rating svg { width: 10px; height: 10px; fill: currentColor; stroke: none; }
+
     /* Reviews Section Subsystem */
     .reviews-section { padding: 24px; background: var(--bg-color); }
     
+    /* Long Name Fixes */
+    .mc-header > div, .review-header > div { flex: 1; min-width: 0; }
+    .mc-name, .review-name { font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .mc-name { font-size: 15px; }
+    .review-name { font-size: 14px; color: var(--text-main); }
+
     /* My Comment - Display Mode */
     .my-comment-display { background: var(--primary); padding: 16px; border-radius: 16px; margin-bottom: 24px; color: white; box-shadow: 0 8px 20px rgba(40, 116, 240, 0.2); }
     .mc-header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
-    .mc-avatar { width: 40px; height: 40px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.3); object-fit: cover; }
-    .mc-name { font-weight: 800; font-size: 15px; }
+    .mc-avatar { width: 40px; height: 40px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.3); object-fit: cover; flex-shrink: 0; }
     .mc-label { font-size: 12px; font-weight: 600; opacity: 0.8; }
-    .mc-edit-btn { margin-left: auto; background: rgba(255,255,255,0.2); border: none; color: white; padding: 6px 14px; border-radius: 50px; font-weight: 700; font-size: 13px; cursor: pointer; backdrop-filter: blur(4px); transition: transform 0.2s; }
+    .mc-edit-btn { margin-left: auto; background: rgba(255,255,255,0.2); border: none; color: white; padding: 6px 14px; border-radius: 50px; font-weight: 700; font-size: 13px; cursor: pointer; backdrop-filter: blur(4px); transition: transform 0.2s; flex-shrink: 0; }
     .mc-edit-btn:active { transform: scale(0.95); }
     .mc-text { font-size: 15px; line-height: 1.5; opacity: 0.95; }
 
@@ -161,7 +181,7 @@
     .my-comment-edit textarea:focus { border-color: var(--primary); }
     .edit-actions { display: flex; gap: 12px; justify-content: flex-end; }
     .btn-cancel { padding: 12px 20px; background: transparent; border: none; font-weight: 700; color: var(--text-sub); cursor: pointer; border-radius: 10px; }
-    .btn-post { padding: 12px 24px; background: var(--primary); color: white; border: none; border-radius: 10px; font-weight: 800; cursor: pointer; box-shadow: 0 4px 12px rgba(40, 116, 240, 0.2); }
+    .btn-post { padding: 12px 24px; background: var(--primary); color: white; border: none; border-radius: 10px; font-weight: 800; cursor: pointer; box-shadow: 0 4px 12px rgba(40, 116, 240, 0.2); transition: opacity 0.2s; }
     .btn-post:active { transform: scale(0.95); }
 
     .login-prompt { padding: 20px; text-align: center; background: var(--surface-color); border-radius: 16px; border: 1.5px dashed var(--border); margin-bottom: 24px; color: var(--text-sub); font-size: 14px; font-weight: 600; display: flex; flex-direction: column; align-items: center; gap: 12px; }
@@ -169,8 +189,7 @@
     /* Other Comments List */
     .review-card { background: var(--surface-color); padding: 20px; border-radius: 16px; margin-bottom: 12px; border: 1px solid var(--border); }
     .review-header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
-    .review-avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--skeleton-base); object-fit: cover; }
-    .review-name { font-weight: 800; font-size: 14px; color: var(--text-main); }
+    .review-avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--skeleton-base); object-fit: cover; flex-shrink: 0; }
     .review-date { font-size: 12px; color: var(--text-sub); font-weight: 600; }
     .review-text { font-size: 15px; line-height: 1.6; color: var(--text-main); }
 
@@ -257,6 +276,12 @@
         <p id="m-desc" class="m-desc"></p>
       </div>
       
+      <!-- Zero-Read Dynamic Recommendations -->
+      <div class="rec-section" id="rec-section" style="display:none;">
+        <div class="rec-header">You Might Also Like</div>
+        <div class="rec-carousel" id="rec-carousel"></div>
+      </div>
+
       <!-- ENTERPRISE REVIEWS SYSTEM ARCHITECTURE INJECTION -->
       <div class="reviews-section" id="reviews-section">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 20px;">
@@ -291,7 +316,7 @@
 
   <script type="module">
     import { auth, db } from '../config.js';
-    import { collection, query, limit, where, getDocs, getDoc, startAfter, doc, setDoc, increment, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { collection, query, limit, where, getDocs, getDoc, startAfter, doc, setDoc, increment, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
     import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
     // Elements
@@ -331,15 +356,39 @@
     let isFetching = false;
     let hasMoreDocs = true;
 
+    // Advanced Enterprise Caching & Stack Arrays
+    let productCache = {};
+    let globalRecommendationPool = [];
+    let modalProductStack = [];
+    let productSnapshotUnsubscribe = null;
+
     // Professional Placeholders & SVGs
     const placeholderImg = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='400' viewBox='0 0 400 400'><rect width='400' height='400' fill='%23f1f3f6'/><path d='M200 160c-22.1 0-40 17.9-40 40s17.9 40 40 40 40-17.9 40-40-17.9-40-40-40zm0 64c-13.2 0-24-10.8-24-24s10.8-24 24-24 24 10.8 24 24-10.8 24-24 24z' fill='%23cccccc'/><path d='M264 120H136c-13.2 0-24 10.8-24 24v112c0 13.2 10.8 24 24 24h128c13.2 0 24-10.8 24-24V144c0-13.2-10.8-24-24-24zm8 136c0 4.4-3.6 8-8 8H136c-4.4 0-8-3.6-8-8V144c0-4.4 3.6-8 8-8h128c4.4 0 8 3.6 8 8v112z' fill='%23cccccc'/></svg>";
     const avatarPlaceholder = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23999'><path d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/></svg>";
-
     const svgThumbUp = `<svg viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.56l2.5-8.76A2 2 0 0 0 20.83 9H14z"/><path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>`;
     const svgThumbDown = `<svg viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.56l-2.5 8.76A2 2 0 0 0 3.17 15H10z"/><path d="M17 2h3a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-3"/></svg>`;
 
+    // --- ZERO-READ PRE-FETCH RECOMMENDATIONS ARCHITECTURE ---
+    async function prefetchLayoutForRecommendations() {
+      try {
+        const snap = await getDoc(doc(db, "layout", "homepage"));
+        if (snap.exists()) {
+          const data = snap.data();
+          const ids = new Set();
+          if (data.slots) Object.values(data.slots).forEach(id => ids.add(id));
+          if (data.categories) {
+            data.categories.forEach(cat => {
+              if (cat.slots) Object.values(cat.slots).forEach(id => ids.add(id));
+            });
+          }
+          globalRecommendationPool = Array.from(ids);
+        }
+      } catch (e) { console.error("Prefetch error", e); }
+    }
+
     onAuthStateChanged(auth, (user) => { 
       currentUser = user; 
+      prefetchLayoutForRecommendations();
       if (isModalOpen && currentSelectedProduct) {
         initReviewSection(currentSelectedProduct.id);
       }
@@ -407,7 +456,7 @@
       searchInput.focus();
     });
 
-    // 3. Search Engine Logic (Firebase Map Query with Multi-Word AND Chaining)
+    // 3. Search Engine Logic
     async function executeSearch(isNewSearch = false) {
       if (isFetching || !hasMoreDocs) return;
       isFetching = true;
@@ -445,10 +494,10 @@
         querySnapshot.forEach((docSnap) => {
           const p = docSnap.data();
           p.id = docSnap.id;
+          productCache[p.id] = p; // Store in cache for recommendations
           
           const imgUrl = (p.images && p.images.thumbnail) ? p.images.thumbnail : placeholderImg;
           
-          // ZERO-READ AGGREGATION: Directly pulling total counts
           const likes = p.totalLikes || 0;
           const dislikes = p.totalDislikes || 0;
           
@@ -474,7 +523,10 @@
             </div>
           `;
 
-          card.addEventListener('click', () => openModal(p, imgUrl));
+          card.addEventListener('click', () => {
+            if (navigator.vibrate) navigator.vibrate(15);
+            pushToModalStack(p, imgUrl);
+          });
           resultsContainer.appendChild(card);
         });
 
@@ -497,11 +549,29 @@
     }, { rootMargin: "100px" });
     observer.observe(sentinel);
 
-    // 5. Product Modal Execution
-    function openModal(product, imgUrl) {
-      if (navigator.vibrate) navigator.vibrate(40);
+
+    // =========================================================================
+    // MODAL DEEP HISTORY STACK & RENDERING ENGINE
+    // =========================================================================
+    
+    function pushToModalStack(product, imgUrl) {
+      modalProductStack.push({ product, imgUrl });
+      history.pushState({ modal: 'product', id: product.id }, '', '');
+      
+      if (!isModalOpen) {
+        modalBg.classList.add('active');
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden'; 
+        isModalOpen = true;
+      }
+      renderModalState(product, imgUrl);
+    }
+
+    function renderModalState(product, imgUrl) {
       currentSelectedProduct = product;
       currentImgUrl = imgUrl;
+      
+      document.getElementById('modal-scroll-area').scrollTo(0,0);
       
       mImg.src = imgUrl;
       mImg.onerror = function() { this.src = placeholderImg; };
@@ -509,27 +579,61 @@
       mPrice.innerText = `₹${(product.price || 0).toLocaleString('en-IN')}`;
       mDesc.innerText = product.description || "Detailed description coming soon.";
       
-      // Update Main Vote Display (Zero-Read Optimistic)
       mLikesCount.innerText = (product.totalLikes || 0).toLocaleString();
       mDislikesCount.innerText = (product.totalDislikes || 0).toLocaleString();
       
-      // Reset Vote Button Visual State (will be overridden by initReviewSection if they voted)
       btnVoteLike.classList.remove('active');
       btnVoteDislike.classList.remove('active');
 
-      modalBg.classList.add('active');
-      modal.classList.add('active');
-      document.body.style.overflow = 'hidden'; 
-      document.getElementById('modal-scroll-area').scrollTo(0,0);
-      
-      isModalOpen = true;
-      history.pushState({ modal: 'product' }, '', '');
-
-      // Boot Independent Review Subsystem
+      // Boot Independent Subsystems
+      renderRecommendations(product.id);
       initReviewSection(product.id);
+
+      // Attach Real-Time Snapshot Listener for YouTube-Style live updates
+      if (productSnapshotUnsubscribe) productSnapshotUnsubscribe();
+      
+      productSnapshotUnsubscribe = onSnapshot(doc(db, "products", product.id), (docSnap) => {
+        if (docSnap.exists() && currentSelectedProduct && currentSelectedProduct.id === docSnap.id) {
+          const data = docSnap.data();
+          currentSelectedProduct.totalLikes = data.totalLikes || 0;
+          currentSelectedProduct.totalDislikes = data.totalDislikes || 0;
+          mLikesCount.innerText = currentSelectedProduct.totalLikes.toLocaleString();
+          mDislikesCount.innerText = currentSelectedProduct.totalDislikes.toLocaleString();
+        }
+      });
     }
 
+    // Modal Nav Controls
+    window.addEventListener('popstate', (e) => {
+      if (isModalOpen) {
+        modalProductStack.pop();
+        if (modalProductStack.length > 0) {
+          const prev = modalProductStack[modalProductStack.length - 1];
+          renderModalState(prev.product, prev.imgUrl);
+        } else {
+          closeModalLogic();
+        }
+      }
+    });
+
+    closeModalBtn.addEventListener('click', () => {
+      if (navigator.vibrate) navigator.vibrate(40);
+      if (isModalOpen) {
+        history.go(-modalProductStack.length);
+        setTimeout(closeModalLogic, 50); // Fallback sweep
+      }
+    });
+
+    modalBg.addEventListener('click', () => {
+      if (isModalOpen) history.go(-modalProductStack.length);
+    });
+
     function closeModalLogic() {
+      if (productSnapshotUnsubscribe) {
+        productSnapshotUnsubscribe();
+        productSnapshotUnsubscribe = null;
+      }
+      modalProductStack = [];
       modalBg.classList.remove('active');
       modal.classList.remove('active');
       document.body.style.overflow = '';
@@ -538,20 +642,103 @@
       currentImgUrl = null;
     }
 
-    function triggerCloseModal() {
-      if (isModalOpen) history.back(); 
+    // =========================================================================
+    // RECOMMENDATIONS ENGINE (Zero-Read Shuffle)
+    // =========================================================================
+    function shuffleArray(array) {
+      let cur = array.length, rand;
+      while (cur != 0) {
+        rand = Math.floor(Math.random() * cur);
+        cur--;
+        [array[cur], array[rand]] = [array[rand], array[cur]];
+      }
+      return array;
     }
 
-    closeModalBtn.addEventListener('click', () => {
-      if (navigator.vibrate) navigator.vibrate(40);
-      triggerCloseModal();
-    });
-    modalBg.addEventListener('click', triggerCloseModal);
-    window.addEventListener('popstate', (e) => {
-      if (isModalOpen) closeModalLogic();
-    });
+    async function renderRecommendations(currentId) {
+      const recSection = document.getElementById('rec-section');
+      const recCarousel = document.getElementById('rec-carousel');
+      
+      if (globalRecommendationPool.length === 0) {
+        recSection.style.display = 'none';
+        return;
+      }
 
-    // 6. Action Bar Functionality (Always Operational)
+      recSection.style.display = 'block';
+      const pool = globalRecommendationPool.filter(id => id !== currentId);
+      const selectedIds = shuffleArray(pool).slice(0, 10);
+
+      if (selectedIds.length === 0) {
+        recSection.style.display = 'none';
+        return;
+      }
+
+      // Render Skeletons First
+      recCarousel.innerHTML = selectedIds.map(() => `
+        <div class="rec-card skeleton-card">
+          <div class="skeleton" style="width:100%; aspect-ratio:1;"></div>
+          <div class="rec-info">
+            <div class="skeleton" style="height:12px; width:90%; margin-bottom:6px;"></div>
+            <div class="skeleton" style="height:12px; width:60%;"></div>
+          </div>
+        </div>
+      `).join('');
+
+      // Determine un-cached items to fetch
+      const fetchPromises = [];
+      selectedIds.forEach(id => {
+        if (!productCache[id]) fetchPromises.push(getDoc(doc(db, "products", id)));
+      });
+
+      if (fetchPromises.length > 0) {
+        try {
+          const docs = await Promise.all(fetchPromises);
+          docs.forEach(d => {
+            if (d.exists()) productCache[d.id] = { id: d.id, ...d.data() };
+          });
+        } catch (e) { console.error("Rec Fetch Error", e); }
+      }
+
+      // Render Real Cards
+      recCarousel.innerHTML = '';
+      selectedIds.forEach(id => {
+        const p = productCache[id];
+        if (!p) return;
+        const imgUrl = (p.images && p.images.thumbnail) ? p.images.thumbnail : placeholderImg;
+        
+        const likes = p.totalLikes || 0;
+        const dislikes = p.totalDislikes || 0;
+        
+        let ratingHtml = `<div class="rec-rating" style="background:var(--skeleton-base); color:var(--text-sub);">${svgThumbUp} 0</div>`;
+        if (likes > 0 || dislikes > 0) {
+          if (likes >= dislikes) {
+            ratingHtml = `<div class="rec-rating" style="color:var(--success-text); background:var(--success-bg);">${svgThumbUp} ${likes.toLocaleString()}</div>`;
+          } else {
+            ratingHtml = `<div class="rec-rating" style="color:var(--warning); background:var(--warning-bg);">${svgThumbDown} ${dislikes.toLocaleString()}</div>`;
+          }
+        }
+
+        const card = document.createElement('div');
+        card.className = 'rec-card';
+        card.innerHTML = `
+          <div class="rec-img-wrap"><img src="${imgUrl}" onerror="this.src='${placeholderImg}'"></div>
+          <div class="rec-info">
+            <div class="rec-title">${p.name}</div>
+            ${ratingHtml}
+          </div>
+        `;
+        
+        card.addEventListener('click', () => {
+          if (navigator.vibrate) navigator.vibrate(15);
+          pushToModalStack(p, imgUrl);
+        });
+        recCarousel.appendChild(card);
+      });
+    }
+
+    // =========================================================================
+    // E-COMMERCE ACTION BAR
+    // =========================================================================
     btnAddCart.addEventListener('click', async () => {
       if (!currentUser) return alert("Please log in to add items.");
       if (!currentSelectedProduct) return;
@@ -708,7 +895,6 @@
           const userRevSnap = await getDoc(doc(db, 'products', productId, 'reviews', currentUser.uid));
           if(userRevSnap.exists()) {
             currentUserReviewData = userRevSnap.data();
-            // Sync Vote Buttons
             if (currentUserReviewData.vote === 'like') btnVoteLike.classList.add('active');
             if (currentUserReviewData.vote === 'dislike') btnVoteDislike.classList.add('active');
           }
@@ -722,6 +908,22 @@
     }
 
     // C. STATE-MACHINE WIDGET (Compose vs Display)
+    window.validateCommentInput = function() {
+      const input = document.getElementById('review-comment-input');
+      const btn = document.getElementById('btn-submit-review');
+      if (input && btn) {
+        if (input.value.trim().length >= 4) {
+          btn.disabled = false;
+          btn.style.opacity = '1';
+          btn.style.pointerEvents = 'auto';
+        } else {
+          btn.disabled = true;
+          btn.style.opacity = '0.5';
+          btn.style.pointerEvents = 'none';
+        }
+      }
+    };
+
     window.renderMyCommentWidget = function() {
       const container = document.getElementById('my-comment-container');
       if (!currentUser) return;
@@ -746,12 +948,14 @@
       } else {
         // STATE: Edit / Compose Mode
         const currentText = hasComment ? currentUserReviewData.comment : '';
+        const isValid = currentText.trim().length >= 4;
+        
         container.innerHTML = `
           <div class="my-comment-edit">
-             <textarea id="review-comment-input" placeholder="Share details of your experience...">${currentText}</textarea>
+             <textarea id="review-comment-input" oninput="validateCommentInput()" placeholder="Share details of your experience...">${currentText}</textarea>
              <div class="edit-actions">
                 ${hasComment ? `<button class="btn-cancel" onclick="toggleEditMyComment()">Cancel</button>` : ''}
-                <button class="btn-post" id="btn-submit-review" onclick="submitTextReview()">Post</button>
+                <button class="btn-post" id="btn-submit-review" onclick="submitTextReview()" ${isValid ? '' : 'disabled style="opacity:0.5; pointer-events:none;"'}>Post</button>
              </div>
           </div>
         `;
@@ -769,7 +973,7 @@
       const commentInput = document.getElementById('review-comment-input').value.trim();
       const submitBtn = document.getElementById('btn-submit-review');
       
-      if (!commentInput) return alert("Please enter a comment before posting.");
+      if (commentInput.length < 4) return alert("Please enter a slightly longer comment.");
       if(navigator.vibrate) navigator.vibrate(20);
       
       submitBtn.style.pointerEvents = 'none';
@@ -786,7 +990,7 @@
           timestamp: new Date().toISOString()
         };
 
-        // If no document existed at all, we create it and they haven't voted yet.
+        // If no document existed at all, we create it
         await setDoc(reviewRef, payload, { merge: true });
 
         // Update Local Memory and trigger Display Mode
