@@ -49,6 +49,13 @@
     /* Premium Data Reveal Animation Engine - Neutralized for seamless 1:1 data swap */
     .hero-animate { animation: none; transition: none; }
     
+    /* NEW: Upgraded Seamless Hero Transition Overrides (Kept original above, overriding here) */
+    @keyframes heroFadeSlide {
+      0% { opacity: 0; transform: translateY(12px) scale(0.98); filter: blur(3px); }
+      100% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+    }
+    .hero-animate { animation: heroFadeSlide 0.65s cubic-bezier(0.22, 1, 0.36, 1) forwards !important; }
+
     /* Preserve space to prevent layout collapse during transition */
     #dynamic-hero-container { min-height: 140px; }
 
@@ -451,16 +458,26 @@
 
     function renderHeroBanners() {
       const container = document.getElementById('dynamic-hero-container');
+      
+      // Setup structural transitions for seamless fade prior to swapping elements
+      container.style.transition = "opacity 0.25s ease-out, filter 0.25s ease-out";
+      container.style.opacity = "0.2";
+      container.style.filter = "blur(4px)";
+      
       if (!globalBanners || globalBanners.length === 0) {
-        container.innerHTML = `
-          <div class="hero-carousel-wrap hero-animate">
-            <div class="hero-carousel">
-              <div class="hero-slide grad-0">
-                <h2>Aarvi Stores</h2>
-                <p>Premium quality, delivered fast.</p>
+        setTimeout(() => {
+          container.innerHTML = `
+            <div class="hero-carousel-wrap hero-animate">
+              <div class="hero-carousel">
+                <div class="hero-slide grad-0">
+                  <h2>Aarvi Stores</h2>
+                  <p>Premium quality, delivered fast.</p>
+                </div>
               </div>
-            </div>
-          </div>`;
+            </div>`;
+          container.style.opacity = "1";
+          container.style.filter = "blur(0)";
+        }, 250);
         return;
       }
 
@@ -476,20 +493,27 @@
         dotsHtml += `<div class="dot ${index === 0 ? 'active' : ''}"></div>`;
       });
 
-      container.innerHTML = `
-        <div class="hero-carousel-wrap hero-animate">
-          <div class="hero-carousel" id="hero-carousel">
-            ${slidesHtml}
+      // Encapsulated within the timeout to trigger the seamless transition
+      setTimeout(() => {
+        container.innerHTML = `
+          <div class="hero-carousel-wrap hero-animate">
+            <div class="hero-carousel" id="hero-carousel">
+              ${slidesHtml}
+            </div>
+            <div class="hero-dots">
+              ${globalBanners.length > 1 ? dotsHtml : ''}
+            </div>
           </div>
-          <div class="hero-dots">
-            ${globalBanners.length > 1 ? dotsHtml : ''}
-          </div>
-        </div>
-      `;
+        `;
 
-      if (globalBanners.length > 1) {
-        initHeroCarousel();
-      }
+        // Restore visibility smoothly post-injection
+        container.style.opacity = "1";
+        container.style.filter = "blur(0)";
+
+        if (globalBanners.length > 1) {
+          initHeroCarousel();
+        }
+      }, 250);
     }
 
     function initHeroCarousel() {
@@ -814,32 +838,42 @@
         }
       });
 
-      // Smart Interaction tracking
+      // Smart Interaction tracking - Re-enables native physics dynamically during user touch
       let isInteracting = false;
-      carousel.addEventListener('touchstart', () => isInteracting = true, { passive: true });
+      carousel.addEventListener('touchstart', () => { isInteracting = true; carousel.style.scrollSnapType = 'x mandatory'; }, { passive: true });
       carousel.addEventListener('touchend', () => isInteracting = false, { passive: true });
-      carousel.addEventListener('mouseenter', () => isInteracting = true);
+      carousel.addEventListener('mouseenter', () => { isInteracting = true; carousel.style.scrollSnapType = 'x mandatory'; });
       carousel.addEventListener('mouseleave', () => isInteracting = false);
 
       // Custom Animation Frame Engine for buttery smooth native feel
       function smoothScrollCustom(element, distance, duration) {
+        // Disengage CSS scroll-snap purely during JS animation frame loop
+        element.style.scrollSnapType = 'none'; 
         const start = element.scrollLeft;
         const startTime = performance.now();
 
-        // Professional easeInOutCubic math for weight and natural deceleration
+        // Professional easeInOutCubic math for weight and natural deceleration (Legacy)
         function easeInOutCubic(t) {
           return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+        }
+
+        // NEW: Professional easeInOutQuart for Apple-like luxury weight and momentum curve
+        function easeInOutQuart(t) {
+          return t < 0.5 ? 8 * t * t * t * t : 1 - Math.pow(-2 * t + 2, 4) / 2;
         }
 
         function step(currentTime) {
           const timeElapsed = currentTime - startTime;
           const progress = Math.min(timeElapsed / duration, 1);
-          const ease = easeInOutCubic(progress);
+          const ease = easeInOutQuart(progress); // Applying upgraded easing algorithm
 
           element.scrollLeft = start + (distance * ease);
 
           if (timeElapsed < duration) {
             requestAnimationFrame(step);
+          } else {
+            // Restore strict snapping instantly after auto-scroll ends for flawless user interaction
+            element.style.scrollSnapType = 'x mandatory';
           }
         }
         requestAnimationFrame(step);
@@ -853,10 +887,10 @@
           
           if(carousel.scrollLeft >= maxScroll - 10) {
             // Smoothly pan all the way back to the start
-            smoothScrollCustom(carousel, -carousel.scrollLeft, 800);
+            smoothScrollCustom(carousel, -carousel.scrollLeft, 850);
           } else {
             // Move exactly by 2 columns (76px width + 12px gap = 88px per column * 2 = 176px)
-            smoothScrollCustom(carousel, 176, 800);
+            smoothScrollCustom(carousel, 176, 850);
           }
         }
       }, 3500); // 3.5 seconds timing
