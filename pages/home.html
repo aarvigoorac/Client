@@ -482,6 +482,13 @@
       const dots = document.querySelectorAll('.dot');
       let currentIndex = 0;
       const total = globalBanners.length;
+      let isInteracting = false;
+
+      // Smart Pausing Logic on Interaction (Prevents glitchy fights between user and interval)
+      carousel.addEventListener('touchstart', () => isInteracting = true, { passive: true });
+      carousel.addEventListener('touchend', () => isInteracting = false, { passive: true });
+      carousel.addEventListener('mouseenter', () => isInteracting = true);
+      carousel.addEventListener('mouseleave', () => isInteracting = false);
 
       carousel.addEventListener('scroll', () => {
         let index = Math.round(carousel.scrollLeft / carousel.clientWidth);
@@ -491,12 +498,12 @@
 
       clearInterval(heroInterval);
       heroInterval = setInterval(() => {
-        if (!modalStack.length) {
+        if (!modalStack.length && !isInteracting) {
           currentIndex++;
           if (currentIndex >= total) currentIndex = 0;
           carousel.scrollTo({ left: currentIndex * carousel.clientWidth, behavior: 'smooth' });
         }
-      }, 3000);
+      }, 4000); // 4 seconds pacing
     }
 
     function buildCardHtml(product, customClass = '') {
@@ -779,6 +786,12 @@
       const carousel = document.getElementById('cat-carousel');
       if(!carousel) return;
 
+      // Ensure CSS doesn't fight our smooth javascript scroll (Fixes the Flashing Issue)
+      carousel.style.scrollSnapType = 'none';
+      carousel.style.scrollBehavior = 'smooth';
+      const items = carousel.querySelectorAll('.cat-item');
+      items.forEach(item => item.style.scrollSnapAlign = 'none');
+
       // Smart Marquee: Check if text is wider than container
       document.querySelectorAll('.cat-name').forEach(el => {
         if (el.scrollWidth > el.parentElement.clientWidth) {
@@ -786,17 +799,27 @@
         }
       });
 
-      // Auto Slide Engine
+      // Smart Interaction tracking
+      let isInteracting = false;
+      carousel.addEventListener('touchstart', () => isInteracting = true, { passive: true });
+      carousel.addEventListener('touchend', () => isInteracting = false, { passive: true });
+      carousel.addEventListener('mouseenter', () => isInteracting = true);
+      carousel.addEventListener('mouseleave', () => isInteracting = false);
+
+      // Auto Slide Engine - Smooth Premium Panning
       clearInterval(carouselInterval);
       carouselInterval = setInterval(() => {
-        if (!modalStack.length) { // Only scroll if no modals open
-          if(carousel.scrollLeft + carousel.clientWidth >= carousel.scrollWidth - 10) {
+        if (!modalStack.length && !isInteracting) { // Only scroll if no modals open & user isn't holding it
+          const maxScroll = carousel.scrollWidth - carousel.clientWidth;
+          
+          if(carousel.scrollLeft >= maxScroll - 10) {
             carousel.scrollTo({ left: 0, behavior: 'smooth' });
           } else {
-            carousel.scrollBy({ left: 160, behavior: 'smooth' });
+            // Move exactly by 2 columns (76px width + 12px gap = 88px per column * 2 = 176px)
+            carousel.scrollBy({ left: 176, behavior: 'smooth' });
           }
         }
-      }, 3000);
+      }, 3500); // 3.5 seconds timing
     }
 
     // 4. E-commerce Actions
