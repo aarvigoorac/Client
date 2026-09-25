@@ -22,6 +22,7 @@
       --star-color: #01875f;
       --skeleton-base: #f1f3f6;
       --skeleton-shine: #ffffff;
+      --warning-color: #d93025;
     }
 
     @media (prefers-color-scheme: dark) {
@@ -37,6 +38,7 @@
         --star-color: #81c995;
         --skeleton-base: #333333;
         --skeleton-shine: #444444;
+        --warning-color: #f28b82;
       }
     }
 
@@ -71,7 +73,7 @@
     .stat-lbl { font-size: 12px; color: var(--text-sub); font-weight: 400; }
 
     /* --- Install Button System --- */
-    .install-container { margin: 8px 0 24px 0; position: relative; width: 100%; }
+    .install-container { margin: 8px 0 8px 0; position: relative; width: 100%; }
     .btn-install { width: 100%; height: 48px; border-radius: 24px; font-size: 15px; font-weight: 600; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; letter-spacing: 0.5px; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); user-select: none; }
     
     .btn-install.primary { background: var(--play-green); color: white; }
@@ -86,10 +88,15 @@
     /* Fake Progress Bar Overlay */
     .progress-track { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 24px; background: var(--border); overflow: hidden; display: none; pointer-events: none; }
     .progress-track.active { display: block; }
-    .progress-fill { position: absolute; top: 0; left: 0; height: 100%; width: 0%; background: var(--play-green); animation: installProgress 3s cubic-bezier(0.1, 0.7, 0.1, 1) forwards; opacity: 0.2; }
-    @keyframes installProgress { 0% { width: 0%; } 20% { width: 15%; } 50% { width: 45%; } 80% { width: 85%; } 100% { width: 100%; } }
+    .progress-fill { position: absolute; top: 0; left: 0; height: 100%; width: 0%; background: var(--play-green); animation: installProgress 30s cubic-bezier(0.1, 0.7, 0.1, 1) forwards; opacity: 0.2; }
+    @keyframes installProgress { 0% { width: 0%; } 15% { width: 10%; } 40% { width: 35%; } 75% { width: 75%; } 90% { width: 95%; } 100% { width: 100%; } }
     .install-text { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 600; color: var(--play-green); display: none; z-index: 2; pointer-events: none; }
     .install-text.active { display: flex; }
+
+    /* Professional Blinking Warning Text */
+    .install-warning { text-align: center; font-size: 13px; font-weight: 600; color: var(--warning-color); margin-bottom: 24px; height: 18px; opacity: 0; transition: opacity 0.3s; pointer-events: none; }
+    .install-warning.active { opacity: 1; animation: pulseWarning 1.5s infinite; }
+    @keyframes pulseWarning { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
 
     /* --- Image Slider --- */
     .screenshots-wrapper { display: flex; overflow-x: auto; gap: 12px; padding: 4px 0 16px 0; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; scroll-behavior: smooth; }
@@ -142,7 +149,8 @@
   <!-- Google Play Style Navbar -->
   <nav class="top-nav">
     <div class="nav-left">
-      <button class="icon-btn" onclick="history.back()"><svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg></button>
+      <!-- Hidden back button as requested to prevent leaving -->
+      <button class="icon-btn" onclick="history.back()" style="display: none;"><svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg></button>
       <svg class="store-logo" viewBox="0 0 40 40" fill="none"><path d="M19.7 0a19.7 19.7 0 100 39.4 19.7 19.7 0 000-39.4zm8.6 15.3l-13.4 7.6-5.8-3.3 11-10.7a1.6 1.6 0 012.3 0l5.9 6.4zm-14.7 9l5.3 3 1.3-2.3-6.6-3.8zm15.4-8.8l-1.3 2.3-15.5-8.9 1.4-2.3 15.4 8.9z" fill="var(--text-main)"/></svg>
     </div>
     <div class="nav-right">
@@ -187,6 +195,7 @@
       <div class="progress-track" id="progress-track"><div class="progress-fill"></div></div>
       <div class="install-text" id="install-text">Installing...</div>
     </div>
+    <div class="install-warning" id="install-warning">Do not leave this page</div>
 
     <!-- Image Gallery -->
     <div class="screenshots-wrapper" id="screenshots-container">
@@ -275,6 +284,7 @@
     const btnAction = document.getElementById('btn-main-action');
     const progressTrack = document.getElementById('progress-track');
     const installText = document.getElementById('install-text');
+    const installWarning = document.getElementById('install-warning');
     let deferredPrompt = null;
     let isAppInstalled = false;
 
@@ -311,7 +321,7 @@
       });
     }
 
-    // 3. The 3-Second Install Illusion & Trigger
+    // 3. The 30-Second Install Illusion & Trigger
     async function triggerInstallSequence() {
       vibrate(20);
       
@@ -327,15 +337,17 @@
       btnAction.style.display = 'none';
       progressTrack.classList.add('active');
       installText.classList.add('active');
+      installWarning.classList.add('active');
 
-      // Wait 3 seconds for bar to fill
+      // Wait 30 seconds for bar to fill
       setTimeout(() => {
         progressTrack.classList.remove('active');
         installText.classList.remove('active');
+        installWarning.classList.remove('active');
         btnAction.style.display = 'flex';
         setInstalledState();
         vibrate([30, 50, 30]); // Success haptic
-      }, 3000);
+      }, 30000);
     }
 
     function setInstalledState() {
