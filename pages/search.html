@@ -732,8 +732,7 @@
     closeModalBtn.addEventListener('click', () => {
       if (navigator.vibrate) navigator.vibrate(40);
       if (isModalOpen) {
-        history.go(-modalProductStack.length);
-        setTimeout(closeModalLogic, 50); // Fallback sweep
+        history.back();
       }
     });
 
@@ -972,7 +971,7 @@
           btnAddCart.innerText = 'Add to Cart';
           btnAddCart.style = '';
           toast.classList.remove('show');
-          triggerCloseModal();
+          history.back();
         }, 1500);
 
       } catch (error) {
