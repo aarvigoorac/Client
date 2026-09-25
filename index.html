@@ -276,6 +276,10 @@
     #install-pill.show { transform: translateX(-50%) translateY(0); }
     #install-pill svg { width: 18px; height: 18px; stroke: currentColor; }
 
+    /* --- Notification Toast --- */
+    #toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-150px); background: #137333; color: white; padding: 14px 24px; border-radius: 50px; font-size: 15px; font-weight: 600; opacity: 0; transition: all 0.4s cubic-bezier(0.32, 0.72, 0, 1); z-index: 3000; box-shadow: 0 8px 20px rgba(0,0,0,0.25); display: flex; align-items: center; gap: 10px; width: max-content; pointer-events: none; }
+    #toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
     /* --- Responsive Switching --- */
     @media (max-width: 768px) {
       aside { display: none !important; }
@@ -461,7 +465,8 @@
 
         const currentSrc = contentFrame.src || "";
         if (currentSrc.includes('login.html') || currentSrc.includes('index.html') || currentSrc.includes('setup.html') || currentSrc === "about:blank") {
-          contentFrame.src = "pages/home.html";
+          // Fix: Append window.location.search to successfully route deep-link IDs into the iframe
+          contentFrame.src = "pages/home.html" + window.location.search;
         }
 
         if (user.photoURL && user.photoURL !== localDpUrl) {
@@ -492,11 +497,42 @@
       } catch (e) {}
     });
 
-    window.addEventListener('message', (event) => {
+    // 3. Central PostMessage Event Router (Setup + Native Sharing)
+    window.addEventListener('message', async (event) => {
+      // Complete Setup Event
       if (event.data === 'SETUP_COMPLETE' || (event.data && event.data.type === 'SETUP_COMPLETE')) {
         localStorage.setItem('aarvi_setup_complete', 'true');
         setNavigationLock(false);
-        contentFrame.src = "pages/home.html";
+        // Fix: Ensure deep links pass through during first setup boot
+        contentFrame.src = "pages/home.html" + window.location.search;
+      }
+
+      // App Shell Native Share Event Router
+      if (event.data && event.data.type === 'SHARE_PRODUCT') {
+        const product = event.data.product;
+        if (!product) return;
+        
+        // This generates the URL using the parent's app root location
+        const shareUrl = `${window.location.origin}${window.location.pathname}?product=${product.id}`;
+        const shareData = {
+          title: product.name,
+          text: `Check out ${product.name} at Aarvi Stores!`,
+          url: shareUrl
+        };
+
+        try {
+          if (navigator.share) {
+            await navigator.share(shareData);
+          } else {
+            // Fallback for non-mobile platforms
+            await navigator.clipboard.writeText(shareUrl);
+            const toast = document.getElementById('toast');
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2000);
+          }
+        } catch (err) {
+          console.error('Error sharing from app shell:', err);
+        }
       }
     });
 
@@ -504,7 +540,8 @@
       if (e.key === 'aarvi_setup_complete' && e.newValue === 'true') {
         setNavigationLock(false);
         if (contentFrame.src.includes('setup.html')) {
-          contentFrame.src = "pages/home.html";
+          // Fix: Ensure deep links pass through on storage syncs
+          contentFrame.src = "pages/home.html" + window.location.search;
         }
       }
     });
