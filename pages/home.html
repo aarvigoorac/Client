@@ -2,12 +2,13 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Home - Aarvi Stores</title>
   <style>
     :root {
       --bg-color: #f1f3f6;
       --surface-color: #ffffff;
+      --surface-rgb: 255, 255, 255;
       --text-main: #000000;
       --text-sub: #666666;
       --border: #e0e0e0;
@@ -25,6 +26,7 @@
       :root {
         --bg-color: #121212;
         --surface-color: #1e1e1e;
+        --surface-rgb: 30, 30, 30;
         --text-main: #ffffff;
         --text-sub: #a0a0a0;
         --border: #333333;
@@ -40,7 +42,7 @@
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; -webkit-tap-highlight-color: transparent; }
     
     ::-webkit-scrollbar { display: none; }
-    html, body, .modal-scroll, .horizontal-scroll { -ms-overflow-style: none; scrollbar-width: none; }
+    html, body, .modal-scroll, .horizontal-scroll, .cat-carousel { -ms-overflow-style: none; scrollbar-width: none; }
 
     body { background-color: var(--bg-color); color: var(--text-main); padding-bottom: 90px; overflow-x: hidden; }
 
@@ -49,6 +51,24 @@
     .hero-banner::after { content: ''; position: absolute; top: -50%; right: -20%; width: 200px; height: 200px; background: rgba(255,255,255,0.1); border-radius: 50%; }
     .hero-banner h2 { font-size: 28px; font-weight: 800; margin-bottom: 4px; letter-spacing: -0.5px; z-index: 1; }
     .hero-banner p { opacity: 0.9; font-size: 15px; font-weight: 500; z-index: 1; }
+
+    /* Blinkit-Style Category Carousel */
+    .cat-carousel-wrap { margin-top: -8px; margin-bottom: 24px; padding: 0 20px; overflow: hidden; }
+    .cat-carousel { display: grid; grid-template-rows: repeat(2, 1fr); grid-auto-flow: column; gap: 16px 12px; overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: 4px; }
+    .cat-carousel::after { content: ''; padding-right: 8px; grid-row: span 2; }
+    
+    .cat-item { display: flex; flex-direction: column; align-items: center; width: 76px; cursor: pointer; scroll-snap-align: start; gap: 8px; transition: transform 0.15s; }
+    .cat-item:active { transform: scale(0.92); }
+    
+    .cat-img-box { width: 72px; height: 72px; border-radius: 18px; background: var(--surface-color); box-shadow: 0 4px 12px rgba(0,0,0,0.06); display: flex; align-items: center; justify-content: center; padding: 8px; border: 1px solid var(--border); overflow: hidden; position: relative; }
+    .cat-img-box img { width: 100%; height: 100%; object-fit: contain; }
+    
+    .cat-name-box { width: 100%; overflow: hidden; position: relative; text-align: center; }
+    .cat-name { font-size: 12px; font-weight: 700; color: var(--text-main); white-space: nowrap; display: inline-block; }
+    
+    /* Smart Text Marquee Animation */
+    @keyframes textPingPong { 0%, 20% { transform: translateX(0); } 80%, 100% { transform: translateX(calc(76px - 100%)); } }
+    .needs-marquee { animation: textPingPong 4s linear infinite alternate; }
 
     .section-header { display: flex; justify-content: space-between; align-items: center; padding: 0 20px; margin-bottom: 16px; margin-top: 24px; }
     .section-title { font-size: 18px; font-weight: 800; color: var(--text-main); }
@@ -76,7 +96,6 @@
 
     /* Section 3: The Flipkart Featured 4-Grid (Perfect Vertical Grid) */
     .featured-grid-wrap { background: var(--surface-color); margin: 32px 0; position: relative; overflow: hidden; padding: 24px 20px; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
-    /* Premium Geometric Blue Background elements */
     .featured-grid-wrap::before { content: ''; position: absolute; top: -50px; right: -50px; width: 150px; height: 150px; border-radius: 50%; background: radial-gradient(circle, rgba(40, 116, 240, 0.15) 0%, rgba(40, 116, 240, 0) 70%); z-index: 0; }
     .featured-grid-wrap::after { content: ''; position: absolute; bottom: -30px; left: -30px; width: 100px; height: 100px; border-radius: 50%; background: var(--primary); opacity: 0.05; z-index: 0; }
     
@@ -85,21 +104,18 @@
     
     .featured-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; position: relative; z-index: 1; width: 100%; }
     
-    /* Slot 8: Main Big Feature (Top, Full Width) */
     .f-main { grid-column: span 2; }
     .f-main .img-container { aspect-ratio: 16/9; padding: 0; }
     .f-main .img-container img { object-fit: cover; border-radius: 16px 16px 0 0; mix-blend-mode: normal; width: 100%; height: 100%; }
     .f-main .card-title { font-size: 16px; -webkit-line-clamp: 2; margin-top: 4px; }
     .f-main .card-price { font-size: 20px; }
     
-    /* Slots 9, 10: Side Stack (Middle, 50% width each) */
     .f-side { grid-column: span 1; }
     .f-side .card-info { padding: 12px; }
     .f-side .card-title { font-size: 13px; margin-bottom: 4px; }
     .f-side .card-price { font-size: 15px; }
     .f-side .card-rating { display: none; } 
     
-    /* Slot 11: End Banner Card (Bottom, Full Width) */
     .f-banner { grid-column: span 2; display: flex; flex-direction: row; align-items: center; height: 110px; padding: 0; }
     .f-banner .img-container { width: 110px; height: 100%; border-right: 1px solid var(--border); border-radius: 16px 0 0 16px; padding: 8px; }
     .f-banner .card-info { padding: 12px 16px; justify-content: center; }
@@ -118,21 +134,33 @@
     .sk-title.short { width: 60%; margin-bottom: 16px; }
     .sk-price-box { height: 20px; width: 45%; margin-top: auto; border-radius: 6px; }
 
-    /* Slide-Up Product Modal (Native Bottom Sheet) */
-    .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 999; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; backdrop-filter: blur(4px); }
+    /* Multi-Layer Modals Base Setup */
+    .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); opacity: 0; pointer-events: none; transition: opacity 0.3s ease; backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); }
     .modal-overlay.active { opacity: 1; pointer-events: auto; }
     
-    .product-modal { position: fixed; bottom: 0; left: 0; width: 100%; height: 88vh; max-height: 850px; background: var(--bg-color); border-radius: 24px 24px 0 0; z-index: 1000; transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1); display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 -10px 40px rgba(0,0,0,0.2); }
-    .product-modal.active { transform: translateY(0); }
-    
-    .modal-pull-indicator { width: 40px; height: 4px; background: var(--border); border-radius: 2px; margin: 12px auto; }
+    .base-modal { position: fixed; bottom: 0; left: 0; width: 100%; background: var(--bg-color); border-radius: 24px 24px 0 0; transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1); display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 -10px 40px rgba(0,0,0,0.2); }
+    .base-modal.active { transform: translateY(0); }
+    .modal-pull-indicator { width: 40px; height: 4px; background: var(--border); border-radius: 2px; margin: 12px auto; flex-shrink: 0; }
+    .modal-scroll { flex: 1; overflow-y: auto; padding-bottom: 100px; }
+
+    /* Category Level Modal (Layer 1) */
+    #cat-modal-bg { z-index: 899; }
+    #cat-modal { z-index: 900; height: 92vh; }
+    .cat-modal-header { display: flex; align-items: center; padding: 12px 16px 16px; position: sticky; top: 0; background: rgba(var(--surface-rgb), 0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); z-index: 10; gap: 16px; }
+    .cat-back-btn { background: var(--surface-color); border: 1px solid var(--border); width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text-main); }
+    .cat-back-btn:active { transform: scale(0.9); }
+    .cat-back-btn svg { width: 24px; height: 24px; stroke: currentColor; stroke-width: 2.5; }
+    .cat-modal-title { font-size: 18px; font-weight: 800; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1; }
+
+    /* Product Level Modal (Layer 2) */
+    #modal-bg { z-index: 1999; }
+    #product-modal { z-index: 2000; height: 88vh; max-height: 850px; }
     .modal-header { display: flex; justify-content: flex-end; padding: 0 16px 12px; position: absolute; width: 100%; z-index: 10; pointer-events: none; top: 12px; }
     .close-btn { background: rgba(255,255,255,0.9); border: none; width: 36px; height: 36px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.1); pointer-events: auto; backdrop-filter: blur(8px); }
     @media (prefers-color-scheme: dark) { .close-btn { background: rgba(31,41,55,0.9); box-shadow: 0 4px 12px rgba(0,0,0,0.3); } }
     .close-btn:active { transform: scale(0.9); }
     .close-btn svg { width: 20px; height: 20px; stroke: var(--text-main); stroke-width: 2.5; }
 
-    .modal-scroll { flex: 1; overflow-y: auto; padding-bottom: 100px; }
     .modal-img-wrapper { background: var(--surface-color); padding: 40px 20px 20px; display: flex; justify-content: center; align-items: center; }
     .modal-img { width: 100%; max-width: 300px; aspect-ratio: 1; object-fit: contain; }
     @media (prefers-color-scheme: light) { .modal-img { mix-blend-mode: multiply; } }
@@ -152,7 +180,7 @@
     .out-of-stock-msg { flex: 1; padding: 16px; border-radius: 14px; font-size: 16px; font-weight: 800; text-align: center; background: var(--warning-bg); color: var(--warning); border: 1.5px solid var(--warning); display: flex; justify-content: center; align-items: center; gap: 8px; }
 
     /* Notification Toast */
-    #toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-100px); background: #137333; color: white; padding: 14px 24px; border-radius: 50px; font-size: 15px; font-weight: 600; opacity: 0; transition: all 0.4s cubic-bezier(0.32, 0.72, 0, 1); z-index: 2000; box-shadow: 0 8px 20px rgba(0,0,0,0.25); display: flex; align-items: center; gap: 10px; width: max-content; }
+    #toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-100px); background: #137333; color: white; padding: 14px 24px; border-radius: 50px; font-size: 15px; font-weight: 600; opacity: 0; transition: all 0.4s cubic-bezier(0.32, 0.72, 0, 1); z-index: 3000; box-shadow: 0 8px 20px rgba(0,0,0,0.25); display: flex; align-items: center; gap: 10px; width: max-content; }
     #toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
   </style>
 </head>
@@ -167,8 +195,6 @@
   <div id="homepage-content">
     
     <!-- High-Fidelity Master Skeletons -->
-    
-    <!-- Section 1 (Top Grid) -->
     <div class="section-header"><h3 class="section-title skeleton" style="width: 140px; height: 20px; border-radius: 4px;"></h3></div>
     <div class="grid-2-col">
       <div class="product-card skeleton-card"><div class="skeleton sk-img"></div><div class="card-info"><div class="skeleton sk-title"></div><div class="skeleton sk-title short"></div><div class="skeleton sk-price-box"></div></div></div>
@@ -177,7 +203,6 @@
       <div class="product-card skeleton-card"><div class="skeleton sk-img"></div><div class="card-info"><div class="skeleton sk-title"></div><div class="skeleton sk-title short"></div><div class="skeleton sk-price-box"></div></div></div>
     </div>
     
-    <!-- Section 2 (Horizontal Scroll) -->
     <div class="section-header"><h3 class="section-title skeleton" style="width: 160px; height: 20px; border-radius: 4px;"></h3></div>
     <div class="horizontal-scroll">
       <div class="product-card h-card skeleton-card"><div class="skeleton sk-img"></div><div class="card-info"><div class="skeleton sk-title"></div><div class="skeleton sk-title short"></div><div class="skeleton sk-price-box"></div></div></div>
@@ -185,7 +210,6 @@
       <div class="product-card h-card skeleton-card"><div class="skeleton sk-img"></div><div class="card-info"><div class="skeleton sk-title"></div><div class="skeleton sk-title short"></div><div class="skeleton sk-price-box"></div></div></div>
     </div>
 
-    <!-- Section 3 (Featured Bento Grid) -->
     <div class="featured-grid-wrap">
       <div class="featured-title"><div class="skeleton" style="width: 180px; height: 24px; border-radius: 4px;"></div></div>
       <div class="featured-grid">
@@ -196,7 +220,6 @@
       </div>
     </div>
 
-    <!-- Section 4 (Line-by-Line List) -->
     <div class="section-header" style="margin-top:12px;"><h3 class="section-title skeleton" style="width: 130px; height: 20px; border-radius: 4px;"></h3></div>
     <div class="list-container">
       <div class="product-card list-card skeleton-card"><div class="skeleton sk-img" style="width: 120px; height: 100%;"></div><div class="card-info" style="justify-content:center;"><div class="skeleton sk-title"></div><div class="skeleton sk-title short"></div><div class="skeleton sk-price-box"></div></div></div>
@@ -204,7 +227,6 @@
       <div class="product-card list-card skeleton-card"><div class="skeleton sk-img" style="width: 120px; height: 100%;"></div><div class="card-info" style="justify-content:center;"><div class="skeleton sk-title"></div><div class="skeleton sk-title short"></div><div class="skeleton sk-price-box"></div></div></div>
     </div>
     
-    <!-- Section 5 (Bottom Grid) -->
     <div class="section-header"><h3 class="section-title skeleton" style="width: 150px; height: 20px; border-radius: 4px;"></h3></div>
     <div class="grid-2-col">
       <div class="product-card skeleton-card"><div class="skeleton sk-img"></div><div class="card-info"><div class="skeleton sk-title"></div><div class="skeleton sk-title short"></div><div class="skeleton sk-price-box"></div></div></div>
@@ -213,9 +235,25 @@
 
   </div>
 
-  <!-- Slide-Up Product Modal -->
+  <!-- Layer 1: Category Modal -->
+  <div class="modal-overlay" id="cat-modal-bg"></div>
+  <div class="base-modal" id="cat-modal">
+    <div class="cat-modal-header">
+      <button class="cat-back-btn" id="close-cat-modal">
+        <svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+      <h2 id="cat-modal-title" class="cat-modal-title">Category</h2>
+    </div>
+    <div class="modal-scroll" style="padding-top: 16px;">
+      <div class="grid-2-col" id="cat-modal-grid">
+        <!-- Products injected here -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Layer 2: Product Detail Modal -->
   <div class="modal-overlay" id="modal-bg"></div>
-  <div class="product-modal" id="product-modal">
+  <div class="base-modal" id="product-modal">
     <div class="modal-pull-indicator"></div>
     <div class="modal-header">
       <button class="close-btn" id="close-modal">
@@ -240,7 +278,7 @@
       <button class="btn btn-buy" id="btn-buy-now">Buy Now</button>
       <div id="out-of-stock-msg" class="out-of-stock-msg" style="display: none;">
         <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
-        Out of Stock - Coming Soon
+        Out of Stock
       </div>
     </div>
   </div>
@@ -258,16 +296,18 @@
 
     const contentDiv = document.getElementById('homepage-content');
     
-    // Modal Elements
+    // Modals
     const modalBg = document.getElementById('modal-bg');
-    const modal = document.getElementById('product-modal');
-    const closeModalBtn = document.getElementById('close-modal');
+    const productModal = document.getElementById('product-modal');
+    const catModalBg = document.getElementById('cat-modal-bg');
+    const catModal = document.getElementById('cat-modal');
+    
+    // Product UI
     const mImg = document.getElementById('m-img');
     const mTitle = document.getElementById('m-title');
     const mPrice = document.getElementById('m-price');
     const mDesc = document.getElementById('m-desc');
     const mRating = document.getElementById('m-rating');
-    
     const btnAddCart = document.getElementById('btn-add-cart');
     const btnBuyNow = document.getElementById('btn-buy-now');
     const outOfStockMsg = document.getElementById('out-of-stock-msg');
@@ -276,12 +316,16 @@
     let currentUser = null;
     let currentSelectedProduct = null;
     let currentImgUrl = null;
-    let isModalOpen = false;
+    
+    // Architecture Upgrades
+    let modalStack = [];
+    let productCache = {}; // Global cache to prevent double-fetching
+    let globalCategories = []; // Extracted from layout doc
+    let carouselInterval;
 
-    // SVG Placeholder using theme-compatible colors
     const placeholderImg = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='400' viewBox='0 0 400 400'><rect width='400' height='400' fill='%23f1f3f6'/><path d='M200 160c-22.1 0-40 17.9-40 40s17.9 40 40 40 40-17.9 40-40-17.9-40-40-40zm0 64c-13.2 0-24-10.8-24-24s10.8-24 24-24 24 10.8 24 24-10.8 24-24 24z' fill='%23cccccc'/><path d='M264 120H136c-13.2 0-24 10.8-24 24v112c0 13.2 10.8 24 24 24h128c13.2 0 24-10.8 24-24V144c0-13.2-10.8-24-24-24zm8 136c0 4.4-3.6 8-8 8H136c-4.4 0-8-3.6-8-8V144c0-4.4 3.6-8 8-8h128c4.4 0 8 3.6 8 8v112z' fill='%23cccccc'/></svg>";
+    const catPlaceholderSvg = "data:image/svg+xml;utf8,<svg fill='none' viewBox='0 0 24 24' stroke='%23cccccc' stroke-width='1.5'><path stroke-linecap='round' stroke-linejoin='round' d='M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z' /></svg>";
 
-    // Robust Image Extractor
     const getProductImage = (prod) => {
       if (!prod) return placeholderImg;
       if (prod.images && prod.images.thumbnail) return prod.images.thumbnail;
@@ -292,40 +336,39 @@
 
     onAuthStateChanged(auth, (user) => { currentUser = user; });
 
-    // 1. Core Data Fetching Pipeline
+    // 1. Core Data Fetching Pipeline (Optimized)
     async function initCustomerHomepage() {
       try {
-        // Step 1: Fetch the layout map (1 read)
         const layoutDoc = await getDoc(doc(db, "layout", "homepage"));
         if (!layoutDoc.exists() || !layoutDoc.data().slots) {
           contentDiv.innerHTML = `<p style="padding:24px; text-align:center; color: var(--text-sub);">Nothing to display right now.</p>`;
           return;
         }
 
-        const slots = layoutDoc.data().slots;
+        const data = layoutDoc.data();
+        const slots = data.slots;
+        globalCategories = data.categories || [];
+        
         const requiredProductIds = [];
         
-        // Extract IDs, ignoring nulls
+        // ONLY fetch the hero slots (1-16) to save database reads
         for (let i = 1; i <= 16; i++) {
           if (slots[i]) requiredProductIds.push(slots[i]);
         }
 
-        if (requiredProductIds.length === 0) {
+        if (requiredProductIds.length === 0 && globalCategories.length === 0) {
           contentDiv.innerHTML = `<p style="padding:24px; text-align:center; color: var(--text-sub);">Our catalog is being updated.</p>`;
           return;
         }
 
-        // Step 2: Batch fetch the actual products
-        const productMap = {};
         const fetchPromises = requiredProductIds.map(id => getDoc(doc(db, "products", id)));
         const productDocs = await Promise.all(fetchPromises);
         
         productDocs.forEach(d => {
-          if (d.exists()) productMap[d.id] = { id: d.id, ...d.data() };
+          if (d.exists()) productCache[d.id] = { id: d.id, ...d.data() };
         });
 
-        // Step 3: Render the 5 layout sections
-        renderDynamicLayout(slots, productMap);
+        renderDynamicLayout(slots, productCache);
 
       } catch (error) {
         console.error("Layout load failed:", error);
@@ -333,9 +376,8 @@
       }
     }
 
-    // Builder Helper for a single card HTML
     function buildCardHtml(product, customClass = '') {
-      if (!product) return ''; // Safety fallback
+      if (!product) return ''; 
       const imgUrl = getProductImage(product);
       
       let ratingHtml = '';
@@ -344,11 +386,10 @@
         ratingHtml = `<div class="card-rating"><svg viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg> ${avg}</div>`;
       }
 
-      // Safe escape for JSON stringification in the onclick handler
       const prodJson = JSON.stringify(product).replace(/'/g, "&#39;").replace(/"/g, "&quot;");
 
       return `
-        <div class="product-card ${customClass}" onclick="openModalFromStr('${prodJson}')">
+        <div class="product-card ${customClass}" onclick="openProductModalFromStr('${prodJson}')">
           <div class="img-container">
             <img src="${imgUrl}" onerror="this.src='${placeholderImg}'" alt="${product.name}">
           </div>
@@ -361,87 +402,15 @@
       `;
     }
 
-    window.openModalFromStr = function(jsonStr) {
+    // Modal Stacking Engine
+    window.openProductModalFromStr = function(jsonStr) {
       const product = JSON.parse(jsonStr.replace(/&quot;/g, '"').replace(/&#39;/g, "'"));
-      openModal(product, getProductImage(product));
-    };
-
-    // 2. The 5-Part Layout Renderer
-    function renderDynamicLayout(slots, productMap) {
-      let finalHtml = '';
-
-      // Section 1: Slots 1-4 (Top 2-Col Grid)
-      const sec1Products = [1,2,3,4].map(i => productMap[slots[i]]).filter(Boolean);
-      if (sec1Products.length > 0) {
-        finalHtml += `
-          <div class="section-header"><h3 class="section-title">Trending Now</h3></div>
-          <div class="grid-2-col">
-            ${sec1Products.map(p => buildCardHtml(p)).join('')}
-          </div>
-        `;
-      }
-
-      // Section 2: Slots 5-7 (Horizontal Scroll)
-      const sec2Products = [5,6,7].map(i => productMap[slots[i]]).filter(Boolean);
-      if (sec2Products.length > 0) {
-        finalHtml += `
-          <div class="section-header"><h3 class="section-title">Curated For You</h3></div>
-          <div class="horizontal-scroll">
-            ${sec2Products.map(p => buildCardHtml(p, 'h-card')).join('')}
-          </div>
-        `;
-      }
-
-      // Section 3: Slots 8-11 (The Vertical Bento Grid)
-      const p8 = productMap[slots[8]];
-      const p9 = productMap[slots[9]];
-      const p10 = productMap[slots[10]];
-      const p11 = productMap[slots[11]];
       
-      if (p8 || p9 || p10 || p11) {
-        finalHtml += `<div class="featured-grid-wrap">
-                        <div class="featured-title">Top Picks of the Day</div>
-                        <div class="featured-grid">`;
-        if (p8) finalHtml += buildCardHtml(p8, 'f-main');
-        if (p9) finalHtml += buildCardHtml(p9, 'f-side');
-        if (p10) finalHtml += buildCardHtml(p10, 'f-side');
-        if (p11) finalHtml += buildCardHtml(p11, 'f-banner');
-        finalHtml += `  </div>
-                      </div>`;
-      }
-
-      // Section 4: Slots 12-14 (Line-by-Line List)
-      const sec4Products = [12,13,14].map(i => productMap[slots[i]]).filter(Boolean);
-      if (sec4Products.length > 0) {
-        finalHtml += `
-          <div class="section-header" style="margin-top:12px;"><h3 class="section-title">Most Wanted</h3></div>
-          <div class="list-container">
-            ${sec4Products.map(p => buildCardHtml(p, 'list-card')).join('')}
-          </div>
-        `;
-      }
-
-      // Section 5: Slots 15-16 (Bottom 2-Col Grid)
-      const sec5Products = [15,16].map(i => productMap[slots[i]]).filter(Boolean);
-      if (sec5Products.length > 0) {
-        finalHtml += `
-          <div class="section-header"><h3 class="section-title">Don't Miss Out</h3></div>
-          <div class="grid-2-col">
-            ${sec5Products.map(p => buildCardHtml(p)).join('')}
-          </div>
-        `;
-      }
-
-      contentDiv.innerHTML = finalHtml;
-    }
-
-    // 3. Modal & Background Lock Logic
-    function openModal(product, imgUrl) {
       if (navigator.vibrate) navigator.vibrate(40);
       currentSelectedProduct = product;
-      currentImgUrl = imgUrl;
+      currentImgUrl = getProductImage(product);
       
-      mImg.src = imgUrl;
+      mImg.src = currentImgUrl;
       mImg.onerror = function() { this.src = placeholderImg; };
       mTitle.innerText = product.name;
       mPrice.innerText = `₹${(product.price || 0).toLocaleString('en-IN')}`;
@@ -455,7 +424,6 @@
         mRating.style.display = 'none';
       }
 
-      // Dynamic Out of Stock Handling
       const stock = Number(product.stock) || 0;
       if (stock <= 0) {
         btnAddCart.style.display = 'none';
@@ -468,36 +436,195 @@
       }
 
       modalBg.classList.add('active');
-      modal.classList.add('active');
-      document.body.style.overflowY = 'hidden'; // Perfectly lock background scrolling
+      productModal.classList.add('active');
+      document.body.style.overflowY = 'hidden'; 
       
-      isModalOpen = true;
-      history.pushState({ modal: 'product' }, '', '');
+      modalStack.push('product');
+      history.pushState({ modal: 'product' }, '');
+    };
+
+    window.openCategoryModalFromId = async function(catId) {
+      if (navigator.vibrate) navigator.vibrate(15);
+      const cat = globalCategories.find(c => c.id === catId);
+      if(!cat) return;
+
+      document.getElementById('cat-modal-title').innerText = cat.name;
+      catModalBg.classList.add('active');
+      catModal.classList.add('active');
+      document.body.style.overflowY = 'hidden';
+      
+      modalStack.push('category');
+      history.pushState({ modal: 'category' }, '');
+
+      const grid = document.getElementById('cat-modal-grid');
+      // Show Master Skeletons immediately
+      grid.innerHTML = Array(6).fill(`<div class="product-card skeleton-card"><div class="skeleton sk-img"></div><div class="card-info"><div class="skeleton sk-title"></div><div class="skeleton sk-title short"></div><div class="skeleton sk-price-box"></div></div></div>`).join('');
+
+      // On-Demand Data Fetching (Zero wasted reads)
+      const slots = cat.slots || {};
+      const requiredIds = [];
+      for(let i=1; i<=20; i++) {
+        if(slots[i] && !productCache[slots[i]]) requiredIds.push(slots[i]);
+      }
+
+      if(requiredIds.length > 0) {
+        try {
+           const promises = requiredIds.map(id => getDoc(doc(db, "products", id)));
+           const docs = await Promise.all(promises);
+           docs.forEach(d => { if(d.exists()) productCache[d.id] = { id: d.id, ...d.data() }; });
+        } catch(e) { console.error("Cat fetch error", e); }
+      }
+
+      let finalHtml = '';
+      let hasProducts = false;
+      for(let i=1; i<=20; i++) {
+        const pid = slots[i];
+        if(pid && productCache[pid]) {
+          finalHtml += buildCardHtml(productCache[pid]);
+          hasProducts = true;
+        }
+      }
+
+      if(!hasProducts) {
+         finalHtml = `<div style="grid-column: span 2; padding: 40px 20px; text-align: center; color: var(--text-sub); font-weight: 600;">More products coming soon.</div>`;
+      }
+      grid.innerHTML = finalHtml;
+    };
+
+    function closeTopModal() {
+      const top = modalStack.pop();
+      if (top === 'product') {
+        modalBg.classList.remove('active');
+        productModal.classList.remove('active');
+        currentSelectedProduct = null;
+      } else if (top === 'category') {
+        catModalBg.classList.remove('active');
+        catModal.classList.remove('active');
+      }
+      if (modalStack.length === 0) document.body.style.overflowY = ''; 
     }
 
-    function closeModalLogic() {
-      modalBg.classList.remove('active');
-      modal.classList.remove('active');
-      document.body.style.overflowY = ''; // Restore background scrolling
-      isModalOpen = false;
-      currentSelectedProduct = null;
-      currentImgUrl = null;
-    }
-
-    function triggerCloseModal() {
-      if (isModalOpen) history.back(); 
-    }
-
-    closeModalBtn.addEventListener('click', () => {
-      if (navigator.vibrate) navigator.vibrate(40);
-      triggerCloseModal();
+    window.addEventListener('popstate', () => {
+      if (modalStack.length > 0) closeTopModal();
     });
-    
-    modalBg.addEventListener('click', triggerCloseModal);
 
-    window.addEventListener('popstate', (e) => {
-      if (isModalOpen) closeModalLogic();
-    });
+    const bindClose = (btnId) => {
+      document.getElementById(btnId).addEventListener('click', () => {
+        if (navigator.vibrate) navigator.vibrate(10);
+        if (modalStack.length > 0) history.back();
+      });
+    };
+
+    bindClose('close-modal');
+    bindClose('close-cat-modal');
+    modalBg.addEventListener('click', () => { if (modalStack.length > 0) history.back(); });
+    catModalBg.addEventListener('click', () => { if (modalStack.length > 0) history.back(); });
+
+    // 2. Main Render Pipeline
+    function renderDynamicLayout(slots, pMap) {
+      let finalHtml = '';
+
+      // INJECT BLINKIT CATEGORY CAROUSEL (Dynamically rendered)
+      if (globalCategories && globalCategories.length > 0) {
+        let catHtml = `<div class="cat-carousel-wrap"><div class="cat-carousel" id="cat-carousel">`;
+        globalCategories.forEach(cat => {
+          const imgSrc = cat.image || catPlaceholderSvg;
+          catHtml += `
+            <div class="cat-item" onclick="openCategoryModalFromId(${cat.id})">
+              <div class="cat-img-box"><img src="${imgSrc}" onerror="this.src='${catPlaceholderSvg}'"></div>
+              <div class="cat-name-box"><span class="cat-name">${cat.name}</span></div>
+            </div>
+          `;
+        });
+        catHtml += `</div></div>`;
+        finalHtml += catHtml;
+      }
+
+      // Section 1
+      const sec1 = [1,2,3,4].map(i => pMap[slots[i]]).filter(Boolean);
+      if (sec1.length > 0) {
+        finalHtml += `
+          <div class="section-header"><h3 class="section-title">Trending Now</h3></div>
+          <div class="grid-2-col">
+            ${sec1.map(p => buildCardHtml(p)).join('')}
+          </div>
+        `;
+      }
+
+      // Section 2
+      const sec2 = [5,6,7].map(i => pMap[slots[i]]).filter(Boolean);
+      if (sec2.length > 0) {
+        finalHtml += `
+          <div class="section-header"><h3 class="section-title">Curated For You</h3></div>
+          <div class="horizontal-scroll">
+            ${sec2.map(p => buildCardHtml(p, 'h-card')).join('')}
+          </div>
+        `;
+      }
+
+      // Section 3
+      const p8 = pMap[slots[8]]; const p9 = pMap[slots[9]];
+      const p10 = pMap[slots[10]]; const p11 = pMap[slots[11]];
+      if (p8 || p9 || p10 || p11) {
+        finalHtml += `<div class="featured-grid-wrap"><div class="featured-title">Top Picks of the Day</div><div class="featured-grid">`;
+        if (p8) finalHtml += buildCardHtml(p8, 'f-main');
+        if (p9) finalHtml += buildCardHtml(p9, 'f-side');
+        if (p10) finalHtml += buildCardHtml(p10, 'f-side');
+        if (p11) finalHtml += buildCardHtml(p11, 'f-banner');
+        finalHtml += `</div></div>`;
+      }
+
+      // Section 4
+      const sec4 = [12,13,14].map(i => pMap[slots[i]]).filter(Boolean);
+      if (sec4.length > 0) {
+        finalHtml += `
+          <div class="section-header" style="margin-top:12px;"><h3 class="section-title">Most Wanted</h3></div>
+          <div class="list-container">
+            ${sec4.map(p => buildCardHtml(p, 'list-card')).join('')}
+          </div>
+        `;
+      }
+
+      // Section 5
+      const sec5 = [15,16].map(i => pMap[slots[i]]).filter(Boolean);
+      if (sec5.length > 0) {
+        finalHtml += `
+          <div class="section-header"><h3 class="section-title">Don't Miss Out</h3></div>
+          <div class="grid-2-col">
+            ${sec5.map(p => buildCardHtml(p)).join('')}
+          </div>
+        `;
+      }
+
+      contentDiv.innerHTML = finalHtml;
+      
+      // Post-Render Actions: Smart Marquee & Auto-Scroll
+      initCarouselBehaviors();
+    }
+
+    function initCarouselBehaviors() {
+      const carousel = document.getElementById('cat-carousel');
+      if(!carousel) return;
+
+      // Smart Marquee: Check if text is wider than container
+      document.querySelectorAll('.cat-name').forEach(el => {
+        if (el.scrollWidth > el.parentElement.clientWidth) {
+          el.classList.add('needs-marquee');
+        }
+      });
+
+      // Auto Slide Engine
+      clearInterval(carouselInterval);
+      carouselInterval = setInterval(() => {
+        if (!modalStack.length) { // Only scroll if no modals open
+          if(carousel.scrollLeft + carousel.clientWidth >= carousel.scrollWidth - 10) {
+            carousel.scrollTo({ left: 0, behavior: 'smooth' });
+          } else {
+            carousel.scrollBy({ left: 160, behavior: 'smooth' });
+          }
+        }
+      }, 3000);
+    }
 
     // 4. E-commerce Actions
     btnAddCart.addEventListener('click', async () => {
@@ -510,7 +637,6 @@
 
       try {
         const cartRef = doc(db, 'carts', currentUser.uid);
-        
         const cartUpdate = {
           items: {
             [currentSelectedProduct.id]: {
@@ -535,7 +661,7 @@
           btnAddCart.innerText = 'Add to Cart';
           btnAddCart.style = '';
           toast.classList.remove('show');
-          triggerCloseModal();
+          history.back(); // Auto-close product modal
         }, 1500);
 
       } catch (error) {
