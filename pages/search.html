@@ -504,7 +504,7 @@
             const imgUrl = (p.images && p.images.thumbnail) ? p.images.thumbnail : placeholderImg;
             
             // Clean up the URL to preserve history stack integrity
-            window.history.replaceState({}, document.title, window.location.pathname);
+            window.parent.history.replaceState({}, document.title, window.parent.location.pathname);
             
             // Push directly to modal
             pushToModalStack(p, imgUrl);
@@ -761,26 +761,11 @@
       if (!currentSelectedProduct) return;
       if (navigator.vibrate) navigator.vibrate(10);
       
-      const shareUrl = `${window.location.origin}${window.location.pathname}?product=${currentSelectedProduct.id}`;
-      const shareData = {
-        title: currentSelectedProduct.name,
-        text: `Check out ${currentSelectedProduct.name} at Aarvi Stores!`,
-        url: shareUrl
-      };
-
-      try {
-        if (navigator.share) {
-          await navigator.share(shareData);
-        } else {
-          // Fallback to clipboard for unsupported browsers (PC)
-          await navigator.clipboard.writeText(shareUrl);
-          toast.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"></path></svg> Link copied to clipboard`;
-          toast.classList.add('show');
-          setTimeout(() => toast.classList.remove('show'), 2000);
-        }
-      } catch (err) {
-        console.error('Error sharing:', err);
-      }
+      // Send the product data up to the index.html app shell
+      window.parent.postMessage({
+        type: 'SHARE_PRODUCT',
+        product: currentSelectedProduct
+      }, '*');
     };
 
     // =========================================================================
@@ -971,7 +956,7 @@
           btnAddCart.innerText = 'Add to Cart';
           btnAddCart.style = '';
           toast.classList.remove('show');
-          history.back();
+          triggerCloseModal();
         }, 1500);
 
       } catch (error) {
