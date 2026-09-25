@@ -130,6 +130,42 @@
     /* Notification Toast */
     #toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-100px); background: #137333; color: white; padding: 14px 24px; border-radius: 50px; font-size: 15px; font-weight: 600; opacity: 0; transition: all 0.4s cubic-bezier(0.32, 0.72, 0, 1); z-index: 2000; box-shadow: 0 8px 20px rgba(0,0,0,0.25); display: flex; align-items: center; gap: 10px; width: max-content; }
     #toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+    
+    /* =========================================================================
+       ENTERPRISE OVERRIDES: Full Screen Modal & Advanced Review Architecture
+       ========================================================================= */
+    .product-modal { height: 100dvh !important; max-height: 100dvh !important; border-radius: 0 !important; width: 100vw; }
+    .modal-header { padding-top: max(12px, env(safe-area-inset-top)); top: 0 !important; background: rgba(var(--surface-rgb), 0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); }
+    .modal-img-wrapper { background: radial-gradient(circle, var(--surface-color) 0%, var(--bg-color) 100%); padding-top: calc(60px + env(safe-area-inset-top)) !important; }
+    .modal-pull-indicator { display: none; }
+    
+    /* Reviews Subcollection System UI */
+    .reviews-section { padding: 24px; background: var(--bg-color); border-top: 1px solid var(--border); }
+    .review-card { background: var(--surface-color); padding: 16px; border-radius: 12px; margin-bottom: 12px; border: 1px solid var(--border); box-shadow: 0 2px 6px rgba(0,0,0,0.02); }
+    .review-header { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+    .review-avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--skeleton-base); object-fit: cover; }
+    .review-name { font-weight: 700; font-size: 14px; color: var(--text-main); }
+    .review-meta { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text-sub); margin-left: auto; }
+    .review-text { font-size: 14px; line-height: 1.5; color: var(--text-sub); }
+    
+    .review-vote-badge { display: inline-flex; align-items: center; gap: 4px; padding: 4px 8px; border-radius: 6px; font-size: 12px; font-weight: 700; }
+    .badge-like { background: var(--success-bg); color: var(--success-text); }
+    .badge-dislike { background: var(--warning-bg); color: var(--warning); }
+    
+    /* Review Composer Engine */
+    .review-form { background: var(--surface-color); padding: 16px; border-radius: 12px; margin-bottom: 24px; border: 1px solid var(--border); box-shadow: 0 4px 12px rgba(0,0,0,0.04); }
+    .vote-toggles { display: flex; gap: 12px; margin-bottom: 12px; }
+    .vote-btn { flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px; border: 1.5px solid var(--border); border-radius: 8px; background: var(--surface-color); font-weight: 700; cursor: pointer; transition: all 0.2s; color: var(--text-sub); }
+    .vote-btn svg { width: 18px; height: 18px; stroke: currentColor; fill: none; }
+    .vote-btn.active.like { border-color: var(--success-text); background: var(--success-bg); color: var(--success-text); }
+    .vote-btn.active.like svg { fill: currentColor; }
+    .vote-btn.active.dislike { border-color: var(--warning); background: var(--warning-bg); color: var(--warning); }
+    .vote-btn.active.dislike svg { fill: currentColor; }
+    .review-textarea { width: 100%; padding: 12px; border: 1.5px solid var(--border); border-radius: 8px; resize: none; min-height: 80px; font-family: inherit; margin-bottom: 12px; background: var(--bg-color); outline: none; color: var(--text-main); }
+    .review-textarea:focus { border-color: var(--primary); }
+    .btn-submit-review { width: 100%; padding: 14px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; display: flex; justify-content: center; gap: 8px; align-items: center; }
+    .btn-submit-review:active { transform: scale(0.98); }
+    .login-prompt { padding: 16px; text-align: center; background: var(--surface-color); border-radius: 12px; border: 1.5px dashed var(--border); margin-bottom: 24px; color: var(--text-sub); font-size: 14px; font-weight: 600; }
   </style>
 </head>
 <body>
@@ -188,7 +224,7 @@
       </button>
     </div>
     
-    <div class="modal-scroll">
+    <div class="modal-scroll" id="modal-scroll-area">
       <div class="modal-img-wrapper">
         <img id="m-img" class="modal-img" src="" alt="Product">
       </div>
@@ -198,6 +234,27 @@
         <div id="m-price" class="m-price">₹0</div>
         <p id="m-desc" class="m-desc"></p>
       </div>
+      
+      <!-- ENTERPRISE REVIEWS SYSTEM ARCHITECTURE INJECTION -->
+      <div class="reviews-section" id="reviews-section">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 16px;">
+          <h3 style="font-size: 18px; font-weight: 800; color:var(--text-main);">Customer Reviews</h3>
+          <span id="reviews-count-header" style="font-size:14px; color:var(--text-sub); font-weight:700;">0 Reviews</span>
+        </div>
+        
+        <div id="review-composer-container">
+           <!-- Dynamic Composer UI Output -->
+        </div>
+
+        <div id="reviews-list"></div>
+        
+        <div class="loading-more" id="reviews-loading">
+          <svg fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-opacity="0.25"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 2v4"/></svg>
+          Loading reviews...
+        </div>
+        <div class="sentinel" id="reviews-sentinel"></div>
+      </div>
+      <!-- END REVIEWS -->
     </div>
 
     <div class="action-bar">
@@ -217,7 +274,7 @@
 
   <script type="module">
     import { auth, db } from '../config.js';
-    import { collection, query, limit, where, getDocs, startAfter, doc, setDoc, increment } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { collection, query, limit, where, getDocs, getDoc, startAfter, doc, setDoc, updateDoc, increment, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
     import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
     // Elements
@@ -256,8 +313,17 @@
 
     // Professional SVG Placeholder
     const placeholderImg = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='400' viewBox='0 0 400 400'><rect width='400' height='400' fill='%23f1f3f6'/><path d='M200 160c-22.1 0-40 17.9-40 40s17.9 40 40 40 40-17.9 40-40-17.9-40-40-40zm0 64c-13.2 0-24-10.8-24-24s10.8-24 24-24 24 10.8 24 24-10.8 24-24 24z' fill='%23cccccc'/><path d='M264 120H136c-13.2 0-24 10.8-24 24v112c0 13.2 10.8 24 24 24h128c13.2 0 24-10.8 24-24V144c0-13.2-10.8-24-24-24zm8 136c0 4.4-3.6 8-8 8H136c-4.4 0-8-3.6-8-8V144c0-4.4 3.6-8 8-8h128c4.4 0 8 3.6 8 8v112z' fill='%23cccccc'/></svg>";
+    const avatarPlaceholder = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23999'><path d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/></svg>";
 
-    onAuthStateChanged(auth, (user) => { currentUser = user; });
+    const svgThumbUp = `<svg viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.56l2.5-8.76A2 2 0 0 0 20.83 9H14z"/><path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>`;
+    const svgThumbDown = `<svg viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.56l-2.5 8.76A2 2 0 0 0 3.17 15H10z"/><path d="M17 2h3a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-3"/></svg>`;
+
+    onAuthStateChanged(auth, (user) => { 
+      currentUser = user; 
+      if (isModalOpen && currentSelectedProduct) {
+        initReviewSection(currentSelectedProduct.id);
+      }
+    });
 
     // Force keyboard to open immediately on most devices
     window.addEventListener('DOMContentLoaded', () => {
@@ -388,6 +454,17 @@
             ratingHtml = `<div class="list-rating"><svg viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg> ${avg}</div>`;
           }
 
+          // ENTERPRISE OVERRIDE: Zero-Read Aggregation Badge Logic (Replaces Original)
+          const likes = p.totalLikes || 0;
+          const dislikes = p.totalDislikes || 0;
+          if (likes > 0 || dislikes > 0) {
+            ratingHtml = `
+              <div style="display:flex; gap:8px; margin-bottom:8px;">
+                ${likes > 0 ? `<div class="list-rating badge-like">${svgThumbUp}${likes.toLocaleString()}</div>` : ''}
+                ${dislikes > 0 ? `<div class="list-rating badge-dislike">${svgThumbDown}${dislikes.toLocaleString()}</div>` : ''}
+              </div>`;
+          }
+
           const card = document.createElement('div');
           card.className = 'list-card';
           card.innerHTML = `
@@ -445,6 +522,19 @@
         mRating.style.display = 'none';
       }
 
+      // ENTERPRISE OVERRIDE: Zero-Read Modal Aggregates
+      const likes = product.totalLikes || 0;
+      const dislikes = product.totalDislikes || 0;
+      if (likes > 0 || dislikes > 0) {
+        mRating.innerHTML = `
+          ${likes > 0 ? `<div class="list-rating badge-like" style="margin-bottom:0;">${svgThumbUp}${likes.toLocaleString()}</div>` : ''}
+          ${dislikes > 0 ? `<div class="list-rating badge-dislike" style="margin-bottom:0; margin-left:8px;">${svgThumbDown}${dislikes.toLocaleString()}</div>` : ''}
+        `;
+        mRating.style.display = 'flex';
+        mRating.style.background = 'transparent';
+        mRating.style.padding = '0';
+      }
+
       // Dynamic Out of Stock Handling
       const stock = Number(product.stock) || 0;
       if (stock <= 0) {
@@ -457,12 +547,23 @@
         outOfStockMsg.style.display = 'none';
       }
 
+      // ENTERPRISE OVERRIDE: Always Allow Ordering (Ignore Stock Output Above)
+      btnAddCart.style.display = 'flex';
+      btnBuyNow.style.display = 'flex';
+      outOfStockMsg.style.display = 'none';
+
+      document.getElementById('reviews-count-header').innerText = `${product.reviewCount || 0} Reviews`;
+
       modalBg.classList.add('active');
       modal.classList.add('active');
       document.body.style.overflow = 'hidden'; // FIX: Lock background scrolling
+      document.getElementById('modal-scroll-area').scrollTo(0,0);
       
       isModalOpen = true;
       history.pushState({ modal: 'product' }, '', '');
+
+      // Initialize Zero-Read Subcollection Architecture
+      initReviewSection(product.id);
     }
 
     function closeModalLogic() {
@@ -555,6 +656,220 @@
       
       window.parent.document.getElementById('content-frame').src = 'pages/checkout.html';
     });
+
+    // =========================================================================
+    // ENTERPRISE REVIEWS SYSTEM ARCHITECTURE (Pagination, Subcollections, Edits)
+    // =========================================================================
+    
+    let reviewsLastVisible = null;
+    let isFetchingReviews = false;
+    let hasMoreReviews = true;
+    let currentUserReviewData = null; // Stores existing review data for editing
+    let currentVoteSelection = null; // 'like', 'dislike', or null
+
+    window.selectVote = function(type) {
+      if(navigator.vibrate) navigator.vibrate(10);
+      currentVoteSelection = (currentVoteSelection === type) ? null : type; // Double click toggle logic
+      
+      document.getElementById('btn-vote-like').classList.toggle('active', currentVoteSelection === 'like');
+      document.getElementById('btn-vote-dislike').classList.toggle('active', currentVoteSelection === 'dislike');
+    };
+
+    async function initReviewSection(productId) {
+      reviewsLastVisible = null;
+      hasMoreReviews = true;
+      isFetchingReviews = false;
+      currentUserReviewData = null;
+      currentVoteSelection = null;
+      document.getElementById('reviews-list').innerHTML = '';
+      
+      const composerContainer = document.getElementById('review-composer-container');
+      
+      if (!currentUser) {
+        composerContainer.innerHTML = `<div class="login-prompt">Sign in to share your experience and rate this product.</div>`;
+      } else {
+        composerContainer.innerHTML = `<div style="text-align:center; padding:20px;"><svg width="24" height="24" stroke="var(--primary)" viewBox="0 0 24 24" fill="none" style="animation: spin 1s linear infinite;"><circle cx="12" cy="12" r="10" stroke-width="2" stroke-opacity="0.25"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 2v4"/></svg></div>`;
+        
+        // Exact 1 Read per user to fetch their isolated review doc ID = UID
+        try {
+          const userRevSnap = await getDoc(doc(db, 'products', productId, 'reviews', currentUser.uid));
+          if(userRevSnap.exists()) {
+            currentUserReviewData = userRevSnap.data();
+            currentVoteSelection = currentUserReviewData.vote || null;
+          }
+        } catch(e) { console.error("Review Fetch Error", e); }
+        
+        const initialComment = currentUserReviewData ? currentUserReviewData.comment : '';
+        const isEditing = !!currentUserReviewData;
+
+        composerContainer.innerHTML = `
+          <div class="review-form">
+             <div style="display:flex; align-items:center; gap:12px; margin-bottom:12px;">
+                <img src="${currentUser.photoURL || avatarPlaceholder}" class="review-avatar" onerror="this.src='${avatarPlaceholder}'">
+                <span class="review-name">${currentUser.displayName || 'You'}</span>
+                ${isEditing ? `<span style="margin-left:auto; font-size:12px; color:var(--primary); font-weight:700;">Editing</span>` : ''}
+             </div>
+             <div class="vote-toggles">
+                <button class="vote-btn like ${currentVoteSelection === 'like' ? 'active' : ''}" id="btn-vote-like" onclick="selectVote('like')">${svgThumbUp} Like</button>
+                <button class="vote-btn dislike ${currentVoteSelection === 'dislike' ? 'active' : ''}" id="btn-vote-dislike" onclick="selectVote('dislike')">${svgThumbDown} Dislike</button>
+             </div>
+             <textarea id="review-comment-input" class="review-textarea" placeholder="Share your detailed experience here...">${initialComment}</textarea>
+             <button class="btn-submit-review" id="btn-submit-review" onclick="submitReview()">
+                ${isEditing ? 'Update Review' : 'Post Review'}
+             </button>
+          </div>
+        `;
+      }
+
+      // Initial Fetch
+      fetchPaginatedReviews();
+    }
+
+    window.submitReview = async function() {
+      if (!currentUser) return;
+      const commentInput = document.getElementById('review-comment-input').value.trim();
+      const submitBtn = document.getElementById('btn-submit-review');
+      
+      if(navigator.vibrate) navigator.vibrate(20);
+      submitBtn.style.pointerEvents = 'none';
+      submitBtn.innerText = 'Saving...';
+
+      try {
+        const productId = currentSelectedProduct.id;
+        const reviewRef = doc(db, 'products', productId, 'reviews', currentUser.uid);
+        const productRef = doc(db, 'products', productId);
+
+        const newReviewData = {
+          vote: currentVoteSelection,
+          comment: commentInput,
+          userName: currentUser.displayName || 'Aarvi Customer',
+          userPhoto: currentUser.photoURL || null,
+          timestamp: new Date().toISOString()
+        };
+
+        // Determine Aggregation Math
+        const updates = {};
+        const isNewReview = !currentUserReviewData;
+        const oldVote = isNewReview ? null : currentUserReviewData.vote;
+
+        if (isNewReview) {
+          updates.reviewCount = increment(1);
+          if (currentVoteSelection === 'like') updates.totalLikes = increment(1);
+          if (currentVoteSelection === 'dislike') updates.totalDislikes = increment(1);
+        } else {
+          if (oldVote !== currentVoteSelection) {
+            if (oldVote === 'like') updates.totalLikes = increment(-1);
+            if (oldVote === 'dislike') updates.totalDislikes = increment(-1);
+            
+            if (currentVoteSelection === 'like') updates.totalLikes = increment(1);
+            if (currentVoteSelection === 'dislike') updates.totalDislikes = increment(1);
+          }
+        }
+
+        // Execute Writes
+        await setDoc(reviewRef, newReviewData, { merge: true });
+        if (Object.keys(updates).length > 0) {
+          await setDoc(productRef, updates, { merge: true });
+          
+          // Optimistic Local Update
+          if(updates.reviewCount) currentSelectedProduct.reviewCount = (currentSelectedProduct.reviewCount || 0) + 1;
+          if(oldVote === 'like' && currentVoteSelection !== 'like') currentSelectedProduct.totalLikes--;
+          if(oldVote === 'dislike' && currentVoteSelection !== 'dislike') currentSelectedProduct.totalDislikes--;
+          if(currentVoteSelection === 'like' && oldVote !== 'like') currentSelectedProduct.totalLikes = (currentSelectedProduct.totalLikes || 0) + 1;
+          if(currentVoteSelection === 'dislike' && oldVote !== 'dislike') currentSelectedProduct.totalDislikes = (currentSelectedProduct.totalDislikes || 0) + 1;
+          
+          document.getElementById('reviews-count-header').innerText = `${currentSelectedProduct.reviewCount || 0} Reviews`;
+        }
+
+        currentUserReviewData = newReviewData;
+        submitBtn.innerText = 'Updated Successfully!';
+        submitBtn.style.background = 'var(--success-bg)';
+        submitBtn.style.color = 'var(--success-text)';
+        
+        setTimeout(() => {
+          submitBtn.innerText = 'Update Review';
+          submitBtn.style = '';
+          submitBtn.style.pointerEvents = 'auto';
+        }, 2000);
+
+      } catch (e) {
+        console.error("Review Submit Error", e);
+        submitBtn.innerText = 'Error saving';
+        submitBtn.style.pointerEvents = 'auto';
+      }
+    };
+
+    async function fetchPaginatedReviews() {
+      if (isFetchingReviews || !hasMoreReviews || !currentSelectedProduct) return;
+      isFetchingReviews = true;
+      const loadingEl = document.getElementById('reviews-loading');
+      loadingEl.classList.add('active');
+
+      try {
+        let q = query(
+          collection(db, 'products', currentSelectedProduct.id, 'reviews'),
+          orderBy('timestamp', 'desc'),
+          limit(10)
+        );
+
+        if (reviewsLastVisible) {
+          q = query(
+            collection(db, 'products', currentSelectedProduct.id, 'reviews'),
+            orderBy('timestamp', 'desc'),
+            startAfter(reviewsLastVisible),
+            limit(10)
+          );
+        }
+
+        const snap = await getDocs(q);
+        
+        if (snap.empty && !reviewsLastVisible) {
+          document.getElementById('reviews-list').innerHTML = `<div style="text-align:center; padding:32px 16px; color:var(--text-sub); font-size:14px; font-weight:600;">No reviews yet. Be the first to share your experience!</div>`;
+          hasMoreReviews = false;
+        } else {
+          if (snap.docs.length < 10) hasMoreReviews = false;
+          else reviewsLastVisible = snap.docs[snap.docs.length - 1];
+
+          snap.forEach(docSnap => {
+            const rev = docSnap.data();
+            // Don't render current user's review in the global list if they are editing it in the composer
+            if(currentUser && docSnap.id === currentUser.uid) return; 
+
+            const dateStr = new Date(rev.timestamp).toLocaleDateString('en-IN', { month: 'short', day: 'numeric', year: 'numeric' });
+            
+            let badgeHtml = '';
+            if(rev.vote === 'like') badgeHtml = `<div class="review-vote-badge badge-like">${svgThumbUp}</div>`;
+            if(rev.vote === 'dislike') badgeHtml = `<div class="review-vote-badge badge-dislike">${svgThumbDown}</div>`;
+
+            const el = document.createElement('div');
+            el.className = 'review-card';
+            el.innerHTML = `
+              <div class="review-header">
+                <img src="${rev.userPhoto || avatarPlaceholder}" class="review-avatar" onerror="this.src='${avatarPlaceholder}'">
+                <div class="review-name">${rev.userName || 'Verified Buyer'}</div>
+                <div class="review-meta">${badgeHtml} ${dateStr}</div>
+              </div>
+              ${rev.comment ? `<div class="review-text">${rev.comment}</div>` : ''}
+            `;
+            document.getElementById('reviews-list').appendChild(el);
+          });
+        }
+      } catch (e) {
+        console.error("Reviews Fetch Error", e);
+      } finally {
+        isFetchingReviews = false;
+        loadingEl.classList.remove('active');
+      }
+    }
+
+    const reviewsObserver = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting && !isFetchingReviews && hasMoreReviews && isModalOpen) {
+        fetchPaginatedReviews();
+      }
+    }, { rootMargin: "200px" });
+    
+    reviewsObserver.observe(document.getElementById('reviews-sentinel'));
+
   </script>
 </body>
 </html>
