@@ -106,10 +106,15 @@
     .card-info { padding: 12px 16px 16px; display: flex; flex-direction: column; flex: 1; background: var(--surface-color); justify-content: flex-start; }
     .card-title { font-size: 13px; font-weight: 600; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; margin-bottom: 8px; line-height: 1.4; color: var(--text-main); min-height: 37px; }
     
+    /* Vote Badges UI for Grid */
+    .card-vote-wrap { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+    .card-vote-pill { font-size: 12px; display: inline-flex; align-items: center; padding: 4px 8px; border-radius: 6px; font-weight: 700; gap: 4px; }
+    .card-vote-pill.like { background: var(--success-bg); color: var(--success-text); }
+    .card-vote-pill.dislike { background: var(--warning-bg); color: var(--warning); }
+    .card-vote-pill.neutral { background: var(--skeleton-base); color: var(--text-sub); opacity: 0.85; }
+    .card-vote-pill svg { width: 12px; height: 12px; fill: currentColor; stroke: none; flex-shrink: 0; }
+
     .card-price { font-size: 17px; font-weight: 800; color: var(--text-main); margin-top: auto; display: flex; align-items: baseline; gap: 2px; }
-    
-    .card-rating { font-size: 12px; color: var(--success-text); background: var(--success-bg); display: inline-flex; align-items: center; padding: 4px 8px; border-radius: 6px; margin-top: 8px; font-weight: 700; gap: 4px; align-self: flex-start; }
-    .card-rating svg { width: 12px; height: 12px; fill: currentColor; }
 
     /* Section 1 & 5: 2-Column Grid */
     .grid-2-col { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; padding: 0 20px; }
@@ -139,7 +144,7 @@
     .f-side .card-info { padding: 12px; }
     .f-side .card-title { font-size: 13px; margin-bottom: 4px; }
     .f-side .card-price { font-size: 15px; }
-    .f-side .card-rating { display: none; } 
+    .f-side .card-vote-wrap { transform: scale(0.85); transform-origin: left center; margin-bottom: 4px; }
     
     .f-banner { grid-column: span 2; display: flex; flex-direction: row; align-items: center; height: 110px; padding: 0; }
     .f-banner .img-container { width: 110px; height: 100%; border-right: 1px solid var(--border); border-radius: 16px 0 0 16px; padding: 8px; }
@@ -498,6 +503,7 @@
     let productCache = {}; // Global cache
     let globalCategories = []; 
     let globalBanners = []; 
+    let globalRecommendationPool = []; // Newly integrated Recommendation Pool for Deep Pagination
     let carouselInterval;
     let heroInterval;
     let productSnapshotUnsubscribe = null;
@@ -533,6 +539,32 @@
       return placeholderImg;
     };
 
+    function getVoteBadgesHtml(likes = 0, dislikes = 0) {
+      const lCount = Number(likes) || 0;
+      const dCount = Number(dislikes) || 0;
+      const likeClass = lCount > 0 ? 'like' : 'neutral';
+      const dislikeClass = dCount > 0 ? 'dislike' : 'neutral';
+      return `
+        <div class="card-vote-wrap">
+          <div class="card-vote-pill ${likeClass}">${svgThumbUp} ${lCount > 0 ? `<span>${lCount.toLocaleString()}</span>` : ''}</div>
+          <div class="card-vote-pill ${dislikeClass}">${svgThumbDown} ${dCount > 0 ? `<span>${dCount.toLocaleString()}</span>` : ''}</div>
+        </div>
+      `;
+    }
+
+    function getRecVoteBadgesHtml(likes = 0, dislikes = 0) {
+      const lCount = Number(likes) || 0;
+      const dCount = Number(dislikes) || 0;
+      const likeClass = lCount > 0 ? 'like' : 'neutral';
+      const dislikeClass = dCount > 0 ? 'dislike' : 'neutral';
+      return `
+        <div class="rec-vote-wrap">
+          <div class="rec-vote-pill ${likeClass}">${svgThumbUp} ${lCount > 0 ? `<span>${lCount.toLocaleString()}</span>` : ''}</div>
+          <div class="rec-vote-pill ${dislikeClass}">${svgThumbDown} ${dCount > 0 ? `<span>${dCount.toLocaleString()}</span>` : ''}</div>
+        </div>
+      `;
+    }
+
     onAuthStateChanged(auth, (user) => { 
       currentUser = user; 
       if (modalStack.includes('product') && currentSelectedProduct) {
@@ -554,10 +586,19 @@
         globalCategories = data.categories || [];
         globalBanners = data.banners || [];
         
+        // Build robust global recommendation pool for infinite pagination from layout
+        const ids = new Set();
+        if (data.slots) Object.values(data.slots).forEach(id => ids.add(id));
+        if (data.categories) {
+          data.categories.forEach(cat => {
+            if (cat.slots) Object.values(cat.slots).forEach(id => ids.add(id));
+          });
+        }
+        globalRecommendationPool = Array.from(ids);
+
         renderHeroBanners();
         
         const requiredProductIds = [];
-        
         for (let i = 1; i <= 16; i++) {
           if (slots[i]) requiredProductIds.push(slots[i]);
         }
@@ -685,6 +726,8 @@
       if (!product) return ''; 
       const imgUrl = getProductImage(product);
       const prodJson = JSON.stringify(product).replace(/'/g, "&#39;").replace(/"/g, "&quot;");
+      const likes = product.totalLikes || 0;
+      const dislikes = product.totalDislikes || 0;
 
       return `
         <div class="product-card ${customClass}" id="card-${product.id}" onclick="openProductModalFromStr('${prodJson}')">
@@ -693,6 +736,9 @@
           </div>
           <div class="card-info">
             <div class="card-title">${product.name}</div>
+            <div id="home-rating-${product.id}">
+              ${getVoteBadgesHtml(likes, dislikes)}
+            </div>
             <div class="card-price">₹${(product.price || 0).toLocaleString('en-IN')}</div>
           </div>
         </div>
@@ -1047,19 +1093,6 @@
       return array;
     }
 
-    function getRecVoteBadgesHtml(likes = 0, dislikes = 0) {
-      const lCount = Number(likes) || 0;
-      const dCount = Number(dislikes) || 0;
-      const likeClass = lCount > 0 ? 'like' : 'neutral';
-      const dislikeClass = dCount > 0 ? 'dislike' : 'neutral';
-      return `
-        <div class="rec-vote-wrap">
-          <div class="rec-vote-pill ${likeClass}">${svgThumbUp} ${lCount > 0 ? `<span>${lCount.toLocaleString()}</span>` : ''}</div>
-          <div class="rec-vote-pill ${dislikeClass}">${svgThumbDown} ${dCount > 0 ? `<span>${dCount.toLocaleString()}</span>` : ''}</div>
-        </div>
-      `;
-    }
-
     async function initRecommendations(currentId) {
       const recSection = document.getElementById('rec-section');
       const recCarousel = document.getElementById('rec-carousel');
@@ -1069,7 +1102,8 @@
       recCarousel.scrollLeft = 0;
       recCarousel.style.scrollBehavior = '';
       
-      const pool = Object.keys(productCache).filter(id => id !== currentId);
+      // Now perfectly fetches un-cached items natively using globalRecommendationPool
+      const pool = globalRecommendationPool.filter(id => id !== currentId);
       if (pool.length === 0) {
         recSection.style.display = 'none';
         return;
@@ -1112,6 +1146,20 @@
       `).join('');
       
       if (sentinelEl) sentinelEl.insertAdjacentHTML('beforebegin', skeletonsHtml);
+
+      const fetchPromises = [];
+      selectedIds.forEach(id => {
+        if (!productCache[id]) fetchPromises.push(getDoc(doc(db, "products", id)));
+      });
+
+      if (fetchPromises.length > 0) {
+        try {
+          const docs = await Promise.all(fetchPromises);
+          docs.forEach(d => {
+            if (d.exists()) productCache[d.id] = { id: d.id, ...d.data() };
+          });
+        } catch (e) { console.error("Rec Fetch Error", e); }
+      }
 
       selectedIds.forEach(id => {
         const skEl = document.getElementById(`sk-rec-${id}`);
@@ -1166,9 +1214,17 @@
       const l = Number(likes) || 0;
       const d = Number(dislikes) || 0;
 
+      // Update recommendation carousel if rendered
       const recRatingEl = document.getElementById(`rec-rating-${productId}`);
       if (recRatingEl) recRatingEl.innerHTML = getRecVoteBadgesHtml(l, d);
 
+      // Update all matching cards strictly on the homepage grid (Trending, Categories, Top Picks)
+      const homeRatingEls = document.querySelectorAll(`[id="home-rating-${productId}"]`);
+      homeRatingEls.forEach(el => {
+        el.innerHTML = getVoteBadgesHtml(l, d);
+      });
+
+      // Update modal view if currently viewing
       if (currentSelectedProduct && currentSelectedProduct.id === productId) {
         currentSelectedProduct.totalLikes = l;
         currentSelectedProduct.totalDislikes = d;
@@ -1176,6 +1232,7 @@
         mDislikesCount.innerText = d > 0 ? d.toLocaleString() : '';
       }
 
+      // Sync memory cache
       if (productCache[productId]) {
         productCache[productId].totalLikes = l;
         productCache[productId].totalDislikes = d;
