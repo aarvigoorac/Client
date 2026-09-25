@@ -464,7 +464,7 @@
         }
 
         const currentSrc = contentFrame.src || "";
-        if (currentSrc.includes('login.html') || currentSrc.includes('index.html') || currentSrc.includes('setup.html') || currentSrc === "about:blank") {
+        if (currentSrc.includes('login.html') || currentSrc.includes('index.html') || currentSrc.includes('setup.html') || currentSrc.includes('home.html') || currentSrc === "about:blank") {
           // Fix: Append window.location.search to successfully route deep-link IDs into the iframe
           contentFrame.src = "pages/home.html" + window.location.search;
         }
