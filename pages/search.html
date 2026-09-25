@@ -132,7 +132,7 @@
     .product-vote-bar { display: flex; gap: 12px; margin-bottom: 24px; }
     .vote-action-btn { display: flex; align-items: center; gap: 8px; padding: 10px 18px; border-radius: 50px; background: var(--surface-color); border: 1.5px solid var(--border); font-weight: 700; font-size: 15px; color: var(--text-sub); cursor: pointer; transition: all 0.2s cubic-bezier(0.32, 0.72, 0, 1); }
     .vote-action-btn:active { transform: scale(0.95); }
-    .vote-action-btn svg { width: 20px; height: 20px; stroke: currentColor; fill: none; }
+    .vote-action-btn svg { width: 20px; height: 20px; stroke: currentColor; fill: none; flex-shrink:0; }
     .vote-action-btn.active.like { background: var(--success-bg); color: var(--success-text); border-color: var(--success-text); }
     .vote-action-btn.active.like svg { fill: currentColor; }
     .vote-action-btn.active.dislike { background: var(--warning-bg); color: var(--warning); border-color: var(--warning); }
@@ -150,7 +150,7 @@
     /* Recommendations Carousel */
     .rec-section { padding: 24px 0 0 0; background: var(--bg-color); }
     .rec-header { padding: 0 24px; font-size: 18px; font-weight: 800; margin-bottom: 12px; color: var(--text-main); }
-    .rec-carousel { display: flex; overflow-x: auto; gap: 16px; padding: 0 24px 16px 24px; scroll-snap-type: x mandatory; }
+    .rec-carousel { display: flex; overflow-x: auto; gap: 16px; padding: 0 24px 16px 24px; scroll-snap-type: x mandatory; align-items: stretch; }
     .rec-carousel::after { content: ''; padding-right: 8px; }
     .rec-card { flex: 0 0 148px; scroll-snap-align: start; background: var(--surface-color); border-radius: 14px; overflow: hidden; border: 1px solid var(--border); box-shadow: 0 4px 10px rgba(0,0,0,0.03); cursor: pointer; transition: transform 0.2s; display: flex; flex-direction: column; }
     .rec-card:active { transform: scale(0.96); }
@@ -166,6 +166,9 @@
     .rec-vote-pill.dislike { background: var(--warning-bg); color: var(--warning); }
     .rec-vote-pill.neutral { background: var(--skeleton-base); color: var(--text-sub); opacity: 0.85; }
     .rec-vote-pill svg { width: 10px; height: 10px; fill: currentColor; stroke: none; flex-shrink: 0; }
+    
+    /* Horizontal Sentinel for Rec Pagination */
+    .rec-sentinel { flex: 0 0 10px; width: 10px; pointer-events: none; }
 
     /* Reviews Section Subsystem */
     .reviews-section { padding: 24px; background: var(--bg-color); }
@@ -275,25 +278,27 @@
         <h2 id="m-title" class="m-title">Loading...</h2>
         <div id="m-price" class="m-price">₹0</div>
         
-        <!-- Professional Independent Vote Bar -->
+        <!-- Professional Independent Vote Bar (Hides Zeros) -->
         <div class="product-vote-bar">
           <button class="vote-action-btn like" id="btn-vote-like" onclick="handleVote('like')">
             <svg viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.56l2.5-8.76A2 2 0 0 0 20.83 9H14z"/><path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg> 
-            <span id="m-likes-count">0</span>
+            <span id="m-likes-count"></span>
           </button>
           <button class="vote-action-btn dislike" id="btn-vote-dislike" onclick="handleVote('dislike')">
             <svg viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.56l-2.5 8.76A2 2 0 0 0 3.17 15H10z"/><path d="M17 2h3a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-3"/></svg>
-            <span id="m-dislikes-count">0</span>
+            <span id="m-dislikes-count"></span>
           </button>
         </div>
 
         <p id="m-desc" class="m-desc"></p>
       </div>
       
-      <!-- Zero-Read Dynamic Recommendations -->
+      <!-- Zero-Read Dynamic Recommendations with Horizontal Pagination -->
       <div class="rec-section" id="rec-section" style="display:none;">
         <div class="rec-header">You Might Also Like</div>
-        <div class="rec-carousel" id="rec-carousel"></div>
+        <div class="rec-carousel" id="rec-carousel">
+           <!-- Loaded Dynamically -->
+        </div>
       </div>
 
       <!-- ENTERPRISE REVIEWS SYSTEM ARCHITECTURE INJECTION -->
@@ -376,13 +381,18 @@
     let modalProductStack = [];
     let productSnapshotUnsubscribe = null;
 
+    // Recommendation Pagination State
+    let currentRecPool = [];
+    let recCurrentIndex = 0;
+    let isFetchingRecs = false;
+
     // Professional Placeholders & SVGs
     const placeholderImg = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='400' viewBox='0 0 400 400'><rect width='400' height='400' fill='%23f1f3f6'/><path d='M200 160c-22.1 0-40 17.9-40 40s17.9 40 40 40 40-17.9 40-40-17.9-40-40-40zm0 64c-13.2 0-24-10.8-24-24s10.8-24 24-24 24 10.8 24 24-10.8 24-24 24z' fill='%23cccccc'/><path d='M264 120H136c-13.2 0-24 10.8-24 24v112c0 13.2 10.8 24 24 24h128c13.2 0 24-10.8 24-24V144c0-13.2-10.8-24-24-24zm8 136c0 4.4-3.6 8-8 8H136c-4.4 0-8-3.6-8-8V144c0-4.4 3.6-8 8-8h128c4.4 0 8 3.6 8 8v112z' fill='%23cccccc'/></svg>";
     const avatarPlaceholder = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23999'><path d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/></svg>";
     const svgThumbUp = `<svg viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.56l2.5-8.76A2 2 0 0 0 20.83 9H14z"/><path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>`;
     const svgThumbDown = `<svg viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.56l-2.5 8.76A2 2 0 0 0 3.17 15H10z"/><path d="M17 2h3a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-3"/></svg>`;
 
-    // --- REUSABLE BADGE BUILDERS ---
+    // --- REUSABLE ZERO-HIDING BADGE BUILDERS ---
     function getVoteBadgesHtml(likes = 0, dislikes = 0) {
       const lCount = Number(likes) || 0;
       const dCount = Number(dislikes) || 0;
@@ -390,8 +400,8 @@
       const dislikeClass = dCount > 0 ? 'dislike' : 'neutral';
       return `
         <div class="card-vote-wrap">
-          <div class="card-vote-pill ${likeClass}">${svgThumbUp} <span>${lCount.toLocaleString()}</span></div>
-          <div class="card-vote-pill ${dislikeClass}">${svgThumbDown} <span>${dCount.toLocaleString()}</span></div>
+          <div class="card-vote-pill ${likeClass}">${svgThumbUp} ${lCount > 0 ? `<span>${lCount.toLocaleString()}</span>` : ''}</div>
+          <div class="card-vote-pill ${dislikeClass}">${svgThumbDown} ${dCount > 0 ? `<span>${dCount.toLocaleString()}</span>` : ''}</div>
         </div>
       `;
     }
@@ -403,8 +413,8 @@
       const dislikeClass = dCount > 0 ? 'dislike' : 'neutral';
       return `
         <div class="rec-vote-wrap">
-          <div class="rec-vote-pill ${likeClass}">${svgThumbUp} <span>${lCount}</span></div>
-          <div class="rec-vote-pill ${dislikeClass}">${svgThumbDown} <span>${dCount}</span></div>
+          <div class="rec-vote-pill ${likeClass}">${svgThumbUp} ${lCount > 0 ? `<span>${lCount.toLocaleString()}</span>` : ''}</div>
+          <div class="rec-vote-pill ${dislikeClass}">${svgThumbDown} ${dCount > 0 ? `<span>${dCount.toLocaleString()}</span>` : ''}</div>
         </div>
       `;
     }
@@ -430,8 +440,8 @@
       if (currentSelectedProduct && currentSelectedProduct.id === productId) {
         currentSelectedProduct.totalLikes = l;
         currentSelectedProduct.totalDislikes = d;
-        mLikesCount.innerText = l.toLocaleString();
-        mDislikesCount.innerText = d.toLocaleString();
+        mLikesCount.innerText = l > 0 ? l.toLocaleString() : '';
+        mDislikesCount.innerText = d > 0 ? d.toLocaleString() : '';
       }
 
       // 4. Update In-Memory Cache
@@ -645,14 +655,16 @@
       mPrice.innerText = `₹${(product.price || 0).toLocaleString('en-IN')}`;
       mDesc.innerText = product.description || "Detailed description coming soon.";
       
-      mLikesCount.innerText = (product.totalLikes || 0).toLocaleString();
-      mDislikesCount.innerText = (product.totalDislikes || 0).toLocaleString();
+      const likes = product.totalLikes || 0;
+      const dislikes = product.totalDislikes || 0;
+      mLikesCount.innerText = likes > 0 ? likes.toLocaleString() : '';
+      mDislikesCount.innerText = dislikes > 0 ? dislikes.toLocaleString() : '';
       
       btnVoteLike.classList.remove('active');
       btnVoteDislike.classList.remove('active');
 
       // Boot Independent Subsystems
-      renderRecommendations(product.id);
+      initRecommendations(product.id);
       initReviewSection(product.id);
 
       // Attach Real-Time Snapshot Listener for live updates across multiple users
@@ -706,7 +718,7 @@
     }
 
     // =========================================================================
-    // RECOMMENDATIONS ENGINE (Zero-Read Shuffle & Wrap-Around Integrity)
+    // RECOMMENDATIONS ENGINE (Zero-Read Shuffle & Horizontal Scroll Batching)
     // =========================================================================
     function shuffleArray(array) {
       let cur = array.length, rand;
@@ -718,7 +730,7 @@
       return array;
     }
 
-    async function renderRecommendations(currentId) {
+    async function initRecommendations(currentId) {
       const recSection = document.getElementById('rec-section');
       const recCarousel = document.getElementById('rec-carousel');
       
@@ -729,16 +741,37 @@
 
       recSection.style.display = 'block';
       const pool = globalRecommendationPool.filter(id => id !== currentId);
-      const selectedIds = shuffleArray(pool).slice(0, 10);
+      currentRecPool = shuffleArray(pool);
+      recCurrentIndex = 0;
+      
+      // Reset Carousel Content & Inject Horizontal Sentinel
+      recCarousel.innerHTML = '<div class="rec-sentinel" id="rec-sentinel"></div>';
+      
+      // Initial Load of 5
+      await loadMoreRecommendations(5);
+    }
 
-      if (selectedIds.length === 0) {
-        recSection.style.display = 'none';
-        return;
+    async function loadMoreRecommendations(count = 5) {
+      // Hard limit logic: Never exceed 10 total items, even on scroll.
+      if (isFetchingRecs || recCurrentIndex >= 10 || recCurrentIndex >= currentRecPool.length) return;
+      isFetchingRecs = true;
+      
+      let fetchCount = count;
+      if (recCurrentIndex + fetchCount > 10) {
+        fetchCount = 10 - recCurrentIndex; // Cap the final batch
       }
 
-      // Render Skeletons First
-      recCarousel.innerHTML = selectedIds.map(() => `
-        <div class="rec-card skeleton-card">
+      const selectedIds = currentRecPool.slice(recCurrentIndex, recCurrentIndex + fetchCount);
+      if (selectedIds.length === 0) {
+         isFetchingRecs = false;
+         return;
+      }
+
+      const sentinelEl = document.getElementById('rec-sentinel');
+
+      // Append Skeletons Before the Sentinel
+      const skeletonsHtml = selectedIds.map(id => `
+        <div class="rec-card skeleton-card" id="sk-rec-${id}">
           <div class="skeleton" style="width:100%; aspect-ratio:1;"></div>
           <div class="rec-info">
             <div class="skeleton" style="height:12px; width:90%; margin-bottom:6px;"></div>
@@ -746,6 +779,8 @@
           </div>
         </div>
       `).join('');
+      
+      if (sentinelEl) sentinelEl.insertAdjacentHTML('beforebegin', skeletonsHtml);
 
       // Determine un-cached items to fetch
       const fetchPromises = [];
@@ -762,13 +797,17 @@
         } catch (e) { console.error("Rec Fetch Error", e); }
       }
 
-      // Render Real Cards
-      recCarousel.innerHTML = '';
+      // Replace Skeletons with Real Cards
       selectedIds.forEach(id => {
+        const skEl = document.getElementById(`sk-rec-${id}`);
         const p = productCache[id];
-        if (!p) return;
-        const imgUrl = (p.images && p.images.thumbnail) ? p.images.thumbnail : placeholderImg;
         
+        if (!p) {
+           if (skEl) skEl.remove();
+           return;
+        }
+
+        const imgUrl = (p.images && p.images.thumbnail) ? p.images.thumbnail : placeholderImg;
         const likes = p.totalLikes || 0;
         const dislikes = p.totalDislikes || 0;
 
@@ -789,9 +828,35 @@
           if (navigator.vibrate) navigator.vibrate(15);
           pushToModalStack(p, imgUrl);
         });
-        recCarousel.appendChild(card);
+        
+        if (skEl) {
+           skEl.replaceWith(card);
+        } else if (sentinelEl) {
+           sentinelEl.insertAdjacentElement('beforebegin', card);
+        }
       });
+
+      recCurrentIndex += fetchCount;
+      isFetchingRecs = false;
+
+      // Remove sentinel if limit reached to stop observing
+      if (recCurrentIndex >= 10 && sentinelEl) {
+         sentinelEl.remove();
+      }
     }
+
+    // Recommendation Horizontal Scrolling Intersection Observer
+    const recObserver = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting && !isFetchingRecs && isModalOpen) {
+        loadMoreRecommendations(5);
+      }
+    }, { root: document.getElementById('rec-carousel'), rootMargin: "50px" });
+    
+    // Attach observer dynamically if sentinel exists
+    setInterval(() => {
+       const el = document.getElementById('rec-sentinel');
+       if (el && isModalOpen) recObserver.observe(el);
+    }, 1000);
 
     // =========================================================================
     // E-COMMERCE ACTION BAR (Perpetually Active - Zero-Stock Restrictions)
@@ -863,7 +928,7 @@
     });
 
     // =========================================================================
-    // ENTERPRISE REVIEWS & VOTING ARCHITECTURE
+    // ENTERPRISE REVIEWS & VOTING ARCHITECTURE (Batch: 5)
     // =========================================================================
     
     let reviewsLastVisible = null;
@@ -928,8 +993,9 @@
       } catch (e) { console.error("Vote write failed", e); }
     };
 
-    // B. COMMENT SUBSYSTEM INITIALIZATION
+    // B. COMMENT SUBSYSTEM INITIALIZATION (Perfect Reset Logic)
     async function initReviewSection(productId) {
+      // Completely wipe state on deep-nav transitions
       reviewsLastVisible = null;
       hasMoreReviews = true;
       isFetchingReviews = false;
@@ -960,7 +1026,7 @@
         renderMyCommentWidget();
       }
 
-      // Boot List Pagination
+      // Boot List Pagination (Strictly fetches 5)
       fetchPaginatedReviews();
     }
 
@@ -1071,18 +1137,20 @@
       }
     };
 
-    // D. SCROLL PAGINATION SUBSYSTEM
+    // D. SCROLL PAGINATION SUBSYSTEM (Strict batches of 5)
     async function fetchPaginatedReviews() {
       if (isFetchingReviews || !hasMoreReviews || !currentSelectedProduct) return;
       isFetchingReviews = true;
       const loadingEl = document.getElementById('reviews-loading');
       loadingEl.classList.add('active');
 
+      const fetchLimit = 5; // Enforced hard limit per scroll batch
+
       try {
         let q = query(
           collection(db, 'products', currentSelectedProduct.id, 'reviews'),
           orderBy('timestamp', 'desc'),
-          limit(10)
+          limit(fetchLimit)
         );
 
         if (reviewsLastVisible) {
@@ -1090,7 +1158,7 @@
             collection(db, 'products', currentSelectedProduct.id, 'reviews'),
             orderBy('timestamp', 'desc'),
             startAfter(reviewsLastVisible),
-            limit(10)
+            limit(fetchLimit)
           );
         }
 
@@ -1100,7 +1168,7 @@
           document.getElementById('reviews-list').innerHTML = `<div style="text-align:center; padding:32px 16px; color:var(--text-sub); font-size:14px; font-weight:600;">No other comments yet.</div>`;
           hasMoreReviews = false;
         } else {
-          if (snap.docs.length < 10) hasMoreReviews = false;
+          if (snap.docs.length < fetchLimit) hasMoreReviews = false;
           else reviewsLastVisible = snap.docs[snap.docs.length - 1];
 
           snap.forEach(docSnap => {
