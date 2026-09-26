@@ -74,6 +74,10 @@
     .qty-btn:active { background: var(--border); transform: scale(0.9); }
     .qty-val { font-size: 14px; font-weight: 800; min-width: 20px; text-align: center; }
 
+    /* Inline Stock Warning */
+    .item-stock-warning { font-size: 12px; color: var(--danger); display: flex; align-items: center; gap: 4px; margin-top: 8px; font-weight: 600; background: rgba(211, 47, 47, 0.08); padding: 6px 10px; border-radius: 8px; border: 1px solid rgba(211, 47, 47, 0.2); width: fit-content; line-height: 1.3; }
+    .item-stock-warning svg { width: 14px; height: 14px; flex-shrink: 0; stroke: currentColor; }
+
     /* Price Breakdown */
     .price-row { display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 12px; color: var(--text-sub); }
     .price-row.total { font-size: 16px; font-weight: 800; color: var(--text-main); margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--border); margin-bottom: 4px; }
@@ -335,7 +339,8 @@
           if(docSnap.exists()) {
             liveProducts[item.id] = docSnap.data();
           } else {
-            liveProducts[item.id] = { price: item.price, name: item.name }; // Item deleted from ERP
+            // Item deleted from ERP, mock it with stock 0 so it instantly blocks checkout
+            liveProducts[item.id] = { price: item.price, name: item.name, stock: 0 }; 
           }
           renderOrderSummary(); // Auto-rerender on any DB change
         });
@@ -476,9 +481,10 @@
       }
     }
 
-    // 7. Render Items & Math (Removed Stock Checks)
+    // 7. Render Items & Math
     function renderOrderSummary() {
       let subTotal = 0;
+      let hasStockIssue = false;
       itemsContainer.innerHTML = '';
 
       orderPayload.forEach(item => {
@@ -486,8 +492,29 @@
         const liveData = liveProducts[item.id] || { price: item.price, name: item.name };
         const livePrice = Number(liveData.price) || 0;
         
+        // Treat undefined stock as available for edge cases, but parse exact 0s and numbers for tracking.
+        const liveStock = liveData.stock !== undefined ? Number(liveData.stock) : Infinity;
+        
         const itemTotal = livePrice * item.qty;
         subTotal += itemTotal;
+
+        // Dynamic Warning Injection Engine
+        let stockWarningHtml = '';
+        if (liveStock === 0) {
+          hasStockIssue = true;
+          stockWarningHtml = `
+            <div class="item-stock-warning">
+              <svg fill="none" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+              Out of Stock
+            </div>`;
+        } else if (item.qty > liveStock) {
+          hasStockIssue = true;
+          stockWarningHtml = `
+            <div class="item-stock-warning">
+              <svg fill="none" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+              Only ${liveStock} available in stock. Please reduce quantity.
+            </div>`;
+        }
 
         const itemDiv = document.createElement('div');
         itemDiv.className = 'summary-item';
@@ -501,6 +528,7 @@
               <span class="qty-val">${item.qty}</span>
               <button class="qty-btn" onclick="changeQty('${item.id}', 1)">+</button>
             </div>
+            ${stockWarningHtml}
           </div>
           <div class="item-price">₹${itemTotal.toLocaleString('en-IN')}</div>
         `;
@@ -515,13 +543,20 @@
       uiTotal.innerText = `₹${finalTotal.toLocaleString('en-IN')}`;
       barTotal.innerText = `₹${finalTotal.toLocaleString('en-IN')}`;
 
-      // Enforce Minimum Order Logic
+      // Enforce Minimum Order Logic & Stock Verification Overlay
       if (subTotal < MINIMUM_ORDER_VALUE) {
         minOrderWarning.style.display = 'flex';
+      } else {
+        minOrderWarning.style.display = 'none';
+      }
+
+      if (hasStockIssue) {
+        btnPlaceOrder.disabled = true;
+        btnPlaceOrder.querySelector('span').innerText = 'Resolve Stock Issues';
+      } else if (subTotal < MINIMUM_ORDER_VALUE) {
         btnPlaceOrder.disabled = true;
         btnPlaceOrder.querySelector('span').innerText = `Add ₹${(MINIMUM_ORDER_VALUE - subTotal)} more`;
       } else {
-        minOrderWarning.style.display = 'none';
         btnPlaceOrder.disabled = !savedAddress; 
         btnPlaceOrder.querySelector('span').innerText = 'Place Order';
       }
