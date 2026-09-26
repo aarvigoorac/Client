@@ -330,7 +330,11 @@
 
     <!-- Main Content Frame -->
     <main>
-      <iframe src="pages/home.html" id="content-frame" name="content-frame" title="App Content"></iframe>
+      <iframe id="content-frame" name="content-frame" title="App Content"></iframe>
+      <script>
+        // Loads the homepage instantly with any URL parameters passed from the parent
+        document.getElementById('content-frame').src = "pages/home.html" + window.location.search;
+      </script>
     </main>
   </div>
 
@@ -464,9 +468,18 @@
         }
 
         const currentSrc = contentFrame.src || "";
-        if (currentSrc.includes('login.html') || currentSrc.includes('index.html') || currentSrc.includes('setup.html') || currentSrc.includes('home.html') || currentSrc === "about:blank") {
-          // Fix: Append window.location.search to successfully route deep-link IDs into the iframe
-          contentFrame.src = "pages/home.html" + window.location.search;
+        const deepLinkParams = window.location.search;
+
+        // 1. If the user is stuck on login, setup, or a blank page, send them to home (with params if they exist)
+        if (currentSrc.includes('login.html') || currentSrc.includes('setup.html') || currentSrc.includes('index.html') || currentSrc === "about:blank") {
+          contentFrame.src = "pages/home.html" + deepLinkParams;
+        } 
+        // 2. If already on the homepage, ONLY reload if there is an actual deep link parameter to pass down
+        else if (currentSrc.includes('home.html') && deepLinkParams !== "") {
+          // Pro-check: Ensure we don't cause an infinite reload loop if the iframe already has the parameters
+          if (!currentSrc.includes(deepLinkParams)) {
+            contentFrame.src = "pages/home.html" + deepLinkParams;
+          }
         }
 
         if (user.photoURL && user.photoURL !== localDpUrl) {
