@@ -63,7 +63,7 @@
     .item-img { width: 60px; height: 60px; background: var(--bg-color); border-radius: 8px; padding: 4px; }
     .item-img img { width: 100%; height: 100%; object-fit: contain; mix-blend-mode: multiply; }
     @media (prefers-color-scheme: dark) { .item-img img { mix-blend-mode: normal; } }
-    .item-info { flex: 1; display: flex; flex-direction: column; justify-content: center; }
+    .item-info { flex: 1; display: flex; flex-direction: column; justify-content: center; min-width: 0; }
     .item-name { font-size: 14px; font-weight: 600; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
     .item-qty { font-size: 13px; color: var(--text-sub); margin-top: 4px; }
     .item-price { font-size: 14px; font-weight: 700; text-align: right; }
@@ -74,9 +74,10 @@
     .qty-btn:active { background: var(--border); transform: scale(0.9); }
     .qty-val { font-size: 14px; font-weight: 800; min-width: 20px; text-align: center; }
 
-    /* Inline Stock Warning */
-    .item-stock-warning { font-size: 12px; color: var(--danger); display: flex; align-items: center; gap: 4px; margin-top: 8px; font-weight: 600; background: rgba(211, 47, 47, 0.08); padding: 6px 10px; border-radius: 8px; border: 1px solid rgba(211, 47, 47, 0.2); width: fit-content; line-height: 1.3; }
+    /* Inline Stock Warning (Fixed for single line truncation) */
+    .item-stock-warning { font-size: 12px; color: var(--danger); display: flex; align-items: center; gap: 4px; margin-top: 8px; font-weight: 600; background: rgba(211, 47, 47, 0.08); padding: 6px 10px; border-radius: 8px; border: 1px solid rgba(211, 47, 47, 0.2); width: fit-content; max-width: 100%; line-height: 1.3; }
     .item-stock-warning svg { width: 14px; height: 14px; flex-shrink: 0; stroke: currentColor; }
+    .item-stock-warning span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
 
     /* Price Breakdown */
     .price-row { display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 12px; color: var(--text-sub); }
@@ -84,10 +85,13 @@
     
     .tax-label { font-size: 11px; color: var(--success); text-align: right; display: block; font-weight: 600;}
 
-    /* Payment Option */
-    .payment-option { display: flex; align-items: center; gap: 12px; padding: 12px; border: 1.5px solid var(--primary); border-radius: 12px; background: rgba(40, 116, 240, 0.05); }
-    .radio-circle { width: 20px; height: 20px; border-radius: 50%; border: 6px solid var(--primary); }
-    .payment-text { font-weight: 600; font-size: 14px; }
+    /* Payment Option (Interactive styling for COD & UOD) */
+    .payment-option { display: flex; align-items: center; gap: 12px; padding: 12px; border: 1.5px solid var(--border); border-radius: 12px; background: var(--surface-color); cursor: pointer; transition: all 0.2s ease; margin-bottom: 8px; }
+    .payment-option:last-child { margin-bottom: 0; }
+    .payment-option.active { border-color: var(--primary); background: rgba(40, 116, 240, 0.05); }
+    .radio-circle { width: 20px; height: 20px; border-radius: 50%; border: 2px solid var(--text-sub); display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; flex-shrink: 0; }
+    .payment-option.active .radio-circle { border: 6px solid var(--primary); }
+    .payment-text { font-weight: 600; font-size: 14px; flex: 1; }
 
     /* Warnings */
     .warning-box { background: rgba(211, 47, 47, 0.1); color: var(--danger); border: 1px solid rgba(211, 47, 47, 0.3); padding: 12px; border-radius: 12px; font-size: 13px; font-weight: 600; display: none; align-items: center; gap: 8px; margin-bottom: 16px;}
@@ -199,10 +203,17 @@
         <svg fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V4.22c0-.756-.728-1.294-1.453-1.096a59.769 59.769 0 01-15.797 2.101c-.727.198-1.454-.343-1.454-1.096V18.75c0 .755.727 1.294 1.454 1.096z" /></svg>
         Payment Method
       </div>
-      <div class="payment-option">
+      
+      <!-- Interactive Payment Selection Options -->
+      <div class="payment-option active" data-method="COD" onclick="selectPayment('COD')">
         <div class="radio-circle"></div>
         <div class="payment-text">Cash on Delivery (COD)</div>
       </div>
+      <div class="payment-option" data-method="UOD" onclick="selectPayment('UOD')">
+        <div class="radio-circle"></div>
+        <div class="payment-text">UPI on Delivery (UOD)</div>
+      </div>
+      
     </div>
 
     <!-- Price Breakdown Card -->
@@ -279,6 +290,7 @@
     let finalSubtotal = 0;
     let finalTotal = 0;
     let savedAddress = null;
+    let selectedPaymentMethod = 'COD';
     
     // Live Data Systems
     let liveProducts = {};
@@ -287,6 +299,19 @@
     // Modal State
     let isConfirmOpen = false;
     let itemToRemoveId = null;
+
+    // 0. Payment Selection Logic
+    window.selectPayment = function(method) {
+      if (navigator.vibrate) navigator.vibrate(10);
+      selectedPaymentMethod = method;
+      document.querySelectorAll('.payment-option').forEach(el => {
+        if(el.dataset.method === method) {
+          el.classList.add('active');
+        } else {
+          el.classList.remove('active');
+        }
+      });
+    };
 
     // 1. Isolate the View
     function toggleParentBottomNav(show) {
@@ -505,14 +530,14 @@
           stockWarningHtml = `
             <div class="item-stock-warning">
               <svg fill="none" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-              Out of Stock
+              <span>Out of Stock</span>
             </div>`;
         } else if (item.qty > liveStock) {
           hasStockIssue = true;
           stockWarningHtml = `
             <div class="item-stock-warning">
               <svg fill="none" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-              Only ${liveStock} available in stock. Please reduce quantity.
+              <span>Only ${liveStock} available. Reduce qty.</span>
             </div>`;
         }
 
@@ -605,7 +630,7 @@
           deliveryFee: DELIVERY_FEE,
           totalAmount: finalTotal,
           deliveryAddress: savedAddress,
-          paymentMethod: 'COD',
+          paymentMethod: selectedPaymentMethod,
           status: 'Processing',
           createdAt: new Date().toISOString()
         });
