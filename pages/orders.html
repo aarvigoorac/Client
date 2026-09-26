@@ -176,6 +176,18 @@
     .tl-item.rejected .tl-title { color: var(--warning); }
     .tl-time { font-size: 12px; color: var(--text-sub); font-weight: 500; }
 
+    /* Rejected Items Styling */
+    .detail-item.rejected { opacity: 0.7; }
+    .detail-item.rejected .d-item-img { filter: grayscale(100%); }
+    .detail-item.rejected .d-item-name { text-decoration: line-through; color: var(--text-sub); }
+    .detail-item.rejected .d-item-price { text-decoration: line-through; color: var(--text-sub); font-weight: normal; }
+
+    /* Rejection Reason Message Box */
+    .reason-card { background: var(--warning-bg); border: 1px solid var(--warning); border-radius: 16px; padding: 16px; margin-top: 16px; box-shadow: 0 2px 8px rgba(179, 38, 30, 0.05); }
+    .reason-header { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 800; color: var(--warning); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .reason-header svg { width: 18px; height: 18px; stroke: currentColor; stroke-width: 2.5; }
+    .reason-text { font-size: 14px; color: var(--warning); line-height: 1.5; font-weight: 500; }
+
   </style>
 </head>
 <body>
@@ -184,20 +196,80 @@
     
     <!-- Skeleton Loaders -->
     <div class="order-list" id="skeleton-container">
-      <div class="order-card">
-        <div class="skeleton sk-text" style="width: 40%"></div>
-        <div class="skeleton sk-text" style="width: 25%; margin-bottom: 24px;"></div>
-        <div style="display: flex; gap: -10px;">
-          <div class="skeleton sk-circle"></div>
-          <div class="skeleton sk-circle" style="margin-left: -12px;"></div>
+      <div class="order-card" style="pointer-events: none;">
+        <div class="order-header" style="border-bottom: 1px solid var(--border); padding-bottom: 12px; margin-bottom: 12px;">
+          <div>
+            <div class="skeleton sk-text" style="width: 120px; height: 18px;"></div>
+            <div class="skeleton sk-text" style="width: 100px; height: 12px; margin-bottom: 0;"></div>
+          </div>
+          <div class="skeleton" style="width: 70px; height: 24px; border-radius: 50px;"></div>
+        </div>
+        <div class="order-body" style="display: flex; justify-content: space-between; align-items: center;">
+          <div style="display: flex; gap: -10px;">
+            <div class="skeleton sk-circle"></div>
+            <div class="skeleton sk-circle" style="margin-left: -12px; border: 2px solid var(--surface-color);"></div>
+          </div>
+          <div style="display: flex; flex-direction: column; align-items: flex-end;">
+            <div class="skeleton sk-text" style="width: 80px; height: 20px; margin-bottom: 4px;"></div>
+            <div class="skeleton sk-text" style="width: 50px; height: 12px; margin-bottom: 0;"></div>
+          </div>
         </div>
       </div>
-      <div class="order-card">
-        <div class="skeleton sk-text" style="width: 40%"></div>
-        <div class="skeleton sk-text" style="width: 25%; margin-bottom: 24px;"></div>
-        <div style="display: flex; gap: -10px;">
-          <div class="skeleton sk-circle"></div>
-          <div class="skeleton sk-circle" style="margin-left: -12px;"></div>
+      <div class="order-card" style="pointer-events: none;">
+        <div class="order-header" style="border-bottom: 1px solid var(--border); padding-bottom: 12px; margin-bottom: 12px;">
+          <div>
+            <div class="skeleton sk-text" style="width: 120px; height: 18px;"></div>
+            <div class="skeleton sk-text" style="width: 100px; height: 12px; margin-bottom: 0;"></div>
+          </div>
+          <div class="skeleton" style="width: 70px; height: 24px; border-radius: 50px;"></div>
+        </div>
+        <div class="order-body" style="display: flex; justify-content: space-between; align-items: center;">
+          <div style="display: flex; gap: -10px;">
+            <div class="skeleton sk-circle"></div>
+            <div class="skeleton sk-circle" style="margin-left: -12px; border: 2px solid var(--surface-color);"></div>
+          </div>
+          <div style="display: flex; flex-direction: column; align-items: flex-end;">
+            <div class="skeleton sk-text" style="width: 80px; height: 20px; margin-bottom: 4px;"></div>
+            <div class="skeleton sk-text" style="width: 50px; height: 12px; margin-bottom: 0;"></div>
+          </div>
+        </div>
+      </div>
+      <div class="order-card" style="pointer-events: none;">
+        <div class="order-header" style="border-bottom: 1px solid var(--border); padding-bottom: 12px; margin-bottom: 12px;">
+          <div>
+            <div class="skeleton sk-text" style="width: 120px; height: 18px;"></div>
+            <div class="skeleton sk-text" style="width: 100px; height: 12px; margin-bottom: 0;"></div>
+          </div>
+          <div class="skeleton" style="width: 70px; height: 24px; border-radius: 50px;"></div>
+        </div>
+        <div class="order-body" style="display: flex; justify-content: space-between; align-items: center;">
+          <div style="display: flex; gap: -10px;">
+            <div class="skeleton sk-circle"></div>
+            <div class="skeleton sk-circle" style="margin-left: -12px; border: 2px solid var(--surface-color);"></div>
+          </div>
+          <div style="display: flex; flex-direction: column; align-items: flex-end;">
+            <div class="skeleton sk-text" style="width: 80px; height: 20px; margin-bottom: 4px;"></div>
+            <div class="skeleton sk-text" style="width: 50px; height: 12px; margin-bottom: 0;"></div>
+          </div>
+        </div>
+      </div>
+      <div class="order-card" style="pointer-events: none;">
+        <div class="order-header" style="border-bottom: 1px solid var(--border); padding-bottom: 12px; margin-bottom: 12px;">
+          <div>
+            <div class="skeleton sk-text" style="width: 120px; height: 18px;"></div>
+            <div class="skeleton sk-text" style="width: 100px; height: 12px; margin-bottom: 0;"></div>
+          </div>
+          <div class="skeleton" style="width: 70px; height: 24px; border-radius: 50px;"></div>
+        </div>
+        <div class="order-body" style="display: flex; justify-content: space-between; align-items: center;">
+          <div style="display: flex; gap: -10px;">
+            <div class="skeleton sk-circle"></div>
+            <div class="skeleton sk-circle" style="margin-left: -12px; border: 2px solid var(--surface-color);"></div>
+          </div>
+          <div style="display: flex; flex-direction: column; align-items: flex-end;">
+            <div class="skeleton sk-text" style="width: 80px; height: 20px; margin-bottom: 4px;"></div>
+            <div class="skeleton sk-text" style="width: 50px; height: 12px; margin-bottom: 0;"></div>
+          </div>
         </div>
       </div>
     </div>
@@ -438,9 +510,10 @@
       const order = allOrdersData[orderId];
       if (!order) return;
 
+      // Generate Approved Items
       let itemsHtml = '';
       let calculatedSubTotal = 0;
-      order.items.forEach(item => {
+      (order.items || []).forEach(item => {
         const itemTotal = item.price * (item.qty || 1);
         calculatedSubTotal += itemTotal;
         itemsHtml += `
@@ -456,6 +529,48 @@
           </div>
         `;
       });
+
+      // Generate Rejected Items
+      let rejectedItemsHtml = '';
+      if (order.rejectedItems && order.rejectedItems.length > 0) {
+        let rejList = '';
+        order.rejectedItems.forEach(item => {
+          rejList += `
+            <div class="detail-item rejected">
+              <div class="d-item-img"><img src="${item.image || placeholderImg}"></div>
+              <div class="d-item-info">
+                <div class="d-item-name">${item.name}</div>
+                <div class="d-item-meta">
+                  <span>Qty: ${item.qty || 1}</span>
+                  <span class="d-item-price">₹${((item.price || 0) * (item.qty || 1)).toLocaleString('en-IN')}</span>
+                </div>
+              </div>
+            </div>
+          `;
+        });
+        rejectedItemsHtml = `
+          <div class="detail-card">
+            <div class="detail-title" style="color: var(--warning);">Rejected Items</div>
+            <div style="display: flex; flex-direction: column;">
+              ${rejList}
+            </div>
+          </div>
+        `;
+      }
+
+      // Generate Rejection Reason
+      let reasonHtml = '';
+      if (order.rejectionReason) {
+        reasonHtml = `
+          <div class="reason-card">
+            <div class="reason-header">
+              <svg fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" /></svg>
+              Message from Store
+            </div>
+            <div class="reason-text">${order.rejectionReason}</div>
+          </div>
+        `;
+      }
 
       const subTotal = order.subTotal !== undefined ? order.subTotal : calculatedSubTotal;
       const deliveryFee = order.deliveryFee !== undefined ? order.deliveryFee : (order.totalAmount - calculatedSubTotal);
@@ -480,9 +595,11 @@
         <div class="detail-card">
           <div class="detail-title">Items Ordered</div>
           <div style="display: flex; flex-direction: column;">
-            ${itemsHtml}
+            ${itemsHtml || '<div style="font-size:14px; color:var(--text-sub);">No items approved.</div>'}
           </div>
         </div>
+
+        ${rejectedItemsHtml}
 
         <div class="detail-card">
           <div class="detail-title">Payment Summary</div>
@@ -502,6 +619,8 @@
             <div style="margin-top: 6px;">Phone: ${addr.phone || 'N/A'}</div>
           </div>
         </div>
+
+        ${reasonHtml}
       `;
 
       modalBg.classList.add('active');
