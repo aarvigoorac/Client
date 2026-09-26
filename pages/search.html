@@ -127,11 +127,20 @@
     
     /* PARALLAX CONTENT LAYER (Scrolls OVER the image) */
     .modal-details { position: relative; z-index: 10; background: var(--bg-color); border-radius: 24px 24px 0 0; margin-top: -24px; padding: 24px; box-shadow: 0 -8px 24px rgba(0,0,0,0.08); }
-    .m-title { font-size: 22px; font-weight: 800; margin-bottom: 12px; line-height: 1.3; color: var(--text-main); }
-    .m-price { font-size: 28px; font-weight: 800; color: var(--primary); margin-bottom: 16px; display: flex; align-items: baseline; gap: 8px; }
     
+    /* Professional Shiny Metallic Brand Injection */
+    .m-brand { font-size: 15px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; display: none; background: linear-gradient(135deg, #7b818a 0%, #d5d9e0 40%, #ffffff 50%, #d5d9e0 60%, #7b818a 100%); background-size: 200% auto; -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    @media (prefers-color-scheme: dark) { .m-brand { background: linear-gradient(135deg, #a0a5aa 0%, #e8ecef 40%, #ffffff 50%, #e8ecef 60%, #a0a5aa 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; } }
+
+    .m-title { font-size: 22px; font-weight: 800; margin-bottom: 12px; line-height: 1.3; color: var(--text-main); }
+    .m-price { font-size: 28px; font-weight: 800; color: var(--primary); margin-bottom: 8px; display: flex; align-items: baseline; gap: 8px; }
+    
+    /* Low Stock Urgency Indicator */
+    .m-low-stock { display: none; align-items: center; gap: 6px; background: var(--warning-bg); color: var(--warning); padding: 4px 12px; border-radius: 6px; font-size: 13px; font-weight: 800; border: 1px solid var(--warning); margin-bottom: 16px; width: fit-content; }
+    .m-low-stock svg { width: 14px; height: 14px; stroke: currentColor; stroke-width: 2.5; }
+
     /* Professional Action Bar (Like / Dislike / Share) */
-    .product-vote-bar { display: flex; gap: 12px; margin-bottom: 24px; align-items: center; }
+    .product-vote-bar { display: flex; gap: 12px; margin-bottom: 24px; align-items: center; margin-top: 8px; }
     .vote-action-btn { display: flex; align-items: center; gap: 8px; padding: 10px 18px; border-radius: 50px; background: var(--surface-color); border: 1.5px solid var(--border); font-weight: 700; font-size: 15px; color: var(--text-sub); cursor: pointer; transition: all 0.2s cubic-bezier(0.32, 0.72, 0, 1); }
     .vote-action-btn:active { transform: scale(0.95); }
     .vote-action-btn svg { width: 20px; height: 20px; stroke: currentColor; fill: none; flex-shrink:0; }
@@ -150,6 +159,9 @@
     .btn:active { transform: scale(0.96); }
     .btn-add { background: var(--bg-color); color: var(--text-main); border: 1.5px solid var(--border); }
     .btn-buy { background: var(--primary); color: #fff; box-shadow: 0 4px 12px rgba(40, 116, 240, 0.25); }
+    
+    /* Out of Stock Override Button */
+    .btn-out-of-stock { display: none; width: 100%; background: var(--skeleton-base); color: var(--text-sub); border: 1.5px dashed var(--border); cursor: not-allowed; text-transform: uppercase; letter-spacing: 0.5px; opacity: 0.85; pointer-events: none; }
 
     /* Recommendations Carousel */
     .rec-section { position: relative; z-index: 10; padding: 24px 0 0 0; background: var(--bg-color); }
@@ -281,8 +293,17 @@
       
       <!-- Content Layer (Scrolls OVER the image) -->
       <div class="modal-details">
+        <!-- Brand Injection -->
+        <div id="m-brand" class="m-brand"></div>
+        
         <h2 id="m-title" class="m-title">Loading...</h2>
         <div id="m-price" class="m-price">₹0</div>
+        
+        <!-- Low Stock Notice -->
+        <div id="m-low-stock" class="m-low-stock">
+          <svg fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+          <span id="m-low-stock-text"></span>
+        </div>
         
         <!-- Professional Independent Vote Bar (Hides Zeros) + Native Share -->
         <div class="product-vote-bar">
@@ -334,6 +355,7 @@
     <div class="action-bar">
       <button class="btn btn-add" id="btn-add-cart">Add to Cart</button>
       <button class="btn btn-buy" id="btn-buy-now">Buy Now</button>
+      <button class="btn btn-out-of-stock" id="btn-out-of-stock" disabled>Out of Stock - Coming Soon</button>
     </div>
   </div>
 
@@ -361,8 +383,11 @@
     const modal = document.getElementById('product-modal');
     const closeModalBtn = document.getElementById('close-modal-btn');
     const mImg = document.getElementById('m-img');
+    const mBrand = document.getElementById('m-brand');
     const mTitle = document.getElementById('m-title');
     const mPrice = document.getElementById('m-price');
+    const mLowStock = document.getElementById('m-low-stock');
+    const mLowStockText = document.getElementById('m-low-stock-text');
     const mDesc = document.getElementById('m-desc');
     const mLikesCount = document.getElementById('m-likes-count');
     const mDislikesCount = document.getElementById('m-dislikes-count');
@@ -371,6 +396,7 @@
     
     const btnAddCart = document.getElementById('btn-add-cart');
     const btnBuyNow = document.getElementById('btn-buy-now');
+    const btnOutOfStock = document.getElementById('btn-out-of-stock');
     const toast = document.getElementById('toast');
 
     // State Variables
@@ -689,8 +715,38 @@
       
       mImg.src = imgUrl;
       mImg.onerror = function() { this.src = placeholderImg; };
+      
+      // Brand Rendering Logic
+      if (product.brand && product.brand.trim() !== '') {
+        mBrand.innerText = product.brand;
+        mBrand.style.display = 'block';
+      } else {
+        mBrand.style.display = 'none';
+      }
+
       mTitle.innerText = product.name;
       mPrice.innerText = `₹${(product.price || 0).toLocaleString('en-IN')}`;
+      
+      // Zero-Stock & Low Stock Logic
+      const stockQty = Number(product.stock) || 0;
+      if (stockQty === 0) {
+         mLowStock.style.display = 'none';
+         btnAddCart.style.display = 'none';
+         btnBuyNow.style.display = 'none';
+         btnOutOfStock.style.display = 'flex';
+      } else {
+         btnAddCart.style.display = 'flex';
+         btnBuyNow.style.display = 'flex';
+         btnOutOfStock.style.display = 'none';
+         
+         if (stockQty < 5) {
+            mLowStockText.innerText = `Only ${stockQty} available`;
+            mLowStock.style.display = 'inline-flex';
+         } else {
+            mLowStock.style.display = 'none';
+         }
+      }
+
       mDesc.innerText = product.description || "Detailed description coming soon.";
       
       const likes = product.totalLikes || 0;
@@ -712,6 +768,26 @@
         if (docSnap.exists() && currentSelectedProduct && currentSelectedProduct.id === docSnap.id) {
           const data = docSnap.data();
           syncAllProductVoteDOM(docSnap.id, data.totalLikes || 0, data.totalDislikes || 0);
+          
+          // Re-calculate real-time stock UI if data updates while looking at it
+          const liveStock = Number(data.stock) || 0;
+          if (liveStock === 0) {
+             mLowStock.style.display = 'none';
+             btnAddCart.style.display = 'none';
+             btnBuyNow.style.display = 'none';
+             btnOutOfStock.style.display = 'flex';
+          } else {
+             btnAddCart.style.display = 'flex';
+             btnBuyNow.style.display = 'flex';
+             btnOutOfStock.style.display = 'none';
+             
+             if (liveStock < 5) {
+                mLowStockText.innerText = `Only ${liveStock} available`;
+                mLowStock.style.display = 'inline-flex';
+             } else {
+                mLowStock.style.display = 'none';
+             }
+          }
         }
       });
     }
