@@ -400,7 +400,7 @@
       return 'status-processing';
     }
 
-    // 1. Fetch Orders Engine (Pagination 20)
+    // 1. Fetch Orders Engine (Pagination 10)
     async function fetchOrders(isNewFetch = false) {
       if (isFetching || (!hasMoreDocs && !isNewFetch)) return;
       isFetching = true;
@@ -412,7 +412,7 @@
             collection(db, "orders"), 
             where("userId", "==", currentUser.uid), 
             orderBy("createdAt", "desc"), 
-            limit(20)
+            limit(10)
           );
         } else {
           loadingMore.classList.add('active');
@@ -421,7 +421,7 @@
             where("userId", "==", currentUser.uid), 
             orderBy("createdAt", "desc"), 
             startAfter(lastVisibleDoc), 
-            limit(20)
+            limit(10)
           );
         }
 
@@ -438,7 +438,7 @@
 
         loadingMore.classList.remove('active');
 
-        if (querySnapshot.docs.length < 20) {
+        if (querySnapshot.docs.length < 10) {
           hasMoreDocs = false;
         } else {
           lastVisibleDoc = querySnapshot.docs[querySnapshot.docs.length - 1];
